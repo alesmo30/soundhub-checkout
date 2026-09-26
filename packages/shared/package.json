@@ -1,4 +1,25 @@
 {
   "name": "@checkout/shared",
-  "private": true
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./constants": "./src/constants/index.ts",
+    "./enums": "./src/enums/index.ts",
+    "./contracts": "./src/contracts/index.ts",
+    "./validation": "./src/validation/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "test:cov": "jest --coverage"
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@swc/core": "^1.16.2",
+    "@swc/jest": "^0.2.39",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.5.2"
+  }
 }
