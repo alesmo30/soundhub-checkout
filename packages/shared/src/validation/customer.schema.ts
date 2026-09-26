@@ -1,9 +1,17 @@
 import { z } from 'zod';
-import { NATIONAL_ID_PATTERN, PHONE_PATTERN, EMAIL_MAX_LENGTH, FULL_NAME_MAX_LENGTH } from '../constants';
+import {
+  NATIONAL_ID_PATTERN,
+  PHONE_PATTERN,
+  EMAIL_MAX_LENGTH,
+  FULL_NAME_MAX_LENGTH,
+} from '../constants';
 import { VALIDATION_MESSAGES } from './messages';
 
 export const customerSchema = z.object({
-  documentNumber: z.string().trim().regex(NATIONAL_ID_PATTERN, VALIDATION_MESSAGES.DOCUMENT_NUMBER_INVALID),
+  documentNumber: z
+    .string()
+    .trim()
+    .regex(NATIONAL_ID_PATTERN, VALIDATION_MESSAGES.DOCUMENT_NUMBER_INVALID),
   fullName: z
     .string()
     .trim()

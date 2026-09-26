@@ -29,13 +29,17 @@ describe('cardSchema', () => {
   it('rejects an unsupported brand prefix', () => {
     const result = cardSchema.safeParse({ ...valid, number: '3782 822463 10005' });
     expect(result.success).toBe(false);
-    expect(!result.success && result.error.issues[0]?.message).toBe(VALIDATION_MESSAGES.CARD_BRAND_UNSUPPORTED);
+    expect(!result.success && result.error.issues[0]?.message).toBe(
+      VALIDATION_MESSAGES.CARD_BRAND_UNSUPPORTED,
+    );
   });
 
   it('rejects a number that fails Luhn', () => {
     const result = cardSchema.safeParse({ ...valid, number: '4242 4242 4242 4241' });
     expect(result.success).toBe(false);
-    expect(!result.success && result.error.issues[0]?.message).toBe(VALIDATION_MESSAGES.CARD_NUMBER_INVALID);
+    expect(!result.success && result.error.issues[0]?.message).toBe(
+      VALIDATION_MESSAGES.CARD_NUMBER_INVALID,
+    );
   });
 
   it('accepts the current month', () => {
@@ -45,43 +49,57 @@ describe('cardSchema', () => {
   it('rejects the previous month as expired', () => {
     const result = cardSchema.safeParse({ ...valid, expiry: '08/26' });
     expect(result.success).toBe(false);
-    expect(!result.success && result.error.issues[0]?.message).toBe(VALIDATION_MESSAGES.CARD_EXPIRY_EXPIRED);
+    expect(!result.success && result.error.issues[0]?.message).toBe(
+      VALIDATION_MESSAGES.CARD_EXPIRY_EXPIRED,
+    );
   });
 
   it('rejects a date more than 20 years ahead', () => {
     const result = cardSchema.safeParse({ ...valid, expiry: '09/47' });
     expect(result.success).toBe(false);
-    expect(!result.success && result.error.issues[0]?.message).toBe(VALIDATION_MESSAGES.CARD_EXPIRY_TOO_FAR);
+    expect(!result.success && result.error.issues[0]?.message).toBe(
+      VALIDATION_MESSAGES.CARD_EXPIRY_TOO_FAR,
+    );
   });
 
   it('rejects a malformed expiry', () => {
     const result = cardSchema.safeParse({ ...valid, expiry: '13/26' });
     expect(result.success).toBe(false);
-    expect(!result.success && result.error.issues[0]?.message).toBe(VALIDATION_MESSAGES.CARD_EXPIRY_FORMAT);
+    expect(!result.success && result.error.issues[0]?.message).toBe(
+      VALIDATION_MESSAGES.CARD_EXPIRY_FORMAT,
+    );
   });
 
   it('rejects a 4-digit CVC', () => {
     const result = cardSchema.safeParse({ ...valid, cvc: '1234' });
     expect(result.success).toBe(false);
-    expect(!result.success && result.error.issues[0]?.message).toBe(VALIDATION_MESSAGES.CARD_CVC_INVALID);
+    expect(!result.success && result.error.issues[0]?.message).toBe(
+      VALIDATION_MESSAGES.CARD_CVC_INVALID,
+    );
   });
 
   it('rejects 0 installments', () => {
     const result = cardSchema.safeParse({ ...valid, installments: 0 });
     expect(result.success).toBe(false);
-    expect(!result.success && result.error.issues[0]?.message).toBe(VALIDATION_MESSAGES.CARD_INSTALLMENTS_INVALID);
+    expect(!result.success && result.error.issues[0]?.message).toBe(
+      VALIDATION_MESSAGES.CARD_INSTALLMENTS_INVALID,
+    );
   });
 
   it('rejects 37 installments', () => {
     const result = cardSchema.safeParse({ ...valid, installments: 37 });
     expect(result.success).toBe(false);
-    expect(!result.success && result.error.issues[0]?.message).toBe(VALIDATION_MESSAGES.CARD_INSTALLMENTS_INVALID);
+    expect(!result.success && result.error.issues[0]?.message).toBe(
+      VALIDATION_MESSAGES.CARD_INSTALLMENTS_INVALID,
+    );
   });
 
   it('rejects a holder shorter than 5 characters', () => {
     const result = cardSchema.safeParse({ ...valid, holder: 'Jo' });
     expect(result.success).toBe(false);
-    expect(!result.success && result.error.issues[0]?.message).toBe(VALIDATION_MESSAGES.CARD_HOLDER_INVALID);
+    expect(!result.success && result.error.issues[0]?.message).toBe(
+      VALIDATION_MESSAGES.CARD_HOLDER_INVALID,
+    );
   });
 
   it('accepts a holder with accents and ñ', () => {
@@ -91,6 +109,8 @@ describe('cardSchema', () => {
   it('rejects a holder with digits', () => {
     const result = cardSchema.safeParse({ ...valid, holder: 'Juan Perez 2' });
     expect(result.success).toBe(false);
-    expect(!result.success && result.error.issues[0]?.message).toBe(VALIDATION_MESSAGES.CARD_HOLDER_INVALID);
+    expect(!result.success && result.error.issues[0]?.message).toBe(
+      VALIDATION_MESSAGES.CARD_HOLDER_INVALID,
+    );
   });
 });

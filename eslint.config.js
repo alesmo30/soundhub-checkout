@@ -30,7 +30,8 @@ export default defineConfig(
         'error',
         {
           selector: "MemberExpression[object.name='process'][property.name='env']",
-          message: 'Read process.env only inside config/ (see references/coding-conventions.md#c2).',
+          message:
+            'Read process.env only inside config/ (see references/coding-conventions.md#c2).',
         },
       ],
       'unicorn/filename-case': ['error', { case: 'kebabCase' }],

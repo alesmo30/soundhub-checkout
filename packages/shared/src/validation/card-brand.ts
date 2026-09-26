@@ -4,7 +4,10 @@ const MASTERCARD_OLD_RANGE = { low: 51, high: 55, length: 2 };
 const MASTERCARD_NEW_RANGE = { low: 2221, high: 2720, length: 4 };
 
 // `digits` is never empty here: callers only reach this once digits.length > 0.
-function prefixOverlapsRange(digits: string, range: { low: number; high: number; length: number }): boolean {
+function prefixOverlapsRange(
+  digits: string,
+  range: { low: number; high: number; length: number },
+): boolean {
   const relevant = digits.slice(0, range.length);
   const lowCandidate = Number(relevant.padEnd(range.length, '0'));
   const highCandidate = Number(relevant.padEnd(range.length, '9'));
@@ -19,7 +22,10 @@ export function isSupportedBrandPrefix(digits: string): boolean {
     return true;
   }
 
-  return prefixOverlapsRange(digits, MASTERCARD_OLD_RANGE) || prefixOverlapsRange(digits, MASTERCARD_NEW_RANGE);
+  return (
+    prefixOverlapsRange(digits, MASTERCARD_OLD_RANGE) ||
+    prefixOverlapsRange(digits, MASTERCARD_NEW_RANGE)
+  );
 }
 
 /** Digits only (spaces already stripped). Definitive: null unless enough

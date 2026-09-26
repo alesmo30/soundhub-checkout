@@ -16,8 +16,14 @@ export const deliverySchema = z.object({
     .min(1, VALIDATION_MESSAGES.RECIPIENT_NAME_REQUIRED)
     .max(FULL_NAME_MAX_LENGTH, VALIDATION_MESSAGES.RECIPIENT_NAME_REQUIRED),
   phone: z.string().trim().regex(PHONE_PATTERN, VALIDATION_MESSAGES.PHONE_INVALID),
-  departmentCode: z.string().trim().regex(DEPARTMENT_CODE_PATTERN, VALIDATION_MESSAGES.DEPARTMENT_REQUIRED),
-  municipalityCode: z.string().trim().regex(MUNICIPALITY_CODE_PATTERN, VALIDATION_MESSAGES.MUNICIPALITY_REQUIRED),
+  departmentCode: z
+    .string()
+    .trim()
+    .regex(DEPARTMENT_CODE_PATTERN, VALIDATION_MESSAGES.DEPARTMENT_REQUIRED),
+  municipalityCode: z
+    .string()
+    .trim()
+    .regex(MUNICIPALITY_CODE_PATTERN, VALIDATION_MESSAGES.MUNICIPALITY_REQUIRED),
   addressLine: z
     .string()
     .trim()
