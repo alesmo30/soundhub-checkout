@@ -114,6 +114,36 @@ async function tokenizeCard(env: SpikeEnv, cardNumber: string): Promise<JsonResu
   });
 }
 
+type TransactionResponse = { data: { id: string; status: string } };
+
+type CreateTransactionInput = {
+  env: SpikeEnv;
+  cardToken: string;
+  acceptanceToken: string;
+  personalAuthToken: string;
+  reference: string;
+};
+
+async function createTransaction(input: CreateTransactionInput): Promise<JsonResult<TransactionResponse>> {
+  const { env, cardToken, acceptanceToken, personalAuthToken, reference } = input;
+  const signature = signIntegrity({ reference, amountInCents: AMOUNT_IN_CENTS, currency: CURRENCY, integritySecret: env.integritySecret });
+
+  return requestJson<TransactionResponse>(`${env.gatewayUrl}/transactions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.privateKey}` },
+    body: JSON.stringify({
+      amount_in_cents: AMOUNT_IN_CENTS,
+      currency: CURRENCY,
+      customer_email: CUSTOMER_EMAIL,
+      reference,
+      signature,
+      payment_method: { type: 'CARD', token: cardToken, installments: INSTALLMENTS },
+      acceptance_token: acceptanceToken,
+      accept_personal_auth: personalAuthToken,
+    }),
+  });
+}
+
 async function main(): Promise<void> {
   const env = readEnv();
 
@@ -124,7 +154,18 @@ async function main(): Promise<void> {
   const reference = buildReference();
   const tokenized = await tokenizeCard(env, CARD_APPROVED_NUMBER);
   console.log(`POST /tokens/cards -> ${tokenized.status}`);
-  console.log(`Reference for next step: ${reference}`);
+
+  const transaction = await createTransaction({
+    env,
+    cardToken: tokenized.body.data.id,
+    acceptanceToken: merchant.body.data.presigned_acceptance.acceptance_token,
+    personalAuthToken: merchant.body.data.presigned_personal_data_auth.acceptance_token,
+    reference,
+  });
+  console.log(`POST /transactions -> ${transaction.status}`);
+  console.log(`Initial status: ${transaction.body.data.status}`);
+  console.log(`Field names: ${transaction.fieldNames.join(', ')}`);
+  console.log(`data.id present: ${Boolean(transaction.body.data.id)}`);
 }
 
 main();
