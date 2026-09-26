@@ -11,7 +11,8 @@
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit -p tsconfig.json && pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
-    "test:cov": "pnpm -r --if-present test:cov"
+    "test:cov": "pnpm -r --if-present test:cov",
+    "worktree:new": "bash scripts/worktree-new.sh"
   },
   "devDependencies": {
     "@types/node": "^22.20.4",
