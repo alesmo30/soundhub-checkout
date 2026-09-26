@@ -1,5 +1,6 @@
 import type { INestApplication } from '@nestjs/common';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import type { FieldError } from '@checkout/shared/contracts';
 import type { ValidationError } from 'class-validator';
 import type { NextFunction, Request, Response } from 'express';
@@ -55,4 +56,12 @@ export function configureApp(app: INestApplication): void {
   );
 
   app.useGlobalFilters(new ProblemDetailsFilter());
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('SoundHub API')
+    .setDescription('Single-product checkout API for SoundHub headphones.')
+    .setVersion('1.0')
+    .build();
+  const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup(DOCS_PATH, app, swaggerDocument);
 }
