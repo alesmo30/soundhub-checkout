@@ -7,9 +7,12 @@ import { CURRENCY } from '@checkout/shared/constants';
 import { AppModule } from './app.module';
 import type { AppConfig } from './config/app-config';
 import { APP_CONFIG } from './config/config.module';
+import { configureApp } from './shared/infrastructure/http/configure-app';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bodyParser: false });
+  configureApp(app);
+
   const { port } = app.get<AppConfig>(APP_CONFIG).app;
   await app.listen(port);
   new Logger('Bootstrap').log(`API listening on port ${port} (currency ${CURRENCY})`);

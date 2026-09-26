@@ -5,7 +5,7 @@ const config: Config = {
   rootDir: '.',
   setupFiles: ['reflect-metadata'],
   transform: {
-    '^.+\\.ts$': [
+    '^.+\\.[tj]s$': [
       '@swc/jest',
       {
         jsc: {
@@ -13,9 +13,14 @@ const config: Config = {
           transform: { legacyDecorator: true, decoratorMetadata: true },
           target: 'es2022',
         },
+        module: { type: 'commonjs' },
       },
     ],
   },
+  // @nestjs/* ships ESM-only; transpile it to CommonJS for Jest too. pnpm
+  // nests real packages under node_modules/.pnpm/<name>@<version>/..., so the
+  // pattern must anchor on that segment, not on the outer node_modules/.
+  transformIgnorePatterns: ['/node_modules/\\.pnpm/(?!@nestjs)'],
   testMatch: ['<rootDir>/src/**/*.spec.ts'],
   coverageReporters: ['text', 'json-summary'],
   coveragePathIgnorePatterns: [
