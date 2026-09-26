@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import type { DataSourceOptions } from 'typeorm';
 
+import type { AppConfig } from './config/app-config';
+import { APP_CONFIG } from './config/config.module';
 import { ConfigModule } from './config/config.module';
 import { CatalogModule } from './modules/catalog/catalog.module';
 import { CustomersModule } from './modules/customers/customers.module';
@@ -10,11 +14,16 @@ import { PricingModule } from './modules/pricing/pricing.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { HealthController } from './shared/infrastructure/http/health/health.controller';
 import { LoggerModule } from './shared/infrastructure/logging/logger.module';
+import { buildDataSourceOptions } from './shared/infrastructure/persistence/data-source';
 
 @Module({
   imports: [
     ConfigModule,
     LoggerModule,
+    TypeOrmModule.forRootAsync({
+      inject: [APP_CONFIG],
+      useFactory: (appConfig: AppConfig): DataSourceOptions => buildDataSourceOptions(appConfig),
+    }),
     CatalogModule,
     LocationsModule,
     PricingModule,

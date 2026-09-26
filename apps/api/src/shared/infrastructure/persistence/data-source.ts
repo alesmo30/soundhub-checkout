@@ -6,10 +6,19 @@ import { ProductOrmEntity } from '../../../modules/catalog/infrastructure/persis
 import { CustomerOrmEntity } from '../../../modules/customers/infrastructure/persistence/customer.orm-entity';
 import { MunicipalityOrmEntity } from '../../../modules/locations/infrastructure/persistence/municipality.orm-entity';
 import { WarehouseOrmEntity } from '../../../modules/locations/infrastructure/persistence/warehouse.orm-entity';
+import { DeliveryOrmEntity } from '../../../modules/deliveries/infrastructure/persistence/delivery.orm-entity';
+import { TransactionOrmEntity } from '../../../modules/transactions/infrastructure/persistence/transaction.orm-entity';
 
 const MIGRATIONS_GLOB = 'src/shared/infrastructure/persistence/migrations/*.ts';
 
-const ENTITIES = [ProductOrmEntity, MunicipalityOrmEntity, WarehouseOrmEntity, CustomerOrmEntity];
+const ENTITIES = [
+  ProductOrmEntity,
+  MunicipalityOrmEntity,
+  WarehouseOrmEntity,
+  CustomerOrmEntity,
+  TransactionOrmEntity,
+  DeliveryOrmEntity,
+];
 
 // Used by the running Nest app: no `migrations` entry, because a webpack
 // bundle cannot resolve that glob at runtime (it tries to on DataSource
