@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+
 const POLL_INTERVAL_MS = 2_000;
 const POLL_TIMEOUT_MS = 60_000;
 const AMOUNT_IN_CENTS = 1_500_000; // COP 15,000
@@ -42,18 +44,41 @@ function readEnv(): SpikeEnv {
   };
 }
 
-function fieldNamesOf(value: unknown, prefix = ''): string[] {
+function collectFieldNames(value: unknown, prefix = ''): string[] {
   if (value === null || typeof value !== 'object') {
     return prefix ? [prefix] : [];
   }
 
   if (Array.isArray(value)) {
-    return value.length > 0 ? fieldNamesOf(value[0], `${prefix}[]`) : [prefix];
+    return value.length > 0 ? collectFieldNames(value[0], `${prefix}[]`) : [prefix];
   }
 
   return Object.entries(value as Record<string, unknown>).flatMap(([key, nested]) =>
-    fieldNamesOf(nested, prefix ? `${prefix}.${key}` : key),
+    collectFieldNames(nested, prefix ? `${prefix}.${key}` : key),
   );
+}
+
+function buildReference(): string {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const suffix = Array.from({ length: 6 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('');
+
+  return `TX-${yyyy}${mm}${dd}-${suffix}`;
+}
+
+type SignIntegrityInput = {
+  reference: string;
+  amountInCents: number;
+  currency: string;
+  integritySecret: string;
+};
+
+function signIntegrity({ reference, amountInCents, currency, integritySecret }: SignIntegrityInput): string {
+  return createHash('sha256').update(`${reference}${amountInCents}${currency}${integritySecret}`).digest('hex');
 }
 
 async function getAcceptanceTokens(
@@ -62,7 +87,7 @@ async function getAcceptanceTokens(
   const response = await fetch(`${env.gatewayUrl}/merchants/${env.publicKey}`);
   const body = await response.json();
 
-  return { status: response.status, body, fieldNames: fieldNamesOf(body) };
+  return { status: response.status, body, fieldNames: collectFieldNames(body) };
 }
 
 async function main(): Promise<void> {
@@ -71,6 +96,11 @@ async function main(): Promise<void> {
   const merchant = await getAcceptanceTokens(env);
   console.log(`GET /merchants/{publicKey} -> ${merchant.status}`);
   console.log(`Field names: ${merchant.fieldNames.join(', ')}`);
+
+  const reference = buildReference();
+  const signature = signIntegrity({ reference, amountInCents: AMOUNT_IN_CENTS, currency: CURRENCY, integritySecret: env.integritySecret });
+  console.log(`Sample reference: ${reference}`);
+  console.log(`Signature length: ${signature.length}`);
 }
 
 main();
