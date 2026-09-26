@@ -64,6 +64,11 @@
   --color-ring: var(--color-brand-sky);
   --color-destructive: var(--color-danger);
   --color-destructive-foreground: var(--color-surface);
+  --color-popover: var(--color-surface);
+  --color-popover-foreground: var(--color-ink);
+  /* No "accent" token in DESIGN.md; reuses the selectable-option highlight. */
+  --color-accent: var(--color-selected-bg);
+  --color-accent-foreground: var(--color-ink);
 }
 
 body {

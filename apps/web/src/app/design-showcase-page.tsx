@@ -1,6 +1,17 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+import { DesignShowcaseSampleForm } from './design-showcase-sample-form';
 
 export default function DesignShowcasePage() {
   return (
@@ -44,6 +55,33 @@ export default function DesignShowcasePage() {
           </CardHeader>
           <CardContent>Tarjeta de ejemplo con radio 16 y sombra card.</CardContent>
         </Card>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="font-heading text-xl font-bold text-text-strong">Select</h2>
+        <Select defaultValue="medellin">
+          <SelectTrigger className="w-64" aria-label="Municipio">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="medellin">Medellín</SelectItem>
+            <SelectItem value="envigado">Envigado</SelectItem>
+            <SelectItem value="rionegro">Rionegro</SelectItem>
+          </SelectContent>
+        </Select>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="font-heading text-xl font-bold text-text-strong">Checkbox</h2>
+        <div className="flex items-center gap-2">
+          <Checkbox id="terms" />
+          <Label htmlFor="terms">Acepto los términos y condiciones</Label>
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="font-heading text-xl font-bold text-text-strong">Form</h2>
+        <DesignShowcaseSampleForm />
       </section>
     </div>
   );
