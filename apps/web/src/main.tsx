@@ -12,8 +12,6 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <AppProviders>
-      <div>SoundHub</div>
-    </AppProviders>
+    <AppProviders />
   </StrictMode>,
 );
