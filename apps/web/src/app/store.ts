@@ -12,6 +12,7 @@ import {
 
 import { checkoutReducer } from '@/features/checkout';
 import { customerReducer } from '@/features/customer';
+import { api } from '@/services/api';
 
 import { localStorageEngine } from './local-storage-engine';
 
@@ -19,6 +20,7 @@ const PERSIST_KEY = 'soundhub';
 const PERSIST_VERSION = 1;
 
 const rootReducer = combineReducers({
+  [api.reducerPath]: api.reducer,
   checkout: checkoutReducer,
   customer: customerReducer,
 });
@@ -43,7 +45,7 @@ export function makeStore(preloadedState?: Partial<RootState>) {
         serializableCheck: {
           ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
         },
-      }),
+      }).concat(api.middleware),
   });
 }
 

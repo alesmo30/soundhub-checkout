@@ -2,7 +2,7 @@ export default {
   testEnvironment: 'jest-fixed-jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
   transform: {
-    '^.+\\.(t|j)sx?$': [
+    '^.+\\.m?(t|j)sx?$': [
       '@swc/jest',
       {
         jsc: {
@@ -13,6 +13,10 @@ export default {
     ],
   },
   testMatch: ['<rootDir>/src/**/*.spec.{ts,tsx}'],
+  // msw pulls in a deep tree of ESM-only packages (@mswjs/*, @open-draft/*,
+  // until-async, rettime, ...) with no CommonJS build. Rather than
+  // allowlisting each one, transform all of node_modules with @swc/jest.
+  transformIgnorePatterns: [],
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': '<rootDir>/src/test/style-mock.ts',
     '\\.(png|jpe?g|gif|svg|webp|woff2?)$': '<rootDir>/src/test/file-mock.ts',
