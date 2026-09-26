@@ -1,12 +1,18 @@
 import { render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 
+import { makeStore } from './store';
 import { routes } from './router';
 
 function renderAt(path: string) {
   const memoryRouter = createMemoryRouter(routes, { initialEntries: [path] });
 
-  return render(<RouterProvider router={memoryRouter} />);
+  return render(
+    <Provider store={makeStore()}>
+      <RouterProvider router={memoryRouter} />
+    </Provider>,
+  );
 }
 
 describe('router', () => {

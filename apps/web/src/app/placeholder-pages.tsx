@@ -1,7 +1,16 @@
 import { useParams } from 'react-router';
 
+import { useGetTempProductsQuery } from './temp-catalog-endpoint';
+
 export function CatalogPlaceholderPage() {
-  return <div>Catálogo (placeholder)</div>;
+  const { data } = useGetTempProductsQuery();
+
+  return (
+    <div>
+      <p>Catálogo (placeholder)</p>
+      {data ? <p>{data.meta.totalItems} products (mock)</p> : null}
+    </div>
+  );
 }
 
 export function ProductPlaceholderPage() {
