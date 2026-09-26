@@ -11,5 +11,5 @@
     "allowJs": true,
     "types": ["node", "jest"]
   },
-  "include": ["src/**/*.ts", "test/**/*.ts", "*.config.ts", "*.config.cjs"]
+  "include": ["src/**/*.ts", "test/**/*.ts", "*.config.ts", "*.config.cjs", "*.config.mjs"]
 }
