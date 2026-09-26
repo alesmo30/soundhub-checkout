@@ -1,0 +1,148 @@
+import { defineConfig } from 'eslint/config';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import tseslint from 'typescript-eslint';
+
+import rootConfig from '../../eslint.config.js';
+
+const TEST_FILES = ['src/**/*.spec.{ts,tsx}', 'src/test/**'];
+
+export default defineConfig(
+  ...rootConfig,
+  {
+    // Tooling config files aren't part of any typechecked tsconfig project;
+    // lint them syntactically instead of type-aware.
+    files: ['*.config.{js,ts}'],
+    extends: [tseslint.configs.disableTypeChecked],
+  },
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    ...reactHooks.configs.flat.recommended,
+  },
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    plugins: reactRefresh.configs.vite.plugins,
+    rules: reactRefresh.configs.vite.rules,
+  },
+  {
+    // W7 (references/layering.md): import.meta.env is only read in config/.
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['src/config/**'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "MemberExpression[object.type='MetaProperty'][property.name='env']",
+          message:
+            'Read import.meta.env only inside config/ (see references/layering.md#web--by-feature).',
+        },
+      ],
+    },
+  },
+  {
+    // W1: components/ui never imports features, services or app.
+    files: ['src/components/ui/**/*.{ts,tsx}'],
+    ignores: TEST_FILES,
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@/features/**', '@/services/**', '@/app/**'],
+              message:
+                'components/ui must not import features, services or app (see layering.md#W1).',
+            },
+          ],
+          paths: [
+            {
+              name: 'axios',
+              message: 'axios is only allowed in services/ and mocks/ (see layering.md#W4).',
+            },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message: 'fetch is only allowed in services/ and mocks/ (see layering.md#W4).',
+        },
+        {
+          name: 'XMLHttpRequest',
+          message: 'XMLHttpRequest is only allowed in services/ and mocks/ (see layering.md#W4).',
+        },
+      ],
+    },
+  },
+  {
+    // W2: a feature imports another feature only through its index.ts.
+    files: ['src/features/**/*.{ts,tsx}'],
+    ignores: TEST_FILES,
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@/features/*/**'],
+              message: 'Import another feature only through its index.ts (see layering.md#W2).',
+            },
+          ],
+          paths: [
+            {
+              name: 'axios',
+              message: 'axios is only allowed in services/ and mocks/ (see layering.md#W4).',
+            },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message: 'fetch is only allowed in services/ and mocks/ (see layering.md#W4).',
+        },
+        {
+          name: 'XMLHttpRequest',
+          message: 'XMLHttpRequest is only allowed in services/ and mocks/ (see layering.md#W4).',
+        },
+      ],
+    },
+  },
+  {
+    // W4 (approximated): fetch, axios and XMLHttpRequest stay in services/ and mocks/.
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: [
+      ...TEST_FILES,
+      'src/components/ui/**',
+      'src/features/**',
+      'src/services/**',
+      'src/mocks/**',
+    ],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'axios',
+              message: 'axios is only allowed in services/ and mocks/ (see layering.md#W4).',
+            },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message: 'fetch is only allowed in services/ and mocks/ (see layering.md#W4).',
+        },
+        {
+          name: 'XMLHttpRequest',
+          message: 'XMLHttpRequest is only allowed in services/ and mocks/ (see layering.md#W4).',
+        },
+      ],
+    },
+  },
+);

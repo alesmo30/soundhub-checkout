@@ -1,9 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
-    "allowJs": true,
+    "noEmit": true,
     "types": ["node"]
   },
-  "include": ["vite.config.ts", "jest.config.js"]
+  "include": ["vite.config.ts"]
 }
