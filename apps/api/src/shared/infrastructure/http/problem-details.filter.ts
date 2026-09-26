@@ -20,9 +20,9 @@ function toKebabCase(code: string): string {
 export class ProblemDetailsFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
     const context = host.switchToHttp();
-    const request = context.getRequest<Request & { id?: string }>();
+    const request = context.getRequest<Request>();
     const response = context.getResponse<Response>();
-    const traceId = request.id ?? randomUUID();
+    const traceId = typeof request.id === 'string' ? request.id : randomUUID();
 
     const problem = this.buildProblemDetails(exception, traceId);
 

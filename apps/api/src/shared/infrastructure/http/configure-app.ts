@@ -8,6 +8,7 @@ import helmet from 'helmet';
 
 import { API_PREFIX, BODY_LIMIT, DOCS_PATH } from '../../../config/app.constants';
 import { ProblemDetailsFilter } from './problem-details.filter';
+import { RequestIdMiddleware } from './request-id.middleware';
 
 function flattenValidationErrors(errors: ValidationError[], parentPath = ''): FieldError[] {
   return errors.flatMap((error) => {
@@ -31,6 +32,11 @@ function docsAwareHelmet(request: Request, response: Response, next: NextFunctio
 }
 
 export function configureApp(app: INestApplication): void {
+  const requestIdMiddleware = new RequestIdMiddleware();
+  app.use((request: Request, response: Response, next: NextFunction) =>
+    requestIdMiddleware.use(request, response, next),
+  );
+
   app.use(docsAwareHelmet);
   app.use(json({ limit: BODY_LIMIT }));
   app.use(urlencoded({ extended: true, limit: BODY_LIMIT }));
