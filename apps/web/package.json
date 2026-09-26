@@ -12,8 +12,11 @@
   },
   "dependencies": {
     "@checkout/shared": "workspace:*",
+    "@reduxjs/toolkit": "^2.12.0",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "react-redux": "^9.3.0",
+    "redux-persist": "^6.0.0"
   },
   "devDependencies": {
     "@swc/core": "^1.16.2",
