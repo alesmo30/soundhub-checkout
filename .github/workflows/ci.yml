@@ -1,0 +1,112 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+
+  coverage:
+    name: coverage (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: shared
+            filter: '@checkout/shared'
+            path: packages/shared
+          - name: api
+            filter: '@checkout/api'
+            path: apps/api
+          - name: web
+            filter: '@checkout/web'
+            path: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --if-present --filter ${{ matrix.filter }} run test:cov
+      - name: Coverage summary
+        if: always()
+        run: |
+          file="${{ matrix.path }}/coverage/coverage-summary.json"
+          if [ -f "$file" ]; then
+            {
+              echo "| Statements | Branches | Functions | Lines |"
+              echo "|---|---|---|---|"
+              echo "| $(jq '.total.statements.pct' "$file")% | $(jq '.total.branches.pct' "$file")% | $(jq '.total.functions.pct' "$file")% | $(jq '.total.lines.pct' "$file")% |"
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "no coverage yet" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  api-integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: checkout
+          POSTGRES_PASSWORD: checkout
+          POSTGRES_DB: checkout
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U checkout -d checkout"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USERNAME: checkout
+      DB_PASSWORD: checkout
+      DB_NAME: checkout
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --if-present --filter @checkout/api run migration:run
+      - run: pnpm --if-present --filter @checkout/api run test:int -- --passWithNoTests
+
+  e2e:
+    # Disabled until web 08 adds Playwright. actionlint's `if-cond` rule
+    # flags this literal `false` as a known, accepted finding (spec 01,
+    # decision log) until that spec flips it to `true`.
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "e2e disabled until web 08"

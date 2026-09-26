@@ -11,7 +11,8 @@ const FINAL_STATUSES = ['APPROVED', 'DECLINED', 'VOIDED', 'ERROR'] as const;
 const CARD_APPROVED_NUMBER = '4242424242424242'; // sandbox test card, always APPROVED
 const CARD_DECLINED_NUMBER = '4111111111111111'; // sandbox test card, always DECLINED
 
-type ScenarioName = 'approved' | 'declined' | 'invalid-token' | 'reused-token' | 'lookup-by-reference';
+type ScenarioName =
+  'approved' | 'declined' | 'invalid-token' | 'reused-token' | 'lookup-by-reference';
 
 type ScenarioResult = {
   scenario: ScenarioName;
@@ -79,7 +80,10 @@ function buildReference(): string {
   const dd = String(today.getDate()).padStart(2, '0');
 
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  const suffix = Array.from({ length: 6 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('');
+  const suffix = Array.from(
+    { length: 6 },
+    () => alphabet[Math.floor(Math.random() * alphabet.length)],
+  ).join('');
 
   return `TX-${yyyy}${mm}${dd}-${suffix}`;
 }
@@ -91,8 +95,15 @@ type SignIntegrityInput = {
   integritySecret: string;
 };
 
-function signIntegrity({ reference, amountInCents, currency, integritySecret }: SignIntegrityInput): string {
-  return createHash('sha256').update(`${reference}${amountInCents}${currency}${integritySecret}`).digest('hex');
+function signIntegrity({
+  reference,
+  amountInCents,
+  currency,
+  integritySecret,
+}: SignIntegrityInput): string {
+  return createHash('sha256')
+    .update(`${reference}${amountInCents}${currency}${integritySecret}`)
+    .digest('hex');
 }
 
 type JsonResult<T> = { status: number; body: T; fieldNames: string[] };
@@ -117,13 +128,22 @@ async function getAcceptanceTokens(env: SpikeEnv): Promise<JsonResult<MerchantRe
 
 type CardTokenResponse = { data: { id: string } };
 
-async function tokenizeCard(env: SpikeEnv, cardNumber: string): Promise<JsonResult<CardTokenResponse>> {
+async function tokenizeCard(
+  env: SpikeEnv,
+  cardNumber: string,
+): Promise<JsonResult<CardTokenResponse>> {
   const expYear = String(new Date().getFullYear() + 2).slice(-2);
 
   return requestJson<CardTokenResponse>(`${env.gatewayUrl}/tokens/cards`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.publicKey}` },
-    body: JSON.stringify({ number: cardNumber, cvc: '123', exp_month: '12', exp_year: expYear, card_holder: CARD_HOLDER }),
+    body: JSON.stringify({
+      number: cardNumber,
+      cvc: '123',
+      exp_month: '12',
+      exp_year: expYear,
+      card_holder: CARD_HOLDER,
+    }),
   });
 }
 
@@ -140,9 +160,16 @@ type CreateTransactionInput = {
   reference: string;
 };
 
-async function createTransaction(input: CreateTransactionInput): Promise<JsonResult<TransactionResponse>> {
+async function createTransaction(
+  input: CreateTransactionInput,
+): Promise<JsonResult<TransactionResponse>> {
   const { env, cardToken, acceptanceToken, personalAuthToken, reference } = input;
-  const signature = signIntegrity({ reference, amountInCents: AMOUNT_IN_CENTS, currency: CURRENCY, integritySecret: env.integritySecret });
+  const signature = signIntegrity({
+    reference,
+    amountInCents: AMOUNT_IN_CENTS,
+    currency: CURRENCY,
+    integritySecret: env.integritySecret,
+  });
 
   return requestJson<TransactionResponse>(`${env.gatewayUrl}/transactions`, {
     method: 'POST',
@@ -175,7 +202,11 @@ type PollResult = {
   fieldNames: string[];
 };
 
-async function pollUntilFinal(env: SpikeEnv, transactionId: string, initialStatus: string): Promise<PollResult> {
+async function pollUntilFinal(
+  env: SpikeEnv,
+  transactionId: string,
+  initialStatus: string,
+): Promise<PollResult> {
   const start = Date.now();
   const statusTrail = [initialStatus];
   let currentStatus = initialStatus;
@@ -184,9 +215,12 @@ async function pollUntilFinal(env: SpikeEnv, transactionId: string, initialStatu
   while (!isFinalStatus(currentStatus) && Date.now() - start < POLL_TIMEOUT_MS) {
     await sleep(POLL_INTERVAL_MS);
 
-    const result = await requestJson<TransactionResponse>(`${env.gatewayUrl}/transactions/${transactionId}`, {
-      headers: { Authorization: `Bearer ${env.privateKey}` },
-    });
+    const result = await requestJson<TransactionResponse>(
+      `${env.gatewayUrl}/transactions/${transactionId}`,
+      {
+        headers: { Authorization: `Bearer ${env.privateKey}` },
+      },
+    );
     fieldNames = result.fieldNames;
     currentStatus = result.body.data!.status;
     if (statusTrail[statusTrail.length - 1] !== currentStatus) statusTrail.push(currentStatus);
@@ -248,7 +282,10 @@ type TransactionOutcome = {
   fieldNames: string[];
 };
 
-async function observeTransactionOutcome(env: SpikeEnv, cardToken: string): Promise<TransactionOutcome> {
+async function observeTransactionOutcome(
+  env: SpikeEnv,
+  cardToken: string,
+): Promise<TransactionOutcome> {
   const start = Date.now();
   const merchant = await getAcceptanceTokens(env);
   const created = await createTransaction({
@@ -314,7 +351,10 @@ async function runReusedTokenScenario(env: SpikeEnv): Promise<ScenarioResult> {
   };
 }
 
-async function runLookupByReferenceScenario(env: SpikeEnv, reference: string): Promise<ScenarioResult> {
+async function runLookupByReferenceScenario(
+  env: SpikeEnv,
+  reference: string,
+): Promise<ScenarioResult> {
   const start = Date.now();
 
   const result = await requestJson<{ data?: unknown[] }>(
@@ -380,4 +420,4 @@ async function main(): Promise<void> {
   }
 }
 
-main();
+void main();

@@ -1,3 +1,18 @@
 /phases
 
 /docs/design/data-model.dbml
+
+# Dependencies and build output
+node_modules
+dist
+cdk.out
+
+# Coverage and test artifacts
+coverage
+playwright-report
+test-results
+
+# Environment
+.env
+.env.local
+!.env.example

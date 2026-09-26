@@ -137,7 +137,7 @@ Each step is one commit (conventional: `chore(api): …` for the script, `docs: 
 - [x] Running with a missing variable exits `1` and prints only the missing variable names.
 - [x] `scripts/gateway-spike.ts` imports only Node built-ins (`node:*` or globals); no `import` from `@checkout/*` or `node_modules`.
 - [x] The script contains exactly one `eslint-disable-next-line no-restricted-syntax`, with a justification comment on the line above.
-- [ ] `pnpm lint` passes on `scripts/gateway-spike.ts` once infra 00 is merged into the branch. — pending: infra 00 not merged yet (no root ESLint config exists on this branch). Run before opening the PR, per the spec's own Risks table.
+- [x] `pnpm lint` passes on `scripts/gateway-spike.ts` once infra 00 is merged into the branch. Closed by spec 01 (infra foundation), step 3: root ESLint config added, one trivial fix applied (`main();` → `void main();`, `no-floating-promises`).
 - [x] `docs/design/gateway-findings.md` has an answer plus evidence for each question:
   - [x] Does the transaction response include `brand` / `last_four`, and at which key path?
   - [x] Can a transaction be looked up by `reference`? (HTTP code + response shape recorded.)

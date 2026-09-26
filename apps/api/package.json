@@ -1,0 +1,7 @@
+{
+  "name": "@checkout/api",
+  "private": true,
+  "dependencies": {
+    "@checkout/shared": "workspace:*"
+  }
+}

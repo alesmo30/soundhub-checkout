@@ -1,0 +1,7 @@
+{
+  "name": "@checkout/web",
+  "private": true,
+  "dependencies": {
+    "@checkout/shared": "workspace:*"
+  }
+}
