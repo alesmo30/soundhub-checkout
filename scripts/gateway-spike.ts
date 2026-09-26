@@ -341,6 +341,7 @@ function printSummary(results: ScenarioResult[]): void {
     console.log(
       `[${mark}] ${result.scenario} -> expected ${result.expected}, observed ${result.observed}, ${result.elapsedMs}ms, trail [${result.statusTrail.join(' -> ')}]`,
     );
+    console.log(`  fields: ${result.fieldNames.join(', ')}`);
   }
 }
 
