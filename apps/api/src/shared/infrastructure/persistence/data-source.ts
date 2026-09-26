@@ -2,8 +2,14 @@ import { DataSource, type DataSourceOptions } from 'typeorm';
 
 import type { AppConfig } from '../../../config/app-config';
 import { loadAppConfig } from '../../../config/app-config';
+import { ProductOrmEntity } from '../../../modules/catalog/infrastructure/persistence/product.orm-entity';
+import { CustomerOrmEntity } from '../../../modules/customers/infrastructure/persistence/customer.orm-entity';
+import { MunicipalityOrmEntity } from '../../../modules/locations/infrastructure/persistence/municipality.orm-entity';
+import { WarehouseOrmEntity } from '../../../modules/locations/infrastructure/persistence/warehouse.orm-entity';
 
 const MIGRATIONS_GLOB = 'src/shared/infrastructure/persistence/migrations/*.ts';
+
+const ENTITIES = [ProductOrmEntity, MunicipalityOrmEntity, WarehouseOrmEntity, CustomerOrmEntity];
 
 // Used by the running Nest app: no `migrations` entry, because a webpack
 // bundle cannot resolve that glob at runtime (it tries to on DataSource
@@ -17,7 +23,7 @@ export function buildDataSourceOptions(appConfig: AppConfig): DataSourceOptions 
     password: appConfig.db.password,
     database: appConfig.db.name,
     synchronize: false,
-    entities: [],
+    entities: ENTITIES,
   };
 }
 
