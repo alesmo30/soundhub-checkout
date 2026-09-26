@@ -1,7 +1,49 @@
 {
   "name": "@checkout/api",
   "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "build": "nest build",
+    "start": "node dist/main.js",
+    "start:dev": "nest start --watch",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "jest -c jest.config.ts",
+    "test:cov": "jest -c jest.config.ts --coverage",
+    "test:int": "jest -c jest.int.config.ts --runInBand",
+    "migration:run": "tsx node_modules/typeorm/cli.js migration:run -d src/shared/infrastructure/persistence/data-source.ts",
+    "migration:revert": "tsx node_modules/typeorm/cli.js migration:revert -d src/shared/infrastructure/persistence/data-source.ts",
+    "migration:generate": "tsx node_modules/typeorm/cli.js migration:generate -d src/shared/infrastructure/persistence/data-source.ts",
+    "seed": "tsx src/shared/infrastructure/persistence/seeds/seed.cli.ts",
+    "seed:reset": "tsx src/shared/infrastructure/persistence/seeds/seed-reset.cli.ts"
+  },
   "dependencies": {
-    "@checkout/shared": "workspace:*"
+    "@checkout/shared": "workspace:*",
+    "@nestjs/common": "^12.1.0",
+    "@nestjs/config": "^12.0.1",
+    "@nestjs/core": "^12.1.0",
+    "@nestjs/platform-express": "^12.1.0",
+    "@nestjs/swagger": "^12.0.2",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
+    "helmet": "^8.3.0",
+    "neverthrow": "^8.2.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^12.0.7",
+    "@nestjs/testing": "^12.1.0",
+    "@swc/core": "^1.16.2",
+    "@swc/jest": "^0.2.39",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.20.4",
+    "fork-ts-checker-webpack-plugin": "^9.1.0",
+    "jest": "^30.5.2",
+    "ts-loader": "^9.6.2",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths-webpack-plugin": "^4.2.0",
+    "typescript": "^5.9.3",
+    "webpack": "^5.111.1",
+    "webpack-node-externals": "^3.0.0"
   }
 }
