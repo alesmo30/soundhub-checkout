@@ -1,4 +1,7 @@
+import { config as loadDotenvFile } from 'dotenv';
+
 import type { EnvironmentVariables, LogLevel, NodeEnv } from './environment-variables';
+import { validateEnvironmentVariables } from './environment-variables';
 
 export interface AppConfig {
   app: { nodeEnv: NodeEnv; port: number; logLevel: LogLevel };
@@ -38,4 +41,13 @@ export function buildAppConfig(env: EnvironmentVariables): AppConfig {
       from: env.EMAIL_FROM,
     },
   };
+}
+
+// Entry point for code that runs outside Nest's DI (the TypeORM CLI, the
+// seed scripts): they get no ConfigService, so they validate the single
+// root .env themselves. Resolved against process.cwd(), same as
+// ConfigModule.forRoot's envFilePath in config.module.ts.
+export function loadAppConfig(): AppConfig {
+  loadDotenvFile({ path: '../../.env' });
+  return buildAppConfig(validateEnvironmentVariables(process.env));
 }
