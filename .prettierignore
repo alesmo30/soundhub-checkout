@@ -1,0 +1,6 @@
+*.md
+pnpm-lock.yaml
+coverage/
+dist/
+cdk.out/
+.github/workflows/claude*.yml

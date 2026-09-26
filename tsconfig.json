@@ -2,7 +2,8 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
-    "types": ["node"]
+    "types": ["node"],
+    "allowJs": true
   },
   "include": ["scripts/**/*.ts", "*.config.js", "*.config.ts", "eslint.config.js"]
 }
