@@ -24,7 +24,11 @@ export default defineConfig(
     ...reactHooks.configs.flat.recommended,
   },
   {
+    // shadcn/ui primitives export their cva() variants alongside the
+    // component (idiomatic shadcn pattern); router.tsx exports route data,
+    // not a component. Neither is a Fast Refresh boundary.
     files: ['src/**/*.{ts,tsx}'],
+    ignores: ['src/components/ui/**', 'src/app/router.tsx'],
     plugins: reactRefresh.configs.vite.plugins,
     rules: reactRefresh.configs.vite.rules,
   },
