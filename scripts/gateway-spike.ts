@@ -205,10 +205,11 @@ type RunCardScenarioInput = {
   scenario: ScenarioName;
   cardNumber: string;
   expectedStatus: string;
+  reference: string;
 };
 
 async function runCardScenario(input: RunCardScenarioInput): Promise<ScenarioResult> {
-  const { env, scenario, cardNumber, expectedStatus } = input;
+  const { env, scenario, cardNumber, expectedStatus, reference } = input;
   const start = Date.now();
 
   // Each presigned acceptance token is single-use: the gateway rejects a
@@ -221,7 +222,7 @@ async function runCardScenario(input: RunCardScenarioInput): Promise<ScenarioRes
     cardToken: tokenized.body.data.id,
     acceptanceToken: merchant.body.data.presigned_acceptance.acceptance_token,
     personalAuthToken: merchant.body.data.presigned_personal_data_auth.acceptance_token,
-    reference: buildReference(),
+    reference,
   });
 
   const poll = await pollUntilFinal(env, created.body.data!.id, created.body.data!.status);
@@ -313,6 +314,26 @@ async function runReusedTokenScenario(env: SpikeEnv): Promise<ScenarioResult> {
   };
 }
 
+async function runLookupByReferenceScenario(env: SpikeEnv, reference: string): Promise<ScenarioResult> {
+  const start = Date.now();
+
+  const result = await requestJson<{ data?: unknown[] }>(
+    `${env.gatewayUrl}/transactions?reference=${encodeURIComponent(reference)}`,
+    { headers: { Authorization: `Bearer ${env.privateKey}` } },
+  );
+  const count = Array.isArray(result.body.data) ? result.body.data.length : 0;
+
+  return {
+    scenario: 'lookup-by-reference',
+    expected: 'recorded result',
+    observed: `HTTP ${result.status}, count=${count}`,
+    passed: true,
+    elapsedMs: Date.now() - start,
+    statusTrail: [],
+    fieldNames: result.fieldNames,
+  };
+}
+
 function printSummary(results: ScenarioResult[]): void {
   console.log('\nScenario summary:');
   for (const result of results) {
@@ -328,14 +349,28 @@ async function main(): Promise<void> {
 
   const results: ScenarioResult[] = [];
 
+  const approvedReference = buildReference();
   results.push(
-    await runCardScenario({ env, scenario: 'approved', cardNumber: CARD_APPROVED_NUMBER, expectedStatus: 'APPROVED' }),
+    await runCardScenario({
+      env,
+      scenario: 'approved',
+      cardNumber: CARD_APPROVED_NUMBER,
+      expectedStatus: 'APPROVED',
+      reference: approvedReference,
+    }),
   );
   results.push(
-    await runCardScenario({ env, scenario: 'declined', cardNumber: CARD_DECLINED_NUMBER, expectedStatus: 'DECLINED' }),
+    await runCardScenario({
+      env,
+      scenario: 'declined',
+      cardNumber: CARD_DECLINED_NUMBER,
+      expectedStatus: 'DECLINED',
+      reference: buildReference(),
+    }),
   );
   results.push(await runInvalidTokenScenario(env));
   results.push(await runReusedTokenScenario(env));
+  results.push(await runLookupByReferenceScenario(env, approvedReference));
 
   printSummary(results);
 
