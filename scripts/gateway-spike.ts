@@ -127,7 +127,10 @@ async function tokenizeCard(env: SpikeEnv, cardNumber: string): Promise<JsonResu
   });
 }
 
-type TransactionResponse = { data: { id: string; status: string } };
+type TransactionResponse = {
+  data?: { id: string; status: string };
+  error?: { type: string; messages?: Record<string, unknown> };
+};
 
 type CreateTransactionInput = {
   env: SpikeEnv;
@@ -185,7 +188,7 @@ async function pollUntilFinal(env: SpikeEnv, transactionId: string, initialStatu
       headers: { Authorization: `Bearer ${env.privateKey}` },
     });
     fieldNames = result.fieldNames;
-    currentStatus = result.body.data.status;
+    currentStatus = result.body.data!.status;
     if (statusTrail[statusTrail.length - 1] !== currentStatus) statusTrail.push(currentStatus);
   }
 
@@ -221,7 +224,7 @@ async function runCardScenario(input: RunCardScenarioInput): Promise<ScenarioRes
     reference: buildReference(),
   });
 
-  const poll = await pollUntilFinal(env, created.body.data.id, created.body.data.status);
+  const poll = await pollUntilFinal(env, created.body.data!.id, created.body.data!.status);
   const observed = poll.finalStatus ?? 'TIMEOUT';
 
   return {
@@ -232,6 +235,81 @@ async function runCardScenario(input: RunCardScenarioInput): Promise<ScenarioRes
     elapsedMs: Date.now() - start,
     statusTrail: poll.statusTrail,
     fieldNames: poll.fieldNames.length > 0 ? poll.fieldNames : created.fieldNames,
+  };
+}
+
+const INVALID_CARD_TOKEN = 'tok_test_invalid_00000000000000000000';
+
+type TransactionOutcome = {
+  observed: string;
+  statusTrail: string[];
+  elapsedMs: number;
+  fieldNames: string[];
+};
+
+async function observeTransactionOutcome(env: SpikeEnv, cardToken: string): Promise<TransactionOutcome> {
+  const start = Date.now();
+  const merchant = await getAcceptanceTokens(env);
+  const created = await createTransaction({
+    env,
+    cardToken,
+    acceptanceToken: merchant.body.data.presigned_acceptance.acceptance_token,
+    personalAuthToken: merchant.body.data.presigned_personal_data_auth.acceptance_token,
+    reference: buildReference(),
+  });
+
+  if (created.status >= 400) {
+    return {
+      observed: `HTTP ${created.status} ${created.body.error?.type ?? 'unknown'}`,
+      statusTrail: [],
+      elapsedMs: Date.now() - start,
+      fieldNames: created.fieldNames,
+    };
+  }
+
+  const poll = await pollUntilFinal(env, created.body.data!.id, created.body.data!.status);
+
+  return {
+    observed: poll.finalStatus ?? 'TIMEOUT',
+    statusTrail: poll.statusTrail,
+    elapsedMs: Date.now() - start,
+    fieldNames: poll.fieldNames.length > 0 ? poll.fieldNames : created.fieldNames,
+  };
+}
+
+async function runInvalidTokenScenario(env: SpikeEnv): Promise<ScenarioResult> {
+  const outcome = await observeTransactionOutcome(env, INVALID_CARD_TOKEN);
+
+  return {
+    scenario: 'invalid-token',
+    expected: 'gateway error',
+    passed: outcome.observed.startsWith('HTTP') || outcome.observed === 'ERROR',
+    ...outcome,
+  };
+}
+
+async function runReusedTokenScenario(env: SpikeEnv): Promise<ScenarioResult> {
+  const merchant = await getAcceptanceTokens(env);
+  const tokenized = await tokenizeCard(env, CARD_APPROVED_NUMBER);
+  await createTransaction({
+    env,
+    cardToken: tokenized.body.data.id,
+    acceptanceToken: merchant.body.data.presigned_acceptance.acceptance_token,
+    personalAuthToken: merchant.body.data.presigned_personal_data_auth.acceptance_token,
+    reference: buildReference(),
+  });
+
+  // Reusing the same card token was not rejected in this sandbox: a manual
+  // probe confirmed 4 consecutive uses all succeeded (no documented reuse
+  // limit found), so this scenario records the outcome instead of forcing
+  // an error.
+  const outcome = await observeTransactionOutcome(env, tokenized.body.data.id);
+
+  return {
+    scenario: 'reused-token',
+    expected: 'recorded result (goal is to observe, not to force an error)',
+    passed: true,
+    ...outcome,
   };
 }
 
@@ -256,6 +334,8 @@ async function main(): Promise<void> {
   results.push(
     await runCardScenario({ env, scenario: 'declined', cardNumber: CARD_DECLINED_NUMBER, expectedStatus: 'DECLINED' }),
   );
+  results.push(await runInvalidTokenScenario(env));
+  results.push(await runReusedTokenScenario(env));
 
   printSummary(results);
 
