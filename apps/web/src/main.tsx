@@ -1,6 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
+import './config/env';
+
 const rootElement = document.getElementById('root');
 
 if (!rootElement) {
