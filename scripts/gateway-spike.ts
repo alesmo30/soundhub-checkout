@@ -8,6 +8,7 @@ const INSTALLMENTS = 1;
 const CUSTOMER_EMAIL = 'spike@example.com';
 const CARD_HOLDER = 'Spike Tester';
 const FINAL_STATUSES = ['APPROVED', 'DECLINED', 'VOIDED', 'ERROR'] as const;
+const CARD_APPROVED_NUMBER = '4242424242424242'; // sandbox test card, always APPROVED
 
 type SpikeEnv = {
   gatewayUrl: string;
@@ -81,13 +82,36 @@ function signIntegrity({ reference, amountInCents, currency, integritySecret }: 
   return createHash('sha256').update(`${reference}${amountInCents}${currency}${integritySecret}`).digest('hex');
 }
 
-async function getAcceptanceTokens(
-  env: SpikeEnv,
-): Promise<{ status: number; body: unknown; fieldNames: string[] }> {
-  const response = await fetch(`${env.gatewayUrl}/merchants/${env.publicKey}`);
-  const body = await response.json();
+type JsonResult<T> = { status: number; body: T; fieldNames: string[] };
+
+async function requestJson<T>(url: string, init?: RequestInit): Promise<JsonResult<T>> {
+  const response = await fetch(url, init);
+  const body = (await response.json()) as T;
 
   return { status: response.status, body, fieldNames: collectFieldNames(body) };
+}
+
+type MerchantResponse = {
+  data: {
+    presigned_acceptance: { acceptance_token: string };
+    presigned_personal_data_auth: { acceptance_token: string };
+  };
+};
+
+async function getAcceptanceTokens(env: SpikeEnv): Promise<JsonResult<MerchantResponse>> {
+  return requestJson<MerchantResponse>(`${env.gatewayUrl}/merchants/${env.publicKey}`);
+}
+
+type CardTokenResponse = { data: { id: string } };
+
+async function tokenizeCard(env: SpikeEnv, cardNumber: string): Promise<JsonResult<CardTokenResponse>> {
+  const expYear = String(new Date().getFullYear() + 2).slice(-2);
+
+  return requestJson<CardTokenResponse>(`${env.gatewayUrl}/tokens/cards`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.publicKey}` },
+    body: JSON.stringify({ number: cardNumber, cvc: '123', exp_month: '12', exp_year: expYear, card_holder: CARD_HOLDER }),
+  });
 }
 
 async function main(): Promise<void> {
@@ -98,9 +122,9 @@ async function main(): Promise<void> {
   console.log(`Field names: ${merchant.fieldNames.join(', ')}`);
 
   const reference = buildReference();
-  const signature = signIntegrity({ reference, amountInCents: AMOUNT_IN_CENTS, currency: CURRENCY, integritySecret: env.integritySecret });
-  console.log(`Sample reference: ${reference}`);
-  console.log(`Signature length: ${signature.length}`);
+  const tokenized = await tokenizeCard(env, CARD_APPROVED_NUMBER);
+  console.log(`POST /tokens/cards -> ${tokenized.status}`);
+  console.log(`Reference for next step: ${reference}`);
 }
 
 main();
