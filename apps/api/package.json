@@ -45,5 +45,11 @@
     "typescript": "^5.9.3",
     "webpack": "^5.111.1",
     "webpack-node-externals": "^3.0.0"
+  },
+  "ts-node": {
+    "transpileOnly": true,
+    "compilerOptions": {
+      "module": "commonjs"
+    }
   }
 }
