@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 
 import { AppProviders } from './app/providers';
 import { env } from './config/env';
+import './styles/index.css';
 
 async function enableMocking() {
   if (!env.apiMocking) {

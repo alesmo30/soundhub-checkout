@@ -6,8 +6,8 @@ export function CatalogPlaceholderPage() {
   const { data } = useGetTempProductsQuery();
 
   return (
-    <div>
-      <p>Catálogo (placeholder)</p>
+    <div className="bg-canvas p-4">
+      <p className="font-heading text-text-strong">Catálogo (placeholder)</p>
       {data ? <p>{data.meta.totalItems} products (mock)</p> : null}
     </div>
   );
@@ -16,15 +16,27 @@ export function CatalogPlaceholderPage() {
 export function ProductPlaceholderPage() {
   const { id } = useParams<{ id: string }>();
 
-  return <div>Producto {id} (placeholder)</div>;
+  return (
+    <div className="bg-canvas p-4">
+      <p className="font-heading text-text-strong">Producto {id} (placeholder)</p>
+    </div>
+  );
 }
 
 export function TransactionPlaceholderPage() {
   const { id } = useParams<{ id: string }>();
 
-  return <div>Transacción {id} (placeholder)</div>;
+  return (
+    <div className="bg-canvas p-4">
+      <p className="font-heading text-text-strong">Transacción {id} (placeholder)</p>
+    </div>
+  );
 }
 
 export function NotFoundPage() {
-  return <div>404 - Página no encontrada</div>;
+  return (
+    <div className="bg-canvas p-4">
+      <p className="font-heading text-text-strong">404 - Página no encontrada</p>
+    </div>
+  );
 }
