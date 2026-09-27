@@ -235,7 +235,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. N
    Manual test: `pnpm --filter @checkout/api test:int` green, and the local catalog shows no new rows afterwards.
    Commit: `feat(api): implement TypeORM product repository`.
 
-4. [ ] **Municipality repository.** `municipality.mapper.ts` and `TypeOrmMunicipalityRepository`, wired and exported from `locations.module.ts`. The rollback int-spec proves:
+4. [x] **Municipality repository.** `municipality.mapper.ts` and `TypeOrmMunicipalityRepository`, wired and exported from `locations.module.ts`. The rollback int-spec proves:
    - `listDepartments` is distinct and sorted by name;
    - `listByDepartment` is sorted by name, excludes soft-deleted rows and returns `[]` for an unknown code;
    - `findByCode` works with and without `tx`;
