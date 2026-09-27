@@ -1,6 +1,6 @@
 # SPEC 06 — API: checkout pricing, quote and customers
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 04 (blocking: this spec starts only after SPEC 04 merges), SPEC 02 (ports, `UnitOfWork`, `respond()`)
 > **Date:** 2026-09-26
 > **Objective:** The server computes every amount the customer will pay through a side-effect-free `GET /quotes` whose delivery fee is chosen by the Strategy pattern, and creates or safely updates customers by national ID through `POST /customers` and `GET /customers/:id`.
@@ -355,7 +355,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. T
 
 ### Close-out
 
-11. [ ] **PR and green CI.** Run `pnpm --filter @checkout/api test:cov` and check in the report that `pricing/domain` is ≥ 90 %, and that `modules/pricing` and `modules/customers` are ≥ 80 % on all four metrics. Then push, open the PR with `gh-cli`, wait for CI and fix whatever fails. If web 03 merged first and touched the lockfile, apply the lockfile protocol. Finally, mark this spec `Implemented` and tick its criteria.
+11. [x] **PR and green CI.** Run `pnpm --filter @checkout/api test:cov` and check in the report that `pricing/domain` is ≥ 90 %, and that `modules/pricing` and `modules/customers` are ≥ 80 % on all four metrics. Then push, open the PR with `gh-cli`, wait for CI and fix whatever fails. If web 03 merged first and touched the lockfile, apply the lockfile protocol. Finally, mark this spec `Implemented` and tick its criteria.
     Manual test: every check green.
     Commit: `docs: mark spec 06 as Implemented`.
 
@@ -416,7 +416,7 @@ Quality and CI
 - [x] `pnpm lint`, `pnpm typecheck`, `pnpm --filter @checkout/api test:cov` and `pnpm --filter @checkout/api test:int` exit 0 locally.
 - [x] The coverage report shows `modules/pricing/domain` at ≥ 90 %, and `modules/pricing` and `modules/customers` at ≥ 80 %, on statements, branches, functions and lines. `apps/api` stays at ≥ 80 % globally.
 - [x] No raw SQL (`query(`, `manager.query`) exists under `modules/pricing` or `modules/customers`.
-- [ ] The PR shows green `lint`, `typecheck`, `coverage (api)` and `api-integration`.
+- [x] The PR shows green `lint`, `typecheck`, `coverage (api)` and `api-integration`.
 - [x] `git diff main --stat` shows changes only under `apps/api/src/modules/pricing/`, `apps/api/src/modules/customers/`, `apps/api/package.json`, `apps/api/eslint.config.mjs`, `pnpm-lock.yaml` and `specs/`. `eslint.config.mjs` was not anticipated when this spec was written: step 4 found that `PricingModule` needs to import `CatalogModule`/`LocationsModule` (real Nest `Module` classes, not their public `index.ts`) to share their DI tree, which the existing cross-module `no-restricted-imports` rule blocked for every file alike. The rule was widened, generically, to let only `*.module.ts` files import a sibling module's `Module` class — `domain/`, `application/` and `infrastructure/` still cross only through `index.ts`, unchanged. See the "Cross-module wiring" entry under Decisions.
 
 ## Decisions
