@@ -45,4 +45,12 @@ describe('DeliveryFeeResolver', () => {
   ])('%s', (_description, overrides, expected) => {
     expect(resolver.resolve(buildContext(overrides))).toEqual(expected);
   });
+
+  it('throws when no strategy supports the context, a state production wiring never reaches', () => {
+    const resolverWithNoStrategies = new DeliveryFeeResolver([]);
+
+    expect(() => resolverWithNoStrategies.resolve(buildContext({}))).toThrow(
+      'No delivery fee strategy matched the context',
+    );
+  });
 });
