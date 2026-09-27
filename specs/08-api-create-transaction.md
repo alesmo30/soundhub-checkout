@@ -322,7 +322,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `test:int` green.
    Commit: `feat(api): implement delivery repository`.
 
-6. [ ] **Transaction repository.** `transaction.mapper.ts`, `helpers/to-transaction-unique-violation.ts` and `TypeOrmTransactionRepository`. The 4 api 06 methods throw `Error('Not implemented — api 06')`. The rollback int-spec proves:
+6. [x] **Transaction repository.** `transaction.mapper.ts`, `helpers/to-transaction-unique-violation.ts` and `TypeOrmTransactionRepository`. The 4 api 06 methods throw `Error('Not implemented — api 06')`. The rollback int-spec proves:
    - insert + `findById` / `findByIdempotencyKey`;
    - a duplicate key → `Err({ constraint: 'IDEMPOTENCY_KEY' })`;
    - a duplicate reference → `Err({ constraint: 'REFERENCE' })`;
