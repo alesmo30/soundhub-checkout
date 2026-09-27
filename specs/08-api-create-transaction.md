@@ -306,7 +306,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `pnpm --filter @checkout/api test:int` green.
    Commit: `feat(api): implement stock reservation with raw SQL`.
 
-4. [ ] **Reservation concurrency proof.** `typeorm-stock-reservation.concurrency.int-spec.ts` creates a product with stock 1 and a random SKU. It then fires 20 `reserve` calls in parallel, each in its own `TypeOrmUnitOfWork`, and proves:
+4. [x] **Reservation concurrency proof.** `typeorm-stock-reservation.concurrency.int-spec.ts` creates a product with stock 1 and a random SKU. It then fires 20 `reserve` calls in parallel, each in its own `TypeOrmUnitOfWork`, and proves:
    - exactly 1 `RESERVED` and 19 `INSUFFICIENT_STOCK`;
    - final `stock_available = 0`, `stock_reserved = 1`.
 
