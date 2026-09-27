@@ -292,7 +292,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. T
    Manual test: `test` green.
    Commit: `feat(api): add GetQuoteUseCase`.
 
-5. [ ] **Quotes endpoint.** `quotes.controller.ts`, `pricing-http.constants.ts` and the quote DTOs. `quotes.controller.spec.ts` (`configureApp` + supertest + fakes) checks:
+5. [x] **Quotes endpoint.** `quotes.controller.ts`, `pricing-http.constants.ts` and the quote DTOs. `quotes.controller.spec.ts` (`configureApp` + supertest + fakes) checks:
    - the `{ data: Quote }` envelope;
    - 400 with `errors[]` for a non-uuid `productId`, `quantity` 0, 11 and `abc`, and `municipalityCode` `0500`;
    - 400 for an unknown query parameter;

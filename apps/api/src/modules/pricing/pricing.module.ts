@@ -14,6 +14,7 @@ import { DeliveryFeeResolver } from './domain/delivery-fee/delivery-fee.resolver
 import { FreeMetroStrategy } from './domain/delivery-fee/free-metro.strategy';
 import { MetroFlatStrategy } from './domain/delivery-fee/metro-flat.strategy';
 import { NationalDistanceStrategy } from './domain/delivery-fee/national-distance.strategy';
+import { QuotesController } from './infrastructure/http/quotes.controller';
 
 // Intermediate DI seam, local to this module: bundles the 3 repositories so
 // the GET_QUOTE_DEPENDENCIES factory below only ever takes 2 positional
@@ -29,6 +30,7 @@ interface QuoteRepositories {
 
 @Module({
   imports: [CatalogModule, LocationsModule],
+  controllers: [QuotesController],
   providers: [
     {
       provide: QUOTE_REPOSITORIES,
