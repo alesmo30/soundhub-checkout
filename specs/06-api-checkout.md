@@ -271,7 +271,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. T
    Manual test: `pnpm --filter @checkout/api test` green.
    Commit: `feat(api): add base fee policy to pricing domain`.
 
-3. [ ] **Delivery fee strategies.** `delivery-fee.strategy.ts`, the three strategies and `DeliveryFeeResolver`, with table-driven specs. The specs cover:
+3. [x] **Delivery fee strategies.** `delivery-fee.strategy.ts`, the three strategies and `DeliveryFeeResolver`, with table-driven specs. The specs cover:
    - metro with subtotal `19_999_900` → `METRO_FLAT 2_000_000`, and metro with `20_000_000` → `FREE_METRO 0`;
    - non-metro km 0 and 50 → `2_000_000`, km 51 → `2_050_000` (rounded up), km 400 → `4_100_000`;
    - km 716 and 717 → `6_000_000` (cap), and km 2000 → `6_000_000`;
