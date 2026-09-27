@@ -23,7 +23,11 @@ import {
 } from '@/components/ui/select';
 
 import { goToStep } from '../checkout.slice';
+import { TEST_MODE_NOTE } from '../checkout.constants';
+import { useCardTokenization } from '../hooks/use-card-tokenization';
 import { CardBrandIcon } from './card-brand-icon';
+import { GatewayError } from './gateway-error';
+import { LegalAcceptance } from './legal-acceptance';
 import { digitsOnly, formatCardNumber, formatExpiry } from '../lib/masks';
 
 const CVC_MAX_DIGITS = 3;
@@ -44,12 +48,14 @@ const INSTALLMENT_OPTIONS = Array.from(
   (_, index) => INSTALLMENTS_MIN + index,
 );
 
-// Tokenization, legal acceptance and the move to SUMMARY are step 8 (see
-// specs/07-web-checkout.md, Part 2); this step only wires the fields and
-// "Volver". The typed card lives in this component's own local form state
-// and is lost once it unmounts, which is what leaving CARD does today (see
+// The typed card lives in this component's own local form state and is
+// lost once it unmounts, which is what leaving CARD does today (see
 // checkout-dialog.tsx's step switch) — the spec's own wording ("it keeps
-// the typed card only while 2b stays mounted") already expects that.
+// the typed card only while 2b stays mounted") already expects that. The
+// number and CVC never leave this local state: `tokenization.submit` calls
+// `tokenizeCard` (a plain fetch, never RTK Query) and only its `{ token,
+// brand, last4 }` result is ever dispatched (see
+// specs/07-web-checkout.md#decisions, Gateway).
 export function CardForm() {
   const dispatch = useAppDispatch();
   const form = useForm<CardFormValues>({
@@ -57,6 +63,7 @@ export function CardForm() {
     defaultValues: EMPTY_CARD,
     mode: 'all',
   });
+  const tokenization = useCardTokenization();
 
   const numberValue = useWatch({ control: form.control, name: 'number' });
   const brand = detectCardBrand(digitsOnly(numberValue ?? ''));
@@ -65,10 +72,31 @@ export function CardForm() {
     dispatch(goToStep('CONTACT'));
   }
 
+  function onSubmit(values: CardFormValues) {
+    // `form.handleSubmit` only re-checks `cardSchema`; the legal checkboxes
+    // and the terms load are a separate gate a keyboard submit could
+    // otherwise bypass (the button itself is only one way to fire this).
+    if (!tokenization.canSubmit || tokenization.isTokenizing) {
+      return;
+    }
+
+    void tokenization.submit(values);
+  }
+
+  const canSubmit = form.formState.isValid && tokenization.canSubmit && !tokenization.isTokenizing;
+
   return (
     <Form {...form}>
-      <form onSubmit={(event) => event.preventDefault()} className="flex flex-col gap-6" noValidate>
+      <form
+        onSubmit={(event) => void form.handleSubmit(onSubmit)(event)}
+        className="flex flex-col gap-6"
+        noValidate
+      >
         <h2 className="font-heading text-xl font-bold text-text-strong">Datos de tu tarjeta</h2>
+
+        <p className="rounded-panel border border-border-subtle bg-canvas p-3 text-xs text-text">
+          {TEST_MODE_NOTE}
+        </p>
 
         <FormField
           control={form.control}
@@ -196,14 +224,26 @@ export function CardForm() {
           )}
         />
 
+        <LegalAcceptance
+          isLoading={tokenization.isTermsLoading}
+          isError={tokenization.isTermsError}
+          onRefetch={tokenization.refetchTerms}
+          termsUrl={tokenization.termsUrl}
+          personalDataUrl={tokenization.personalDataUrl}
+          acceptedTerms={tokenization.acceptedTerms}
+          onAcceptedTermsChange={tokenization.setAcceptedTerms}
+          acceptedPersonalData={tokenization.acceptedPersonalData}
+          onAcceptedPersonalDataChange={tokenization.setAcceptedPersonalData}
+        />
+
+        <GatewayError reason={tokenization.gatewayError} />
+
         <div className="flex items-center justify-between">
           <Button type="button" variant="secondary" onClick={handleVolver}>
             Volver
           </Button>
-          {/* Tokenization is step 8; this placeholder stays disabled until it
-              is wired (see specs/07-web-checkout.md, step 8). */}
-          <Button type="submit" disabled>
-            Continuar
+          <Button type="submit" disabled={!canSubmit}>
+            {tokenization.isTokenizing ? 'Validando tarjeta…' : 'Continuar'}
           </Button>
         </div>
       </form>

@@ -322,7 +322,7 @@ Each step is one commit after review. Target ≤ ~300 changed lines per step. Te
    Chrome: the empty card form, VISA detected, Mastercard detected, and errors, at both viewports.
    Commit: `feat(web): add card form with brand detection`.
 
-8. [ ] **Legal acceptance and tokenization.** `legal-acceptance.tsx`, `gateway-error.tsx`, the test-mode note, the submit handler calling `tokenizeCard`, `saveCard`, `goToStep('SUMMARY')`, and the `summary-sheet.tsx` stub.
+8. [x] **Legal acceptance and tokenization.** `legal-acceptance.tsx`, `gateway-error.tsx`, the test-mode note, the submit handler calling `tokenizeCard`, `saveCard`, `goToStep('SUMMARY')`, and the `summary-sheet.tsx` stub.
    Tests (MSW):
    - both checkboxes render with their links; "Continuar" stays disabled until both are checked; terms error then "Reintentar";
    - 4242 → the stub shows `VISA •••• 4242`, and the session holds the token, the installments and both acceptance tokens;

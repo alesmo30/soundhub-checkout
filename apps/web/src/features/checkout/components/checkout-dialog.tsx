@@ -12,6 +12,7 @@ import { useCheckoutStep } from '../hooks/use-checkout-step';
 import { CardForm } from './card-form';
 import { ContactForm } from './contact-form';
 import { OrderPanel } from './order-panel';
+import { SummarySheet } from './summary-sheet';
 
 const MIN_QUANTITY = 1;
 
@@ -22,12 +23,7 @@ function CheckoutStepContent({ step }: { step: CheckoutStep }) {
     case 'CARD':
       return <CardForm />;
     case 'SUMMARY':
-      return (
-        <div className="flex flex-col gap-2">
-          <h2 className="font-heading text-xl font-bold text-text-strong">Resumen de tu compra</h2>
-          <p className="text-sm text-text">El resumen de la compra va aquí.</p>
-        </div>
-      );
+      return <SummarySheet />;
   }
 }
 

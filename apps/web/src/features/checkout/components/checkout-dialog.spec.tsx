@@ -1,8 +1,9 @@
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 
 import { products } from '@/mocks/fixtures/products';
 import { renderWithProviders, type RenderWithProvidersOptions } from '@/test/render-with-providers';
 
+import { startCheckout } from '../checkout.slice';
 import { CheckoutDialog } from './checkout-dialog';
 
 const product = products.find((candidate) => candidate.sku === 'HP-SNY-WH1000XM5')!;
@@ -112,6 +113,62 @@ describe('CheckoutDialog', () => {
 
       expect(screen.queryByRole('heading', { name: 'Tus datos' })).not.toBeInTheDocument();
       expect(screen.getByRole('heading', { name: 'Datos de tu tarjeta' })).toBeInTheDocument();
+    });
+  });
+
+  describe('tokenization (2b) and the summary stub', () => {
+    function renderAtCard() {
+      return renderDialog(true, {
+        checkout: { productId: product.id, quantity: 2, isDialogOpen: true, step: 'CARD' },
+        customer: { remembered: REMEMBERED },
+      });
+    }
+
+    // Flushes the zod resolver's own microtask tick inside an `act`
+    // boundary, so react-hook-form's late `isValidating` update never lands
+    // after the interaction that triggered it already returned.
+    async function settle() {
+      await act(() => Promise.resolve());
+    }
+
+    async function fillAndSubmitCard(user: ReturnType<typeof renderAtCard>['user']) {
+      await user.type(screen.getByLabelText('Número de tarjeta'), '4242424242424242');
+      await user.type(screen.getByLabelText('Nombre en la tarjeta'), 'Jane Doe');
+      await user.type(screen.getByLabelText('MM/AA'), '1229');
+      await user.type(screen.getByLabelText('CVC'), '391');
+      await user.tab();
+      await settle();
+      await user.click(await screen.findByRole('checkbox', { name: /términos y condiciones/ }));
+      await user.click(screen.getByRole('checkbox', { name: /tratamiento de mis datos personales/ }));
+      await settle();
+      await user.click(screen.getByRole('button', { name: 'Continuar' }));
+    }
+
+    it('tokenizes 4242 and moves to the summary stub showing VISA •••• 4242', async () => {
+      const { user } = renderAtCard();
+
+      await fillAndSubmitCard(user);
+
+      expect(await screen.findByText('VISA •••• 4242', {}, { timeout: 5000 })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Editar' })).toBeInTheDocument();
+    });
+
+    it('after tokenizing, closing and reopening lands on CARD with an empty card form', async () => {
+      const { user, store } = renderAtCard();
+
+      await fillAndSubmitCard(user);
+      await screen.findByText('VISA •••• 4242', {}, { timeout: 5000 });
+
+      await user.click(screen.getByRole('button', { name: 'Cerrar' }));
+      expect(store.getState().checkout.isDialogOpen).toBe(false);
+      expect(store.getState().checkoutSession.card).toBeNull();
+
+      act(() => {
+        store.dispatch(startCheckout({ productId: product.id, quantity: 2 }));
+      });
+
+      expect(await screen.findByRole('heading', { name: 'Datos de tu tarjeta' })).toBeInTheDocument();
+      expect(screen.getByLabelText('Número de tarjeta')).toHaveValue('');
     });
   });
 });
