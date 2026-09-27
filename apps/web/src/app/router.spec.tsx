@@ -16,8 +16,14 @@ function renderAt(path: string) {
 }
 
 describe('router', () => {
+  it('renders the catalog on /', async () => {
+    renderAt('/');
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Audífonos' })).toBeInTheDocument();
+    expect(await screen.findAllByRole('heading', { level: 2 })).toHaveLength(10);
+  });
+
   it.each([
-    ['/', 'Catálogo (placeholder)'],
     ['/products/abc', 'Producto abc (placeholder)'],
     ['/transactions/abc', 'Transacción abc (placeholder)'],
     ['/nope', '404 - Página no encontrada'],

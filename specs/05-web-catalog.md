@@ -155,10 +155,11 @@ Each step is one commit after review. Target ≤ ~300 changed lines per step (im
    Tests: badge text for 0 / 1 / 7; `srcset` derivation and fallback; eager vs lazy by index; skeleton hidden after `load`; card links to `/products/:id` and shows `formatCop` price.
    Commit: `feat(web): add product card and grid components`.
 
-4. [ ] **Catalog page.** `use-page-param`, `pagination`, `catalog-error-state`, `lib/catalog-error-message.ts`, `catalog-page.tsx`, and the `/` route pointing to it (placeholder and its temporary query removed).
+4. [x] **Catalog page.** `use-page-param`, `pagination`, `catalog-error-state`, `lib/catalog-error-message.ts`, `catalog-page.tsx`, and the `/` route pointing to it (placeholder and its temporary query removed).
    Tests (MSW): loading skeleton → 10 cards; "Agotado" visible on the out-of-stock fixture; clicking page 2 updates the URL and shows page-2 items; `aria-current` on the active page; `?page=abc` → page 1; 500 then success via `server.use` → error message → "Reintentar" → cards; `RATE_LIMITED` message; empty catalog; page past the end.
    Chrome: catalog page 1 and 2 at both viewports, error state at mobile.
    Commit: `feat(web): add paginated catalog page`.
+   Decision: removing the placeholder's temporary query also deletes `app/temp-catalog-endpoint.ts` and updates `app/router.spec.tsx` (it asserted the catalog placeholder), both outside the listed diff paths.
 
 ### Part 2 — product detail
 
