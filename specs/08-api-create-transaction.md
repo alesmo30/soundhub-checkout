@@ -285,7 +285,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
 
 ### Domain
 
-2. [ ] **Transactions domain.** `transactions.constants.ts`, `transaction-reference.ts`, `request-hash.ts`, `integrity-signature.ts` and `transaction.errors.ts`, with unit specs. The specs cover:
+2. [x] **Transactions domain.** `transactions.constants.ts`, `transaction-reference.ts`, `request-hash.ts`, `integrity-signature.ts` and `transaction.errors.ts`, with unit specs. The specs cover:
    - `2026-09-28T01:00Z` → `TX-20260927-…` and `2026-09-27T05:00Z` → `TX-20260927-…`;
    - the random part is 6 characters from the alphabet (injected `random`);
    - key order does not change the hash, array order does, and nested objects are sorted;
