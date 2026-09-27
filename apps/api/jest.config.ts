@@ -22,6 +22,14 @@ const config: Config = {
   // pattern must anchor on that segment, not on the outer node_modules/.
   transformIgnorePatterns: ['/node_modules/\\.pnpm/(?!@nestjs)'],
   testMatch: ['<rootDir>/src/**/*.spec.ts'],
+  // Without this, Jest only measures files some test happens to import,
+  // silently excluding untouched files (and their 0% coverage) from the
+  // aggregate entirely.
+  collectCoverageFrom: [
+    '<rootDir>/src/**/*.ts',
+    '!<rootDir>/src/**/*.spec.ts',
+    '!<rootDir>/src/**/*.int-spec.ts',
+  ],
   coverageReporters: ['text', 'json-summary'],
   coveragePathIgnorePatterns: [
     '/node_modules/',

@@ -118,4 +118,24 @@ describe('configureApp', () => {
     expect((problem as unknown as { stack?: unknown }).stack).toBeUndefined();
     expect(JSON.stringify(problem)).not.toContain('sensitive detail');
   });
+
+  it('maps an unknown route to 400 Problem Details with the framework message', async () => {
+    const response = await request(server).get('/api/v1/no-such-route');
+    const problem = asProblem(response.body);
+
+    expect(response.status).toBe(404);
+    expect(problem.code).toBe('VALIDATION_ERROR');
+    expect(problem.detail).toContain('Cannot GET');
+  });
+
+  it('maps a body over BODY_LIMIT to 413 Problem Details', async () => {
+    const response = await request(server)
+      .post('/api/v1/test/echo')
+      .set('Content-Type', 'application/json')
+      .send({ name: 'Ana', payment: { cardLast4: '1234' }, filler: 'x'.repeat(200_000) });
+    const problem = asProblem(response.body);
+
+    expect(response.status).toBe(413);
+    expect(problem.code).toBe('VALIDATION_ERROR');
+  });
 });
