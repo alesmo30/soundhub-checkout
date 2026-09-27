@@ -281,7 +281,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. T
    Manual test: `test` green.
    Commit: `feat(api): add delivery fee strategies and resolver`.
 
-4. [ ] **Get quote use case.** `quote.errors.ts` and `GetQuoteUseCase`, wired in `pricing.module.ts` (imports `CatalogModule` and `LocationsModule`, a resolver `useFactory` provider, and `GetQuoteUseCase` exported) and exported from `pricing/index.ts`. Unit specs over in-memory fake repositories cover:
+4. [x] **Get quote use case.** `quote.errors.ts` and `GetQuoteUseCase`, wired in `pricing.module.ts` (imports `CatalogModule` and `LocationsModule`, a resolver `useFactory` provider, and `GetQuoteUseCase` exported) and exported from `pricing/index.ts`. Unit specs over in-memory fake repositories cover:
    - 2 × `189_990_000` to a metro municipality → subtotal `379_980_000`, VAT `60_669_100`, base fee `12_066_000`, delivery `0 FREE_METRO`, total `392_046_000`, `currency: "COP"`;
    - a non-metro municipality → `NATIONAL_DISTANCE` with the nearest warehouse and its integer `distanceKm`;
    - 422 `PRODUCT_NOT_FOUND`, 422 `MUNICIPALITY_NOT_FOUND`, and 409 `OUT_OF_STOCK` with `quantity = stockAvailable + 1`;

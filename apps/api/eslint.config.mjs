@@ -58,11 +58,28 @@ function crossModulePatterns(moduleName) {
   }));
 }
 
+// A *.module.ts file (Nest's composition root for a module) may import a
+// sibling module's Module class directly — that's how NestJS shares a DI
+// tree (e.g. PricingModule needs `imports: [CatalogModule]` to resolve
+// PRODUCT_REPOSITORY for GetQuoteUseCase; sibling modules under AppModule
+// don't share exported providers on their own). This is a different concern
+// from application/domain code reaching into another module's internals, so
+// it still blocks domain/application/infrastructure, just not the sibling
+// Module class or its index.ts.
+function crossModulePatternsForModuleFile(moduleName) {
+  return MODULES.filter((other) => other !== moduleName).map((other) => ({
+    group: [`**/${other}/domain/**`, `**/${other}/application/**`, `**/${other}/infrastructure/**`],
+    message: `A module talks to '${other}' only through its index.ts or its Module class (see references/layering.md).`,
+  }));
+}
+
 const moduleConfigs = MODULES.flatMap((moduleName) => {
   const cross = crossModulePatterns(moduleName);
+  const crossForModuleFile = crossModulePatternsForModuleFile(moduleName);
   const domainGlob = `src/modules/${moduleName}/domain/**`;
   const applicationGlob = `src/modules/${moduleName}/application/**`;
   const persistenceGlob = `src/modules/${moduleName}/infrastructure/persistence/**`;
+  const moduleFileGlob = `src/modules/${moduleName}/*.module.ts`;
 
   return [
     {
@@ -94,9 +111,20 @@ const moduleConfigs = MODULES.flatMap((moduleName) => {
     },
     {
       files: [`src/modules/${moduleName}/**/*.ts`],
-      ignores: [`${domainGlob}/**`, `${applicationGlob}/**`, `${persistenceGlob}/**`],
+      ignores: [
+        `${domainGlob}/**`,
+        `${applicationGlob}/**`,
+        `${persistenceGlob}/**`,
+        moduleFileGlob,
+      ],
       rules: {
         'no-restricted-imports': ['error', { patterns: cross }],
+      },
+    },
+    {
+      files: [moduleFileGlob],
+      rules: {
+        'no-restricted-imports': ['error', { patterns: crossForModuleFile }],
       },
     },
   ];
