@@ -151,7 +151,7 @@ Each step is one commit after review. Target ≤ ~300 changed lines per step (im
    Commit: `feat(web): add catalog endpoints and checkout quantity actions`.
    Decision: `src/test/render-with-providers.spec.tsx` now preloads a full `CheckoutState` because its fields are required (outside the listed diff paths, approved by the user); web tests are named `*.spec.ts(x)`, not `*.test.ts`, because `apps/web/jest.config.js` only matches `.spec`.
 
-3. [ ] **Card components.** `stock-badge`, `product-image`, `product-card`, `product-grid` (+ skeleton), `lib/product-image-srcset.ts`, `catalog.constants.ts`.
+3. [x] **Card components.** `stock-badge`, `product-image`, `product-card`, `product-grid` (+ skeleton), `lib/product-image-srcset.ts`, `catalog.constants.ts`.
    Tests: badge text for 0 / 1 / 7; `srcset` derivation and fallback; eager vs lazy by index; skeleton hidden after `load`; card links to `/products/:id` and shows `formatCop` price.
    Commit: `feat(web): add product card and grid components`.
 
