@@ -294,7 +294,7 @@ Each step is one commit after review. Target ≤ ~300 changed lines per step. Te
    Chrome: the dialog at both viewports with and without a total.
    Commit: `feat(web): add checkout dialog shell with amount box`.
 
-4. [ ] **Contact form fields.** `contact-form.tsx` with both sections, the cascading selects and `setQuoteMunicipality` on municipality change. It is wired into the `CONTACT` sub-step, with "Continuar" not yet dispatching anything but `saveContact`.
+4. [x] **Contact form fields.** `contact-form.tsx` with both sections, the cascading selects and `setQuoteMunicipality` on municipality change. It is wired into the `CONTACT` sub-step, with "Continuar" not yet dispatching anything but `saveContact`.
    Tests (MSW): one validation message per field, and `aria-describedby` linking it; the municipality select is disabled until a department is chosen, and loads that department's list; changing department resets the municipality; choosing a municipality triggers the quote; "Continuar" is disabled until valid.
    Chrome: the empty form, a form with errors, and a filled form, at both viewports.
    Commit: `feat(web): add customer and delivery form`.

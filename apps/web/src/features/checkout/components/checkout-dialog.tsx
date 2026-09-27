@@ -9,21 +9,17 @@ import {
   type CheckoutStep,
 } from '../checkout.slice';
 import { useCheckoutStep } from '../hooks/use-checkout-step';
+import { ContactForm } from './contact-form';
 import { OrderPanel } from './order-panel';
 
 const MIN_QUANTITY = 1;
 
-// The real forms land in later steps (contact: step 4, card: step 7); this
-// step only wires the sub-step switch driven by the derived step.
+// The card form lands in step 7; this step only wires the sub-step switch
+// driven by the derived step.
 function CheckoutStepContent({ step }: { step: CheckoutStep }) {
   switch (step) {
     case 'CONTACT':
-      return (
-        <div className="flex flex-col gap-2">
-          <h2 className="font-heading text-xl font-bold text-text-strong">Tus datos y entrega</h2>
-          <p className="text-sm text-text">El formulario de contacto y entrega va aquí.</p>
-        </div>
-      );
+      return <ContactForm />;
     case 'CARD':
       return (
         <div className="flex flex-col gap-2">

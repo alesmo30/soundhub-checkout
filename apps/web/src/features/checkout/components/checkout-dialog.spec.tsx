@@ -33,12 +33,11 @@ describe('CheckoutDialog', () => {
     expect(await screen.findByText(product.name, { selector: 'p' })).toBeInTheDocument();
   });
 
-  it('renders the CONTACT placeholder as the current sub-step', () => {
+  it('renders the contact form as the current sub-step', () => {
     renderDialog(true);
 
-    expect(
-      screen.getByRole('heading', { name: 'Tus datos y entrega' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Tus datos' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Entrega' })).toBeInTheDocument();
   });
 
   it('dispatches closeCheckout on Escape and keeps the chosen quantity', async () => {
