@@ -134,5 +134,11 @@ export default defineConfig(
     ignores: ['src/shared/infrastructure/persistence/seeds/**/*.int-spec.ts'],
     rules: { 'no-console': 'off' },
   },
+  {
+    // Jest setup file, not application code: gives unit tests fallback db
+    // values so importing data-source.ts never needs a real .env.
+    files: ['jest.setup-env.ts'],
+    rules: { 'no-restricted-syntax': 'off' },
+  },
   ...moduleConfigs,
 );

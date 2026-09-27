@@ -3,7 +3,7 @@ import type { Config } from 'jest';
 const config: Config = {
   testEnvironment: 'node',
   rootDir: '.',
-  setupFiles: ['reflect-metadata'],
+  setupFiles: ['reflect-metadata', '<rootDir>/jest.setup-env.ts'],
   transform: {
     '^.+\\.[tj]s$': [
       '@swc/jest',

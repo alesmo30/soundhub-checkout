@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "jest -c jest.config.ts",
     "test:cov": "jest -c jest.config.ts --coverage",
-    "test:int": "jest -c jest.int.config.ts --runInBand",
+    "test:int": "sh -c 'jest -c jest.int.config.ts --runInBand'",
     "migration:run": "tsx node_modules/typeorm/cli.js migration:run -d src/shared/infrastructure/persistence/data-source.ts",
     "migration:revert": "tsx node_modules/typeorm/cli.js migration:revert -d src/shared/infrastructure/persistence/data-source.ts",
     "migration:generate": "tsx node_modules/typeorm/cli.js migration:generate -d src/shared/infrastructure/persistence/data-source.ts",
