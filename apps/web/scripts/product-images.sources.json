@@ -1,0 +1,77 @@
+[
+  {
+    "sku": "HP-SNY-WH1000XM5",
+    "sourceUrl": "https://d1ncau8tqf99kp.cloudfront.net/converted/103364_original_local_1200x1050_v3_converted.webp",
+    "credit": "© Sony Electronics"
+  },
+  {
+    "sku": "HP-SNY-WF1000XM5",
+    "sourceUrl": "https://d1ncau8tqf99kp.cloudfront.net/converted/115577_original_local_1200x1050_v3_converted.webp",
+    "credit": "© Sony Electronics"
+  },
+  {
+    "sku": "HP-SNY-WHCH720N",
+    "sourceUrl": "https://d1ncau8tqf99kp.cloudfront.net/converted/110696_original_local_1200x1050_v3_converted.webp",
+    "credit": "© Sony Electronics"
+  },
+  {
+    "sku": "HP-BOS-QCULTRA",
+    "sourceUrl": "https://assets.bosecreative.com/transform/315d0d30-1503-4a3a-9105-a228150d9bbb/QCUH_SF_PDP_Gallery_Black_x2_2",
+    "credit": "© Bose Corporation"
+  },
+  {
+    "sku": "HP-BOS-QCEARBUDS2",
+    "sourceUrl": "https://assets.bosecreative.com/transform/8ad93c06-70b0-4539-9e36-74f2d2de43e7/COM-1750_QCEBII_RT_2000x2000_DynamicAngle_black_RGB-psd",
+    "credit": "© Bose Corporation"
+  },
+  {
+    "sku": "HP-APL-AIRPODSPRO2",
+    "sourceUrl": "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/MTJV3?wid=2000&hei=2000&fmt=jpeg&qlt=90",
+    "credit": "© Apple Inc."
+  },
+  {
+    "sku": "HP-APL-AIRPODSMAX",
+    "sourceUrl": "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/airpods-max-select-202409-midnight?wid=2000&hei=2000&fmt=jpeg&qlt=90",
+    "credit": "© Apple Inc."
+  },
+  {
+    "sku": "HP-JBL-TUNE520BT",
+    "sourceUrl": "https://www.jbl.com/on/demandware.static/-/Sites-masterCatalog_Harman/default/dwfecd0c7f/01.JBL_Tune_520BT_ProductImage_Hero_White.png",
+    "credit": "© HARMAN International (JBL)"
+  },
+  {
+    "sku": "HP-JBL-LIVE770NC",
+    "sourceUrl": "https://www.jbl.com/on/demandware.static/-/Sites-masterCatalog_Harman/default/dw9cbe1dd3/01.JBL_Live_770NC_Product%20Image_Hero_Black.png",
+    "credit": "© HARMAN International (JBL)"
+  },
+  {
+    "sku": "HP-JBL-TOURPRO2",
+    "sourceUrl": "https://www.jbl.com/on/demandware.static/-/Sites-masterCatalog_Harman/default/dwb701c881/1.JBL_Tour_Pro_2_ProductImage_Hero_Black.png",
+    "credit": "© HARMAN International (JBL)"
+  },
+  {
+    "sku": "HP-SNH-MOMENTUM4",
+    "sourceUrl": "https://us.sennheiser-hearing.com/cdn/shop/files/MOMENTUM_4_Black.jpg",
+    "credit": "© Sennheiser (Sonova Consumer Hearing)"
+  },
+  {
+    "sku": "HP-SNH-HD660S2",
+    "sourceUrl": "https://us.sennheiser-hearing.com/cdn/shop/files/Sennheiser_HD_660_S_2_Open_Back_Audiophile_Headphones_Main_Image.jpg",
+    "credit": "© Sennheiser (Sonova Consumer Hearing)"
+  },
+  {
+    "sku": "HP-BTS-STUDIOPRO",
+    "sourceUrl": "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/MQTP3?wid=2000&hei=2000&fmt=jpeg&qlt=90",
+    "credit": "© Apple Inc. (Beats)"
+  },
+  {
+    "sku": "HP-SMS-BUDS3PRO",
+    "sourceUrl": "https://images.samsung.com/is/image/samsung/p6pim/latin_en/2407/gallery/latin-en-galaxy-buds3-pro-r630-sm-r630nzaalta-542135490",
+    "credit": "© Samsung Electronics"
+  },
+  {
+    "sku": "HP-ATH-M50X",
+    "sourceUrl": "https://www.audio-technica.com/media/catalog/product/a/t/ath-m50x_01a.png",
+    "credit": "© Audio-Technica"
+  }
+]
