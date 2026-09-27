@@ -2,6 +2,22 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -10,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 
 import { DesignShowcaseSampleForm } from './design-showcase-sample-form';
 
@@ -82,6 +99,47 @@ export default function DesignShowcasePage() {
       <section className="space-y-4">
         <h2 className="font-heading text-xl font-bold text-text-strong">Form</h2>
         <DesignShowcaseSampleForm />
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="font-heading text-xl font-bold text-text-strong">Dialog</h2>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="secondary">Abrir dialog</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Resumen de tu pedido</DialogTitle>
+              <DialogDescription>Radio 20 (rounded-panel) y sombra shadow-overlay.</DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="font-heading text-xl font-bold text-text-strong">Drawer</h2>
+        <Drawer>
+          <DrawerTrigger asChild>
+            <Button variant="secondary">Abrir drawer</Button>
+          </DrawerTrigger>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>Resumen de tu pedido</DrawerTitle>
+              <DrawerDescription>Versión móvil del resumen, como bottom sheet.</DrawerDescription>
+            </DrawerHeader>
+          </DrawerContent>
+        </Drawer>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="font-heading text-xl font-bold text-text-strong">Skeleton</h2>
+        <div className="flex items-center gap-4">
+          <Skeleton className="size-16 rounded-card" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-40" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+        </div>
       </section>
     </div>
   );
