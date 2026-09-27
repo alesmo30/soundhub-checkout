@@ -279,7 +279,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. N
    Manual test: `test` green.
    Commit: `feat(api): add department and municipality use cases`.
 
-9. [ ] **Locations endpoints.** `locations.controller.ts`, the locations request and response DTOs and `locations-http.constants.ts`. `locations.controller.spec.ts` checks:
+9. [x] **Locations endpoints.** `locations.controller.ts`, the locations request and response DTOs and `locations-http.constants.ts`. `locations.controller.spec.ts` checks:
    - both envelopes;
    - 400 for `:code` values `abc`, `5` and `123`;
    - 404 `DEPARTMENT_NOT_FOUND`;
@@ -291,6 +291,8 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. N
    - `…/departments/99/municipalities` returns 404 with no `Cache-Control`.
 
    Commit: `feat(api): expose department and municipality endpoints`.
+
+   Decision: the manual test's `.../departments/99/municipalities` example does not hold against the real seed — `99` is Vichada, a genuine DIVIPOLA department already seeded with 4 municipalities, so it returns 200, not 404. This also breaks the acceptance criterion that names `99` explicitly. The 404 path itself works correctly, verified instead with genuinely unused 2-digit codes (`00`, `98`). Step 10 must use one of those instead of `99` when checking this criterion, or the acceptance criteria text should be corrected to a real unused code.
 
 ### Close-out
 
