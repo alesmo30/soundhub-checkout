@@ -275,7 +275,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. N
 
    Commit: `feat(api): expose GET /products and GET /products/:id`.
 
-8. [ ] **Locations use cases.** `ListDepartmentsUseCase` and `ListMunicipalitiesUseCase`, with unit specs over a fake `MunicipalityRepository`. They cover the mapping to `{ code, name, isMetroArea }` and `DEPARTMENT_NOT_FOUND` on an empty list.
+8. [x] **Locations use cases.** `ListDepartmentsUseCase` and `ListMunicipalitiesUseCase`, with unit specs over a fake `MunicipalityRepository`. They cover the mapping to `{ code, name, isMetroArea }` and `DEPARTMENT_NOT_FOUND` on an empty list.
    Manual test: `test` green.
    Commit: `feat(api): add department and municipality use cases`.
 
