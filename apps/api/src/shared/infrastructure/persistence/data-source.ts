@@ -7,8 +7,8 @@ import 'reflect-metadata';
 
 import { DataSource, type DataSourceOptions } from 'typeorm';
 
-import type { AppConfig } from '../../../config/app-config';
-import { loadAppConfig } from '../../../config/app-config';
+import type { DbConfig } from '../../../config/app-config';
+import { loadDbConfig } from '../../../config/app-config';
 import { ProductOrmEntity } from '../../../modules/catalog/infrastructure/persistence/product.orm-entity';
 import { CustomerOrmEntity } from '../../../modules/customers/infrastructure/persistence/customer.orm-entity';
 import { MunicipalityOrmEntity } from '../../../modules/locations/infrastructure/persistence/municipality.orm-entity';
@@ -29,24 +29,27 @@ const ENTITIES = [
 
 // Used by the running Nest app: no `migrations` entry, because a webpack
 // bundle cannot resolve that glob at runtime (it tries to on DataSource
-// initialization, even though the app itself never runs migrations).
-export function buildDataSourceOptions(appConfig: AppConfig): DataSourceOptions {
+// initialization, even though the app itself never runs migrations). Takes
+// only the `db` group (the full AppConfig satisfies this too) so callers
+// that only ever open a DataSource — the CLI, integration tests — never
+// need to validate paymentGateway/smtp values.
+export function buildDataSourceOptions(config: DbConfig): DataSourceOptions {
   return {
     type: 'postgres',
-    host: appConfig.db.host,
-    port: appConfig.db.port,
-    username: appConfig.db.username,
-    password: appConfig.db.password,
-    database: appConfig.db.name,
+    host: config.db.host,
+    port: config.db.port,
+    username: config.db.username,
+    password: config.db.password,
+    database: config.db.name,
     synchronize: false,
     entities: ENTITIES,
   };
 }
 
-// Entry point for the TypeORM CLI (migration:run/revert/generate), run
-// through tsx: it needs its own AppConfig, since Nest's DI isn't running,
-// and the migrations glob, which only the CLI ever reads.
+// Entry point for the TypeORM CLI (migration:run/revert/generate) and
+// integration tests, run through tsx: neither has Nest's DI, and neither
+// needs paymentGateway/smtp values, only a DataSource.
 export default new DataSource({
-  ...buildDataSourceOptions(loadAppConfig()),
+  ...buildDataSourceOptions(loadDbConfig()),
   migrations: [MIGRATIONS_GLOB],
 });

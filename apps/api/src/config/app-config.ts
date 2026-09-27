@@ -1,7 +1,15 @@
 import { config as loadDotenvFile } from 'dotenv';
 
-import type { EnvironmentVariables, LogLevel, NodeEnv } from './environment-variables';
-import { validateEnvironmentVariables } from './environment-variables';
+import type {
+  DbEnvironmentVariables,
+  EnvironmentVariables,
+  LogLevel,
+  NodeEnv,
+} from './environment-variables';
+import {
+  validateDbEnvironmentVariables,
+  validateEnvironmentVariables,
+} from './environment-variables';
 
 export interface AppConfig {
   app: { nodeEnv: NodeEnv; port: number; logLevel: LogLevel };
@@ -43,11 +51,36 @@ export function buildAppConfig(env: EnvironmentVariables): AppConfig {
   };
 }
 
-// Entry point for code that runs outside Nest's DI (the TypeORM CLI, the
-// seed scripts): they get no ConfigService, so they validate the single
-// root .env themselves. Resolved against process.cwd(), same as
-// ConfigModule.forRoot's envFilePath in config.module.ts.
+// Entry point for code that runs outside Nest's DI (the seed scripts):
+// they get no ConfigService, so they validate the single root .env
+// themselves. Resolved against process.cwd(), same as ConfigModule.forRoot's
+// envFilePath in config.module.ts.
 export function loadAppConfig(): AppConfig {
   loadDotenvFile({ path: '../../.env', quiet: true });
   return buildAppConfig(validateEnvironmentVariables(process.env));
+}
+
+export interface DbConfig {
+  db: AppConfig['db'];
+}
+
+export function buildDbConfig(env: DbEnvironmentVariables): DbConfig {
+  return {
+    db: {
+      host: env.DB_HOST,
+      port: env.DB_PORT,
+      username: env.DB_USERNAME,
+      password: env.DB_PASSWORD,
+      name: env.DB_NAME,
+    },
+  };
+}
+
+// Entry point for the TypeORM CLI and integration tests: they only ever
+// open a DataSource, so this validates just the db group. The CI job that
+// runs test:int sets no paymentGateway or smtp values (see
+// specs/02-api-app-foundation.md, Decisions > Bootstrap).
+export function loadDbConfig(): DbConfig {
+  loadDotenvFile({ path: '../../.env', quiet: true });
+  return buildDbConfig(validateDbEnvironmentVariables(process.env));
 }

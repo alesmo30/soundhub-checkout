@@ -72,18 +72,54 @@ export class EnvironmentVariables {
   EMAIL_FROM!: string;
 }
 
+function assertNoErrors(errors: { property: string }[]): void {
+  if (errors.length > 0) {
+    const invalidNames = errors.map((error) => error.property).join(', ');
+    throw new Error(`Invalid environment configuration. Check: ${invalidNames}`);
+  }
+}
+
 export function validateEnvironmentVariables(
   config: Record<string, unknown>,
 ): EnvironmentVariables {
   const validated = plainToInstance(EnvironmentVariables, config, {
     enableImplicitConversion: true,
   });
-  const errors = validateSync(validated, { skipMissingProperties: false });
+  assertNoErrors(validateSync(validated, { skipMissingProperties: false }));
 
-  if (errors.length > 0) {
-    const invalidNames = errors.map((error) => error.property).join(', ');
-    throw new Error(`Invalid environment configuration. Check: ${invalidNames}`);
-  }
+  return validated;
+}
+
+// Only the `db` group: used by the TypeORM CLI and integration tests, which
+// open a DataSource and nothing else, so CI needs no gateway or SMTP values
+// for that job (see specs/02-api-app-foundation.md, Decisions > Bootstrap).
+export class DbEnvironmentVariables {
+  @IsString()
+  DB_HOST!: string;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(65535)
+  DB_PORT!: number;
+
+  @IsString()
+  DB_USERNAME!: string;
+
+  @IsString()
+  DB_PASSWORD!: string;
+
+  @IsString()
+  DB_NAME!: string;
+}
+
+export function validateDbEnvironmentVariables(
+  config: Record<string, unknown>,
+): DbEnvironmentVariables {
+  const validated = plainToInstance(DbEnvironmentVariables, config, {
+    enableImplicitConversion: true,
+  });
+  assertNoErrors(validateSync(validated, { skipMissingProperties: false }));
 
   return validated;
 }
