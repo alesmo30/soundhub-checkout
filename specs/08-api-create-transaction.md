@@ -368,7 +368,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `test` green.
    Commit: `feat(api): add release-only finalize transaction use case`.
 
-10. [ ] **Create transaction: idempotency, guard, quote.** `CreateTransactionUseCase` with `checkIdempotency`, `guard` and `quoteAndVerify`, and `reserve` / `charge` stubbed to `Ok`. The unit specs cover:
+10. [x] **Create transaction: idempotency, guard, quote.** `CreateTransactionUseCase` with `checkIdempotency`, `guard` and `quoteAndVerify`, and `reserve` / `charge` stubbed to `Ok`. The unit specs cover:
     - a replay with the same hash → `replayed: true` and the current state;
     - a different hash → `IDEMPOTENCY_KEY_REUSED`;
     - an open breaker → `PAYMENT_GATEWAY_UNAVAILABLE`, with nothing read or written;
