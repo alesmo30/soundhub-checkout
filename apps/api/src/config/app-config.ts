@@ -48,6 +48,6 @@ export function buildAppConfig(env: EnvironmentVariables): AppConfig {
 // root .env themselves. Resolved against process.cwd(), same as
 // ConfigModule.forRoot's envFilePath in config.module.ts.
 export function loadAppConfig(): AppConfig {
-  loadDotenvFile({ path: '../../.env' });
+  loadDotenvFile({ path: '../../.env', quiet: true });
   return buildAppConfig(validateEnvironmentVariables(process.env));
 }
