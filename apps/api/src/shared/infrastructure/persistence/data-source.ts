@@ -1,3 +1,10 @@
+// Idempotent: safe even when the Nest app already imported it in main.ts.
+// Standalone CLI entry points (migration/seed scripts) import this module
+// directly, sometimes before anything else polyfills it, and decorators on
+// EnvironmentVariables/the ORM entities need Reflect.getMetadata at
+// module-load time, before any of our own code runs.
+import 'reflect-metadata';
+
 import { DataSource, type DataSourceOptions } from 'typeorm';
 
 import type { AppConfig } from '../../../config/app-config';
