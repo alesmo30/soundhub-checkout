@@ -141,9 +141,10 @@ Each step is one commit after review. Target ≤ ~300 changed lines per step (im
 
 ### Part 1 — product list
 
-1. [ ] **Product images.** `sharp` as a dev dependency, `scripts/build-product-images.mjs`, `scripts/product-images.sources.json` (one manufacturer photo per SKU), the 45 generated WebP files and `CREDITS.md` (SKU, source URL, "© <manufacturer>, used for a non-commercial demo"). Source downloads go to a git-ignored temp folder.
+1. [x] **Product images.** `sharp` as a dev dependency, `scripts/build-product-images.mjs`, `scripts/product-images.sources.json` (one manufacturer photo per SKU), the 45 generated WebP files and `CREDITS.md` (SKU, source URL, "© <manufacturer>, used for a non-commercial demo"). Source downloads go to a git-ignored temp folder.
    Manual test: `du -sh public/images/products` < 2 MB; 45 files; each opens as a 1:1 image; re-running the script produces the same files.
    Commit: `feat(web): add product images`.
+   Decision: image files use the seeded SKU in uppercase (`<SKU>-<width>.webp`), matching the API seed's `imageUrl`; SPEC 03's MSW fixtures (wrong SKUs, lowercased `imageUrl`) are fixed in a separate PR before step 4, not on this branch.
 
 2. [ ] **Catalog endpoints and checkout quantity actions.** `catalog.api.ts`, `invalidateProduct`, the checkout slice actions and selectors, `catalog/index.ts` and `checkout/index.ts` exports.
    Tests: `getProducts` keeps `meta`; `getProduct` unwraps `data`; `invalidateProduct` triggers a refetch of a subscribed product; slice reducers and `selectQuantityFor` (match → saved value, other product → 1).
