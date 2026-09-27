@@ -253,7 +253,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. N
 
 ### Application and HTTP
 
-6. [ ] **Catalog use cases.** `ListProductsUseCase`, `GetProductDetailUseCase` and the helpers `toProductSummary` / `buildPaginationMeta`, with unit specs over an in-memory fake `ProductRepository`. The specs cover:
+6. [x] **Catalog use cases.** `ListProductsUseCase`, `GetProductDetailUseCase` and the helpers `toProductSummary` / `buildPaginationMeta`, with unit specs over an in-memory fake `ProductRepository`. The specs cover:
    - `meta` on the first page, a middle page, the last page and a page past the end;
    - `totalPages` 0 on an empty catalog;
    - the detail's VAT and `maxPurchaseQuantity`;
