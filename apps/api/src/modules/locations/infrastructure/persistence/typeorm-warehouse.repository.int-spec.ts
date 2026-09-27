@@ -1,18 +1,37 @@
 import type { EntityManager, QueryRunner } from 'typeorm';
 
 import dataSource from '../../../../shared/infrastructure/persistence/data-source';
+import { MunicipalityOrmEntity } from './municipality.orm-entity';
 import { WarehouseOrmEntity } from './warehouse.orm-entity';
 import { TypeOrmWarehouseRepository } from './typeorm-warehouse.repository';
 
-// The four real seeded warehouses (see warehouses.json) are named
-// "<City> DC". Fixture names below never take that shape, so they can
-// never collide with a committed row when asserting order or presence.
+// CI never seeds real data before running test:int (only migrations), so
+// warehouse fixtures must satisfy the municipality_code FK with a
+// self-contained row instead of assuming a real seeded code exists.
+// DIVIPOLA department codes actually seeded never start with this prefix,
+// so it can never collide with a real, committed municipality.
+const FIXTURE_MUNICIPALITY_CODE = '01001';
+
+async function ensureFixtureMunicipality(manager: EntityManager): Promise<void> {
+  await manager.getRepository(MunicipalityOrmEntity).save({
+    code: FIXTURE_MUNICIPALITY_CODE,
+    name: 'Test Municipality',
+    departmentCode: '01',
+    departmentName: 'Test Department',
+    latitude: 6.25,
+    longitude: -75.56,
+    isMetroArea: false,
+  });
+}
+
+// Fixture names below never take the real seeded warehouses' "<City> DC"
+// shape, so they can never collide with a committed row when asserting order.
 function buildWarehouseRow(
   overrides: Partial<WarehouseOrmEntity> = {},
 ): Partial<WarehouseOrmEntity> {
   return {
     name: overrides.name ?? 'Test Warehouse',
-    municipalityCode: overrides.municipalityCode ?? '05001',
+    municipalityCode: overrides.municipalityCode ?? FIXTURE_MUNICIPALITY_CODE,
     address: overrides.address ?? 'Integration test address',
     latitude: overrides.latitude ?? 6.2195,
     longitude: overrides.longitude ?? -75.584,
@@ -43,6 +62,7 @@ describe('TypeOrmWarehouseRepository', () => {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     repository = new TypeOrmWarehouseRepository(queryRunner.manager);
+    await ensureFixtureMunicipality(queryRunner.manager);
   });
 
   afterEach(async () => {
@@ -50,14 +70,11 @@ describe('TypeOrmWarehouseRepository', () => {
     await queryRunner.release();
   });
 
-  it('listActive is ordered by name and includes the real seeded warehouses', async () => {
+  it('listActive is ordered by name', async () => {
     const warehouses = (await repository.listActive())._unsafeUnwrap();
     const names = warehouses.map((warehouse) => warehouse.name);
 
     expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)));
-    expect(names).toEqual(
-      expect.arrayContaining(['Medellín DC', 'Bogotá DC', 'Cali DC', 'Barranquilla DC']),
-    );
   });
 
   it('listActive orders inserted fixtures alphabetically, not by insertion order', async () => {
@@ -116,12 +133,15 @@ describe('TypeOrmWarehouseRepository', () => {
     expect(result._unsafeUnwrap()).toBeNull();
   });
 
-  it('returns coordinates as JS numbers, not strings, for a real seeded warehouse', async () => {
-    const warehouses = (await repository.listActive())._unsafeUnwrap();
-    const medellin = warehouses.find((warehouse) => warehouse.name === 'Medellín DC');
+  it('returns coordinates as JS numbers, not strings', async () => {
+    const fixture = await insertWarehouse(queryRunner.manager, {
+      name: 'Coordinates Test Warehouse',
+    });
 
-    expect(medellin).not.toBeUndefined();
-    expect(typeof medellin?.latitude).toBe('number');
-    expect(typeof medellin?.longitude).toBe('number');
+    const warehouse = (await repository.findById(fixture.id))._unsafeUnwrap();
+
+    expect(warehouse).not.toBeNull();
+    expect(typeof warehouse?.latitude).toBe('number');
+    expect(typeof warehouse?.longitude).toBe('number');
   });
 });

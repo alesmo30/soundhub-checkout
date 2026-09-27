@@ -172,11 +172,18 @@ describe('TypeOrmMunicipalityRepository', () => {
     expect(withTx?.code).toBe(fixture.code);
   });
 
-  it('returns coordinates as JS numbers, not strings, for a real seeded municipality', async () => {
-    const medellin = (await repository.findByCode('05001'))._unsafeUnwrap();
+  it('returns coordinates as JS numbers, not strings', async () => {
+    const code = `${UNKNOWN_DEPARTMENT_CODE}${randomCodeSuffix()}`;
+    const fixture = await insertMunicipality(queryRunner.manager, code, {
+      departmentCode: UNKNOWN_DEPARTMENT_CODE,
+      latitude: 6.25,
+      longitude: -75.56,
+    });
 
-    expect(medellin).not.toBeNull();
-    expect(typeof medellin?.latitude).toBe('number');
-    expect(typeof medellin?.longitude).toBe('number');
+    const found = (await repository.findByCode(fixture.code))._unsafeUnwrap();
+
+    expect(found).not.toBeNull();
+    expect(typeof found?.latitude).toBe('number');
+    expect(typeof found?.longitude).toBe('number');
   });
 });
