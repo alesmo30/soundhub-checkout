@@ -1,0 +1,122 @@
+[
+  {
+    "sku": "HP-SNY-WH1000XM5",
+    "brand": "Sony",
+    "name": "WH-1000XM5",
+    "description": "Audífonos over-ear con cancelación activa de ruido líder en su categoría y hasta 30 horas de batería. Ideales para viajes largos, oficina o estudio, con sonido Hi-Res y llamadas nítidas gracias a sus múltiples micrófonos.",
+    "priceInCents": 189990000,
+    "stock": 7
+  },
+  {
+    "sku": "HP-SNY-WF1000XM5",
+    "brand": "Sony",
+    "name": "WF-1000XM5",
+    "description": "Audífonos in-ear inalámbricos con cancelación activa de ruido y hasta 8 horas de batería, o 24 con el estuche de carga. Perfectos para el día a día en la ciudad, con ajuste cómodo y sonido equilibrado.",
+    "priceInCents": 129990000,
+    "stock": 12
+  },
+  {
+    "sku": "HP-SNY-WHCH720N",
+    "brand": "Sony",
+    "name": "WH-CH720N",
+    "description": "Audífonos over-ear livianos con cancelación de ruido y hasta 35 horas de batería. Una opción económica para quienes buscan silencio y comodidad en trayectos diarios o teletrabajo.",
+    "priceInCents": 49990000,
+    "stock": 25
+  },
+  {
+    "sku": "HP-BOS-QCULTRA",
+    "brand": "Bose",
+    "name": "QuietComfort Ultra Headphones",
+    "description": "Audífonos over-ear premium con cancelación de ruido inmersiva y audio espacial Bose Immersive. Hasta 24 horas de batería, pensados para quienes no negocian calidad de sonido ni silencio total.",
+    "priceInCents": 219990000,
+    "stock": 3
+  },
+  {
+    "sku": "HP-BOS-QCEARBUDS2",
+    "brand": "Bose",
+    "name": "QuietComfort Earbuds II",
+    "description": "Audífonos in-ear con cancelación de ruido personalizable según la forma del oído. Hasta 6 horas de batería, o 24 con el estuche, ideales para gimnasio, transporte público o llamadas frecuentes.",
+    "priceInCents": 109990000,
+    "stock": 0
+  },
+  {
+    "sku": "HP-APL-AIRPODSPRO2",
+    "brand": "Apple",
+    "name": "AirPods Pro (2.ª generación)",
+    "description": "Audífonos in-ear con cancelación activa de ruido y audio adaptativo, con hasta 6 horas de batería y 30 con el estuche MagSafe. Se integran de forma nativa con dispositivos Apple para un cambio automático entre equipos.",
+    "priceInCents": 124990000,
+    "stock": 20
+  },
+  {
+    "sku": "HP-APL-AIRPODSMAX",
+    "brand": "Apple",
+    "name": "AirPods Max",
+    "description": "Audífonos over-ear premium con cancelación activa de ruido, audio espacial y sonido de alta fidelidad. Hasta 20 horas de batería, con carcasa de aluminio y controles físicos precisos.",
+    "priceInCents": 299990000,
+    "stock": 1
+  },
+  {
+    "sku": "HP-JBL-TUNE520BT",
+    "brand": "JBL",
+    "name": "Tune 520BT",
+    "description": "Audífonos on-ear inalámbricos sin cancelación de ruido, pensados para uso casual diario. Hasta 57 horas de batería y sonido JBL Pure Bass, una opción económica para música y llamadas.",
+    "priceInCents": 22990000,
+    "stock": 25
+  },
+  {
+    "sku": "HP-JBL-LIVE770NC",
+    "brand": "JBL",
+    "name": "Live 770NC",
+    "description": "Audífonos over-ear con cancelación de ruido adaptativa y hasta 50 horas de batería. Buen equilibrio entre precio y prestaciones para quienes viajan o trabajan en ambientes ruidosos.",
+    "priceInCents": 69990000,
+    "stock": 8
+  },
+  {
+    "sku": "HP-JBL-TOURPRO2",
+    "brand": "JBL",
+    "name": "Tour Pro 2",
+    "description": "Audífonos in-ear con cancelación activa de ruido y estuche de carga con pantalla táctil para controlar música y llamadas. Hasta 10 horas de batería, o 40 con el estuche, ideales para viajeros frecuentes.",
+    "priceInCents": 104990000,
+    "stock": 5
+  },
+  {
+    "sku": "HP-SNH-MOMENTUM4",
+    "brand": "Sennheiser",
+    "name": "Momentum 4 Wireless",
+    "description": "Audífonos over-ear con cancelación de ruido adaptativa y una autonomía sobresaliente de hasta 60 horas. Pensados para quienes buscan sonido audiófilo sin preocuparse por cargar seguido.",
+    "priceInCents": 159990000,
+    "stock": 2
+  },
+  {
+    "sku": "HP-SNH-HD660S2",
+    "brand": "Sennheiser",
+    "name": "HD 660S2",
+    "description": "Audífonos over-ear abiertos de alta fidelidad, diseñados para escucha crítica en casa con cable. Sin cancelación de ruido ni batería, priorizan un sonido natural y detallado para audiófilos exigentes.",
+    "priceInCents": 249990000,
+    "stock": 15
+  },
+  {
+    "sku": "HP-BTS-STUDIOPRO",
+    "brand": "Beats",
+    "name": "Studio Pro",
+    "description": "Audífonos over-ear con cancelación activa de ruido y hasta 24 horas de batería. Compatibles por igual con iOS y Android, con un sonido afinado para géneros urbanos y uso diario.",
+    "priceInCents": 139990000,
+    "stock": 8
+  },
+  {
+    "sku": "HP-SMS-BUDS3PRO",
+    "brand": "Samsung",
+    "name": "Galaxy Buds3 Pro",
+    "description": "Audífonos in-ear con cancelación activa de ruido inteligente y hasta 6 horas de batería, o 26 con el estuche. Se integran especialmente bien con el ecosistema Galaxy, aunque funcionan con cualquier dispositivo Bluetooth.",
+    "priceInCents": 99990000,
+    "stock": 12
+  },
+  {
+    "sku": "HP-ATH-M50X",
+    "brand": "Audio-Technica",
+    "name": "ATH-M50x",
+    "description": "Audífonos over-ear cerrados de referencia para monitoreo de estudio, cableados y sin cancelación de ruido. Ofrecen un sonido preciso y aislamiento pasivo, ideales para producción musical o mezcla.",
+    "priceInCents": 74990000,
+    "stock": 5
+  }
+]
