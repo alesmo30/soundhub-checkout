@@ -112,19 +112,30 @@ describe('ProductPage', () => {
       productId: inStock.id,
       quantity: 2,
       isDialogOpen: true,
+      step: 'CONTACT',
     });
     expect(screen.getByRole('dialog', { name: 'Pago con tarjeta' })).toBeInTheDocument();
   });
 
   it('restores the quantity saved for this product and reopens the dialog', async () => {
-    renderProductPage(inStock.id, { productId: inStock.id, quantity: 4, isDialogOpen: true });
+    renderProductPage(inStock.id, {
+      productId: inStock.id,
+      quantity: 4,
+      isDialogOpen: true,
+      step: 'CONTACT',
+    });
 
     expect(await screen.findByRole('dialog', { name: 'Pago con tarjeta' })).toBeInTheDocument();
     expect(quantityShown()).toHaveTextContent('4');
   });
 
   it('only reopens the dialog on the product it was opened for', async () => {
-    const openOnInStock = { productId: inStock.id, quantity: 2, isDialogOpen: true };
+    const openOnInStock = {
+      productId: inStock.id,
+      quantity: 2,
+      isDialogOpen: true,
+      step: 'CONTACT' as const,
+    };
     renderProductPage(lowStock.id, openOnInStock);
     await findTitle(lowStock.name);
 
@@ -137,7 +148,12 @@ describe('ProductPage', () => {
   });
 
   it('starts at 1 when the saved quantity belongs to another product', async () => {
-    renderProductPage(inStock.id, { productId: lowStock.id, quantity: 3, isDialogOpen: false });
+    renderProductPage(inStock.id, {
+      productId: lowStock.id,
+      quantity: 3,
+      isDialogOpen: false,
+      step: 'CONTACT',
+    });
     await findTitle(inStock.name);
 
     expect(quantityShown()).toHaveTextContent('1');
@@ -148,6 +164,7 @@ describe('ProductPage', () => {
       productId: lowStock.id,
       quantity: 9,
       isDialogOpen: false,
+      step: 'CONTACT',
     });
     await findTitle(lowStock.name);
 
