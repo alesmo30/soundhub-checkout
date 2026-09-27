@@ -314,7 +314,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `test:int` three times in a row, all green, and `GET /api/v1/products` shows no test product.
    Commit: `test(api): prove concurrent reservations never oversell`.
 
-5. [ ] **Delivery repository.** `delivery.mapper.ts` and `TypeOrmDeliveryRepository` (all 4 methods), wired and exported as `DELIVERY_REPOSITORY` from `deliveries.module.ts`. `transition` is raw SQL `… WHERE status = 'AWAITING_PAYMENT'`. The rollback int-spec proves:
+5. [x] **Delivery repository.** `delivery.mapper.ts` and `TypeOrmDeliveryRepository` (all 4 methods), wired and exported as `DELIVERY_REPOSITORY` from `deliveries.module.ts`. `transition` is raw SQL `… WHERE status = 'AWAITING_PAYMENT'`. The rollback int-spec proves:
    - insert, then `findById` / `findByTransactionId`, with and without `tx`;
    - `transition` to `CANCELLED` changes one row;
    - a second `transition` is a no-op.
