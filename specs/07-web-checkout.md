@@ -289,7 +289,7 @@ Each step is one commit after review. Target ≤ ~300 changed lines per step. Te
 
 ### Part 1 — customer and delivery
 
-3. [ ] **Dialog shell and amount box.** `checkout-dialog.tsx` (replaces the stub), `order-panel.tsx`, `amount-box.tsx`, the sub-step switch driven by `useCheckoutStep` (placeholders for 2a and 2b), and the `useGetProductQuery` export in `catalog/index.ts`.
+3. [x] **Dialog shell and amount box.** `checkout-dialog.tsx` (replaces the stub), `order-panel.tsx`, `amount-box.tsx`, the sub-step switch driven by `useCheckoutStep` (placeholders for 2a and 2b), and the `useGetProductQuery` export in `catalog/index.ts`.
    Tests (MSW): two panels are rendered, and Esc dispatches `closeCheckout`; amount box without a municipality, loading, total `$ 3.920.460` from the fixture, `OUT_OF_STOCK` message with its link, and a 500 error then "Reintentar" to the total.
    Chrome: the dialog at both viewports with and without a total.
    Commit: `feat(web): add checkout dialog shell with amount box`.
