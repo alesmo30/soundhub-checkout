@@ -318,7 +318,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. T
    Manual test: `pnpm --filter @checkout/api test:int` green.
    Commit: `feat(api): implement TypeORM customer repository`.
 
-7. [ ] **Customer use cases.** `customer.errors.ts`, `UpsertCustomerUseCase` and `GetCustomerUseCase`, with unit specs over a fake repository and a fake `UnitOfWork`. The specs cover:
+7. [x] **Customer use cases.** `customer.errors.ts`, `UpsertCustomerUseCase` and `GetCustomerUseCase`, with unit specs over a fake repository and a fake `UnitOfWork`. The specs cover:
    - every row of the §6 table, including the same email in different case;
    - the retry path: `insert` returns a violation, and the second attempt finds the existing row and returns `created: false` (same email) or `CUSTOMER_DATA_MISMATCH` (different email);
    - an `EMAIL` violation that ends in `EMAIL_ALREADY_REGISTERED`;
