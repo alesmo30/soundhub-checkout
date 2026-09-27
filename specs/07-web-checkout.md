@@ -317,7 +317,7 @@ Each step is one commit after review. Target ≤ ~300 changed lines per step. Te
    Decision: manual sandbox call made with real credentials (2026-09-27). Confirmed `data.presigned_acceptance.permalink` and `data.presigned_personal_data_auth.permalink` both exist and are URLs, matching the assumed mapping — no mapper change needed. `exp_month`/`exp_year` as 2-digit strings also confirmed against SPEC 06's `scripts/gateway-spike.ts`.
    Commit: `feat(web): add payment gateway service`.
 
-7. [ ] **Card form fields.** `lib/masks.ts`, `card-brand-icon.tsx` and `card-form.tsx` (number, holder, expiry, CVC, installments), wired into the `CARD` sub-step with "Volver". No submit yet.
+7. [x] **Card form fields.** `lib/masks.ts`, `card-brand-icon.tsx` and `card-form.tsx` (number, holder, expiry, CVC, installments), wired into the `CARD` sub-step with "Volver". No submit yet.
    Tests: `formatCardNumber`, `formatExpiry` and `digitsOnly` tables; the logo shows VISA for `4`, Mastercard for `51`, `55`, `2221` and `2720`, and nothing for `56` or `2721`; one validation message per field (Luhn, expired, CVC, holder); installments default to 1 and offer 36 options.
    Chrome: the empty card form, VISA detected, Mastercard detected, and errors, at both viewports.
    Commit: `feat(web): add card form with brand detection`.
