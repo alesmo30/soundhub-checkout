@@ -24,11 +24,12 @@ describe('renderWithProviders', () => {
   });
 
   it('exposes a working store seeded with preloadedState', () => {
+    const checkout = { productId: null, quantity: 1, isDialogOpen: false };
     const { store } = renderWithProviders(<LocationProbe />, {
-      preloadedState: { checkout: {}, customer: {} },
+      preloadedState: { checkout, customer: {} },
     });
 
-    expect(store.getState().checkout).toEqual({});
+    expect(store.getState().checkout).toEqual(checkout);
     expect(store.getState().customer).toEqual({});
   });
 

@@ -146,9 +146,10 @@ Each step is one commit after review. Target ≤ ~300 changed lines per step (im
    Commit: `feat(web): add product images`.
    Decision: image files use the seeded SKU in uppercase (`<SKU>-<width>.webp`), matching the API seed's `imageUrl`; SPEC 03's MSW fixtures (wrong SKUs, lowercased `imageUrl`) are fixed in a separate PR before step 4, not on this branch.
 
-2. [ ] **Catalog endpoints and checkout quantity actions.** `catalog.api.ts`, `invalidateProduct`, the checkout slice actions and selectors, `catalog/index.ts` and `checkout/index.ts` exports.
+2. [x] **Catalog endpoints and checkout quantity actions.** `catalog.api.ts`, `invalidateProduct`, the checkout slice actions and selectors, `catalog/index.ts` and `checkout/index.ts` exports.
    Tests: `getProducts` keeps `meta`; `getProduct` unwraps `data`; `invalidateProduct` triggers a refetch of a subscribed product; slice reducers and `selectQuantityFor` (match → saved value, other product → 1).
    Commit: `feat(web): add catalog endpoints and checkout quantity actions`.
+   Decision: `src/test/render-with-providers.spec.tsx` now preloads a full `CheckoutState` because its fields are required (outside the listed diff paths, approved by the user); web tests are named `*.spec.ts(x)`, not `*.test.ts`, because `apps/web/jest.config.js` only matches `.spec`.
 
 3. [ ] **Card components.** `stock-badge`, `product-image`, `product-card`, `product-grid` (+ skeleton), `lib/product-image-srcset.ts`, `catalog.constants.ts`.
    Tests: badge text for 0 / 1 / 7; `srcset` derivation and fallback; eager vs lazy by index; skeleton hidden after `load`; card links to `/products/:id` and shows `formatCop` price.
