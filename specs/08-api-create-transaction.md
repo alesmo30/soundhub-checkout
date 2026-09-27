@@ -379,7 +379,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
     Manual test: `test` green.
     Commit: `feat(api): add idempotency, guard and quote phases to create transaction`.
 
-11. [ ] **Create transaction: reserve and charge.** Real `reserve` and `charge` phases plus `helpers/to-transaction-created.ts`. The unit specs cover:
+11. [x] **Create transaction: reserve and charge.** Real `reserve` and `charge` phases plus `helpers/to-transaction-created.ts`. The unit specs cover:
     - `INSUFFICIENT_STOCK` → `OUT_OF_STOCK`, with nothing inserted;
     - the snapshots, `reservation_expires_at = now + TTL`, and the delivery with warehouse, distance and rule;
     - a reference collision retried up to 3 times, then a rejection;
