@@ -369,55 +369,55 @@ Notes:
 
 Contract change
 
-- [ ] `CustomerRepository.insert` returns `ResultAsync<Customer, CustomerUniqueViolation>`, and that change reached `main` in its own PR, which touches only `customer.repository.port.ts`, before any other commit of this spec.
+- [x] `CustomerRepository.insert` returns `ResultAsync<Customer, CustomerUniqueViolation>`, and that change reached `main` in its own PR, which touches only `customer.repository.port.ts`, before any other commit of this spec.
 
 Quote
 
-- [ ] `GET /api/v1/quotes?productId=<HP-SNY-WH1000XM5>&quantity=2&municipalityCode=05001` returns 200 with `subtotalInCents: 379980000`, `vatIncludedInCents: 60669100`, `baseFeeInCents: 12066000`, `delivery.feeInCents: 0`, `delivery.rule: "FREE_METRO"`, `totalInCents: 392046000` and `currency: "COP"`.
-- [ ] The response has exactly the `Quote` fields, including `delivery.distanceKm` as an integer and `delivery.warehouse` as `{ id, name }`.
-- [ ] A non-uuid `productId`, a `quantity` of 0, 11 or `abc`, a `municipalityCode` that is not 5 digits, or an unknown query parameter each returns 400 `VALIDATION_ERROR` with `errors[]`.
-- [ ] An unknown or soft-deleted product returns 422 `PRODUCT_NOT_FOUND`, and an unknown municipality returns 422 `MUNICIPALITY_NOT_FOUND`.
-- [ ] `quantity = stockAvailable + 1` returns 409 `OUT_OF_STOCK`, and `quantity = stockAvailable` returns 200.
-- [ ] The 200 carries `Cache-Control: no-store`.
-- [ ] Calling the endpoint writes nothing: the `products` row counts and `stock_available` values are the same before and after.
-- [ ] With no active warehouse, the endpoint returns 500 `INTERNAL_ERROR` without internal details (proven by the use-case spec rejecting).
+- [x] `GET /api/v1/quotes?productId=<HP-SNY-WH1000XM5>&quantity=2&municipalityCode=05001` returns 200 with `subtotalInCents: 379980000`, `vatIncludedInCents: 60669100`, `baseFeeInCents: 12066000`, `delivery.feeInCents: 0`, `delivery.rule: "FREE_METRO"`, `totalInCents: 392046000` and `currency: "COP"`.
+- [x] The response has exactly the `Quote` fields, including `delivery.distanceKm` as an integer and `delivery.warehouse` as `{ id, name }`.
+- [x] A non-uuid `productId`, a `quantity` of 0, 11 or `abc`, a `municipalityCode` that is not 5 digits, or an unknown query parameter each returns 400 `VALIDATION_ERROR` with `errors[]`.
+- [x] An unknown or soft-deleted product returns 422 `PRODUCT_NOT_FOUND`, and an unknown municipality returns 422 `MUNICIPALITY_NOT_FOUND`.
+- [x] `quantity = stockAvailable + 1` returns 409 `OUT_OF_STOCK`, and `quantity = stockAvailable` returns 200.
+- [x] The 200 carries `Cache-Control: no-store`.
+- [x] Calling the endpoint writes nothing: the `products` row counts and `stock_available` values are the same before and after.
+- [x] With no active warehouse, the endpoint returns 500 `INTERNAL_ERROR` without internal details (proven by the use-case spec rejecting).
 
 Pricing domain
 
-- [ ] `baseFeeInCents(379_980_000) === 12_066_000`, and the function uses no floating-point rate.
-- [ ] The strategy specs cover the boundaries 19,999,900 vs 20,000,000 cents, km 50 vs 51, rounding up to 500 COP, and the 60,000 COP cap at km 717.
-- [ ] `DeliveryFeeResolver` returns the first matching strategy in the order FREE_METRO → METRO_FLAT → NATIONAL_DISTANCE.
-- [ ] `pricing/index.ts` exports `GetQuoteUseCase`, and `PricingModule` exports it, so another module can inject it by importing `PricingModule`.
+- [x] `baseFeeInCents(379_980_000) === 12_066_000`, and the function uses no floating-point rate.
+- [x] The strategy specs cover the boundaries 19,999,900 vs 20,000,000 cents, km 50 vs 51, rounding up to 500 COP, and the 60,000 COP cap at km 717.
+- [x] `DeliveryFeeResolver` returns the first matching strategy in the order FREE_METRO → METRO_FLAT → NATIONAL_DISTANCE.
+- [x] `pricing/index.ts` exports `GetQuoteUseCase`, and `PricingModule` exports it, so another module can inject it by importing `PricingModule`.
 
 Customers
 
-- [ ] `POST /api/v1/customers` returns:
+- [x] `POST /api/v1/customers` returns:
   - 201 for a new ID with a free email;
   - 409 `EMAIL_ALREADY_REGISTERED` for a new ID with another ID's email;
   - 200 with name and phone updated for an existing ID with the same email in any case;
   - 409 `CUSTOMER_DATA_MISMATCH` for an existing ID with a different email, leaving the row unchanged.
-- [ ] The body's fields are trimmed and the email is stored lowercase (`"  Ana@Mail.COM "` → `ana@mail.com`).
-- [ ] An invalid document number, phone, email or name, or an unknown field, returns 400 `VALIDATION_ERROR` with `errors[]`.
-- [ ] `GET /api/v1/customers/:id` returns 200 with `{ id, documentNumber, fullName, email, phone }`, 400 for a non-uuid-v4 id, and 404 `CUSTOMER_NOT_FOUND`.
-- [ ] Both customer endpoints send `Cache-Control: no-store` on 200 and 201.
-- [ ] The concurrency int-spec passes three runs in a row, and each scenario ends with exactly one row for the contested document number.
-- [ ] Captured logs from `POST /customers` (success and 409) contain none of the raw document number, email or phone, and no customer error `detail` includes them.
-- [ ] No endpoint, use case or repository method searches customers by email or document number from HTTP input other than the upsert itself.
-- [ ] `POST /customers` carries `@Throttle` metadata with 20 requests per 60 s, and no throttler guard is registered yet.
-- [ ] `CustomersModule` provides and exports `CUSTOMER_REPOSITORY`.
+- [x] The body's fields are trimmed and the email is stored lowercase (`"  Ana@Mail.COM "` → `ana@mail.com`).
+- [x] An invalid document number, phone, email or name, or an unknown field, returns 400 `VALIDATION_ERROR` with `errors[]`.
+- [x] `GET /api/v1/customers/:id` returns 200 with `{ id, documentNumber, fullName, email, phone }`, 400 for a non-uuid-v4 id, and 404 `CUSTOMER_NOT_FOUND`.
+- [x] Both customer endpoints send `Cache-Control: no-store` on 200 and 201.
+- [x] The concurrency int-spec passes three runs in a row, and each scenario ends with exactly one row for the contested document number.
+- [x] Captured logs from `POST /customers` (success and 409) contain none of the raw document number, email or phone, and no customer error `detail` includes them.
+- [x] No endpoint, use case or repository method searches customers by email or document number from HTTP input other than the upsert itself.
+- [x] `POST /customers` carries `@Throttle` metadata with 20 requests per 60 s, and no throttler guard is registered yet.
+- [x] `CustomersModule` provides and exports `CUSTOMER_REPOSITORY`.
 
 Swagger
 
-- [ ] `/api/docs` shows `GET /quotes`, `POST /customers` and `GET /customers/:id` with their constraints, their success schemas (201 and 200 for `POST /customers`), and their error responses.
-- [ ] `QuoteDto implements Quote` and `CustomerDto implements Customer`.
+- [x] `/api/docs` shows `GET /quotes`, `POST /customers` and `GET /customers/:id` with their constraints, their success schemas (201 and 200 for `POST /customers`), and their error responses.
+- [x] `QuoteDto implements Quote` and `CustomerDto implements Customer`.
 
 Quality and CI
 
-- [ ] `pnpm lint`, `pnpm typecheck`, `pnpm --filter @checkout/api test:cov` and `pnpm --filter @checkout/api test:int` exit 0 locally.
-- [ ] The coverage report shows `modules/pricing/domain` at ≥ 90 %, and `modules/pricing` and `modules/customers` at ≥ 80 %, on statements, branches, functions and lines. `apps/api` stays at ≥ 80 % globally.
-- [ ] No raw SQL (`query(`, `manager.query`) exists under `modules/pricing` or `modules/customers`.
+- [x] `pnpm lint`, `pnpm typecheck`, `pnpm --filter @checkout/api test:cov` and `pnpm --filter @checkout/api test:int` exit 0 locally.
+- [x] The coverage report shows `modules/pricing/domain` at ≥ 90 %, and `modules/pricing` and `modules/customers` at ≥ 80 %, on statements, branches, functions and lines. `apps/api` stays at ≥ 80 % globally.
+- [x] No raw SQL (`query(`, `manager.query`) exists under `modules/pricing` or `modules/customers`.
 - [ ] The PR shows green `lint`, `typecheck`, `coverage (api)` and `api-integration`.
-- [ ] `git diff main --stat` shows changes only under `apps/api/src/modules/pricing/`, `apps/api/src/modules/customers/`, `apps/api/package.json`, `apps/api/eslint.config.mjs`, `pnpm-lock.yaml` and `specs/`. `eslint.config.mjs` was not anticipated when this spec was written: step 4 found that `PricingModule` needs to import `CatalogModule`/`LocationsModule` (real Nest `Module` classes, not their public `index.ts`) to share their DI tree, which the existing cross-module `no-restricted-imports` rule blocked for every file alike. The rule was widened, generically, to let only `*.module.ts` files import a sibling module's `Module` class — `domain/`, `application/` and `infrastructure/` still cross only through `index.ts`, unchanged. See the "Cross-module wiring" entry under Decisions.
+- [x] `git diff main --stat` shows changes only under `apps/api/src/modules/pricing/`, `apps/api/src/modules/customers/`, `apps/api/package.json`, `apps/api/eslint.config.mjs`, `pnpm-lock.yaml` and `specs/`. `eslint.config.mjs` was not anticipated when this spec was written: step 4 found that `PricingModule` needs to import `CatalogModule`/`LocationsModule` (real Nest `Module` classes, not their public `index.ts`) to share their DI tree, which the existing cross-module `no-restricted-imports` rule blocked for every file alike. The rule was widened, generically, to let only `*.module.ts` files import a sibling module's `Module` class — `domain/`, `application/` and `infrastructure/` still cross only through `index.ts`, unchanged. See the "Cross-module wiring" entry under Decisions.
 
 ## Decisions
 
