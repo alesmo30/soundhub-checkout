@@ -276,7 +276,7 @@ Each step is one commit after review. Target ≤ ~300 changed lines per step. Te
    Tests (MSW): departments and municipalities unwrap `data`; `getMunicipalities('99')` surfaces `DEPARTMENT_NOT_FOUND`; `getQuote` sends the three query params and unwraps `data`.
    Commit: `feat(web): add locations and quote endpoints to checkout`.
 
-2. [ ] **Checkout state.** `lib/contact-details.ts`, `checkout-session.slice.ts`, the `step` in `checkout.slice.ts`, the `customer` slice, `use-checkout-step.ts`, the store registration and the persist migration. `checkout/index.ts` and `customer/index.ts` exports.
+2. [x] **Checkout state.** `lib/contact-details.ts`, `checkout-session.slice.ts`, the `step` in `checkout.slice.ts`, the `customer` slice, `use-checkout-step.ts`, the store registration and the persist migration. `checkout/index.ts` and `customer/index.ts` exports.
    Tests:
    - reducers and selectors of the three slices;
    - `closeCheckout` drops `card` and `acceptance` but keeps `contact`; `forgetDetails` clears `remembered` and the whole session;

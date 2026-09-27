@@ -2,10 +2,15 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 const MIN_QUANTITY = 1;
 
+export type CheckoutStep = 'CONTACT' | 'CARD' | 'SUMMARY';
+
+const INITIAL_STEP: CheckoutStep = 'CONTACT';
+
 export interface CheckoutState {
   productId: string | null;
   quantity: number;
   isDialogOpen: boolean;
+  step: CheckoutStep;
 }
 
 export interface ProductQuantity {
@@ -17,6 +22,7 @@ const initialState: CheckoutState = {
   productId: null,
   quantity: MIN_QUANTITY,
   isDialogOpen: false,
+  step: INITIAL_STEP,
 };
 
 // The upper bound depends on the product's current stock, so the page clamps
@@ -41,6 +47,9 @@ export const checkoutSlice = createSlice({
     closeCheckout(state) {
       state.isDialogOpen = false;
     },
+    goToStep(state, action: PayloadAction<CheckoutStep>) {
+      state.step = action.payload;
+    },
   },
   selectors: {
     // A quantity saved for another product must not leak into this one.
@@ -48,10 +57,15 @@ export const checkoutSlice = createSlice({
       state.productId === productId ? state.quantity : MIN_QUANTITY,
     selectIsCheckoutOpen: (state): boolean => state.isDialogOpen,
     selectCheckoutProductId: (state): string | null => state.productId,
+    selectCheckoutStep: (state): CheckoutStep => state.step,
   },
 });
 
-export const { setQuantity, startCheckout, closeCheckout } = checkoutSlice.actions;
-export const { selectQuantityFor, selectIsCheckoutOpen, selectCheckoutProductId } =
-  checkoutSlice.selectors;
+export const { setQuantity, startCheckout, closeCheckout, goToStep } = checkoutSlice.actions;
+export const {
+  selectQuantityFor,
+  selectIsCheckoutOpen,
+  selectCheckoutProductId,
+  selectCheckoutStep,
+} = checkoutSlice.selectors;
 export const checkoutReducer = checkoutSlice.reducer;

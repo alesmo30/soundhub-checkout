@@ -1,7 +1,9 @@
 import {
   checkoutReducer,
   closeCheckout,
+  goToStep,
   selectCheckoutProductId,
+  selectCheckoutStep,
   selectIsCheckoutOpen,
   selectQuantityFor,
   setQuantity,
@@ -17,8 +19,13 @@ function reduce(...actions: Parameters<typeof checkoutReducer>[1][]): CheckoutSt
 }
 
 describe('checkout slice', () => {
-  it('starts with no product, quantity 1 and the dialog closed', () => {
-    expect(reduce()).toEqual({ productId: null, quantity: 1, isDialogOpen: false });
+  it('starts with no product, quantity 1, the dialog closed and step CONTACT', () => {
+    expect(reduce()).toEqual({
+      productId: null,
+      quantity: 1,
+      isDialogOpen: false,
+      step: 'CONTACT',
+    });
   });
 
   it('setQuantity stores the product and quantity without opening the dialog', () => {
@@ -26,6 +33,7 @@ describe('checkout slice', () => {
       productId: PRODUCT_ID,
       quantity: 3,
       isDialogOpen: false,
+      step: 'CONTACT',
     });
   });
 
@@ -39,13 +47,28 @@ describe('checkout slice', () => {
       productId: PRODUCT_ID,
       quantity: 2,
       isDialogOpen: true,
+      step: 'CONTACT',
     });
   });
 
-  it('closeCheckout closes the dialog but keeps the product and quantity', () => {
-    const state = reduce(startCheckout({ productId: PRODUCT_ID, quantity: 4 }), closeCheckout());
+  it('closeCheckout closes the dialog but keeps the product, quantity and step', () => {
+    const state = reduce(
+      startCheckout({ productId: PRODUCT_ID, quantity: 4 }),
+      goToStep('CARD'),
+      closeCheckout(),
+    );
 
-    expect(state).toEqual({ productId: PRODUCT_ID, quantity: 4, isDialogOpen: false });
+    expect(state).toEqual({
+      productId: PRODUCT_ID,
+      quantity: 4,
+      isDialogOpen: false,
+      step: 'CARD',
+    });
+  });
+
+  it('goToStep moves the persisted step', () => {
+    expect(reduce(goToStep('CARD')).step).toBe('CARD');
+    expect(reduce(goToStep('CARD'), goToStep('SUMMARY')).step).toBe('SUMMARY');
   });
 });
 
@@ -74,5 +97,10 @@ describe('checkout selectors', () => {
 
     expect(selectCheckoutProductId({ checkout: started })).toBe(PRODUCT_ID);
     expect(selectCheckoutProductId({ checkout: reduce() })).toBeNull();
+  });
+
+  it('selectCheckoutStep returns the persisted step', () => {
+    expect(selectCheckoutStep({ checkout: reduce() })).toBe('CONTACT');
+    expect(selectCheckoutStep({ checkout: reduce(goToStep('CARD')) })).toBe('CARD');
   });
 });

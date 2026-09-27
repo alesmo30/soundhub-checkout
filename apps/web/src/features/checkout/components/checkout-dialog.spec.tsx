@@ -6,7 +6,9 @@ import { CheckoutDialog } from './checkout-dialog';
 
 function renderDialog(isDialogOpen: boolean) {
   return renderWithProviders(<CheckoutDialog />, {
-    preloadedState: { checkout: { productId: 'product-1', quantity: 2, isDialogOpen } },
+    preloadedState: {
+      checkout: { productId: 'product-1', quantity: 2, isDialogOpen, step: 'CONTACT' },
+    },
   });
 }
 
@@ -32,6 +34,7 @@ describe('CheckoutDialog', () => {
       productId: 'product-1',
       quantity: 2,
       isDialogOpen: false,
+      step: 'CONTACT',
     });
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
