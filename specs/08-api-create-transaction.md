@@ -335,7 +335,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
 
 ### Gateway
 
-7. [ ] **Gateway mapping.** `gateway-response.mapper.ts`, `gateway-error.classifier.ts` and the `__fixtures__/*.json` files, shaped after `gateway-findings.md` with fake ids. The unit specs cover:
+7. [x] **Gateway mapping.** `gateway-response.mapper.ts`, `gateway-error.classifier.ts` and the `__fixtures__/*.json` files, shaped after `gateway-findings.md` with fake ids. The unit specs cover:
    - each provider status → `TransactionStatus`, and an unknown one → `PENDING`;
    - brand and last 4 read from `payment_method.extra`;
    - extra fields (`merchant`, `entries`, …) ignored;

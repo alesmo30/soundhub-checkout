@@ -1,0 +1,12 @@
+{
+  "error": {
+    "type": "INPUT_VALIDATION_ERROR",
+    "messages": {
+      "payment_method": {
+        "messages": {
+          "token": ["The token field is not valid"]
+        }
+      }
+    }
+  }
+}
