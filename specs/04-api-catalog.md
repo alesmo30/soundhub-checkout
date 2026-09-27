@@ -213,7 +213,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. N
    Manual test: `pnpm --filter @checkout/api test` green.
    Commit: `feat(api): add VAT breakdown and purchase limit to catalog domain`.
 
-2. [ ] **Locations domain.** `locations.constants.ts`, `geo-point.ts`, `haversine.ts`, `nearest-warehouse.finder.ts` and `location.errors.ts`, with unit specs, plus `haversineKm`, `findNearestWarehouse`, `GeoPoint` and `NearestWarehouse` exported from `locations/index.ts`. The specs cover:
+2. [x] **Locations domain.** `locations.constants.ts`, `geo-point.ts`, `haversine.ts`, `nearest-warehouse.finder.ts` and `location.errors.ts`, with unit specs, plus `haversineKm`, `findNearestWarehouse`, `GeoPoint` and `NearestWarehouse` exported from `locations/index.ts`. The specs cover:
    - Medellín ↔ Bogotá ≈ 240 km (± 5) and two more known city pairs;
    - distance 0 for the same point;
    - an empty warehouse list returning `null`;
