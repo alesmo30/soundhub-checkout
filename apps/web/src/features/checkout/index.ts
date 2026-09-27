@@ -1,3 +1,4 @@
+export { CheckoutDialog } from './components/checkout-dialog';
 export {
   checkoutReducer,
   closeCheckout,

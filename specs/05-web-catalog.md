@@ -163,7 +163,7 @@ Each step is one commit after review. Target ≤ ~300 changed lines per step (im
 
 ### Part 2 — product detail
 
-5. [ ] **Quantity selector and checkout dialog stub.** `quantity-selector.tsx`, `checkout/components/checkout-dialog.tsx` (stub on `Dialog`, controlled by `selectIsCheckoutOpen`, `closeCheckout` on close).
+5. [x] **Quantity selector and checkout dialog stub.** `quantity-selector.tsx`, `checkout/components/checkout-dialog.tsx` (stub on `Dialog`, controlled by `selectIsCheckoutOpen`, `closeCheckout` on close).
    Tests: bounds (can't go below 1 or above max; max = 10 when stock is 25), disabled at stock 0, `aria-live` value; dialog opens when the slice says so and Esc dispatches `closeCheckout`.
    Commit: `feat(web): add quantity selector and checkout dialog stub`.
 
