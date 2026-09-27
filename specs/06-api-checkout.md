@@ -329,7 +329,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. T
    Manual test: `test` green.
    Commit: `feat(api): add upsert and get customer use cases`.
 
-8. [ ] **Concurrency proof.** `upsert-customer.concurrency.int-spec.ts` uses the real `TypeOrmUnitOfWork` and repository. A test-only wrapper around the repository holds both attempts at a barrier after their reads, so both reach `insert` before either commits and the race is deterministic. Rows commit, with random document numbers and emails. The spec proves:
+8. [x] **Concurrency proof.** `upsert-customer.concurrency.int-spec.ts` uses the real `TypeOrmUnitOfWork` and repository. A test-only wrapper around the repository holds both attempts at a barrier after their reads, so both reach `insert` before either commits and the race is deterministic. Rows commit, with random document numbers and emails. The spec proves:
    - same new ID + same email → outcomes `{ created: true }` and `{ created: false }`, and exactly one row;
    - same new ID + different emails → one `created: true` and one `CUSTOMER_DATA_MISMATCH`, one row, and the winner's email unchanged;
    - two new IDs + the same email → one created and one `EMAIL_ALREADY_REGISTERED`.
