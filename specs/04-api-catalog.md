@@ -205,7 +205,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. N
 
 ### Domain
 
-1. [ ] **Catalog domain.** `catalog.constants.ts`, `vat.ts`, `purchase-limit.ts` and `product.errors.ts`, with unit specs, plus `vatIncludedInCents` exported from `catalog/index.ts`. The specs cover:
+1. [x] **Catalog domain.** `catalog.constants.ts`, `vat.ts`, `purchase-limit.ts` and `product.errors.ts`, with unit specs, plus `vatIncludedInCents` exported from `catalog/index.ts`. The specs cover:
    - `189_990_000 → 30_334_500` and `379_980_000 → 60_669_100`;
    - a price whose VAT lands exactly on `.5` pesos;
    - `maxPurchaseQuantity` for stock 0, 1, 10 and 25.
