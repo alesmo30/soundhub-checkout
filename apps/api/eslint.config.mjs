@@ -130,7 +130,8 @@ export default defineConfig(
   },
   {
     // Developer-run CLI tools; not part of the deployed app.
-    files: ['src/shared/infrastructure/persistence/seeds/scripts/**/*.ts'],
+    files: ['src/shared/infrastructure/persistence/seeds/**/*.ts'],
+    ignores: ['src/shared/infrastructure/persistence/seeds/**/*.int-spec.ts'],
     rules: { 'no-console': 'off' },
   },
   ...moduleConfigs,

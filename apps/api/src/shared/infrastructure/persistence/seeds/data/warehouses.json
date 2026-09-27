@@ -1,0 +1,34 @@
+[
+  {
+    "id": "0b7c1f2e-5d4a-4e8b-9c1a-3f2d6e7a8b01",
+    "name": "Medellín DC",
+    "municipalityCode": "05001",
+    "address": "Carrera 52 # 14-30, Guayabal",
+    "latitude": 6.2195,
+    "longitude": -75.584
+  },
+  {
+    "id": "0b7c1f2e-5d4a-4e8b-9c1a-3f2d6e7a8b02",
+    "name": "Bogotá DC",
+    "municipalityCode": "11001",
+    "address": "Carrera 106 # 15A-25, Zona Franca, Fontibón",
+    "latitude": 4.6706,
+    "longitude": -74.1473
+  },
+  {
+    "id": "0b7c1f2e-5d4a-4e8b-9c1a-3f2d6e7a8b03",
+    "name": "Cali DC",
+    "municipalityCode": "76001",
+    "address": "Calle 15 # 8-56, Zona Industrial",
+    "latitude": 3.458,
+    "longitude": -76.522
+  },
+  {
+    "id": "0b7c1f2e-5d4a-4e8b-9c1a-3f2d6e7a8b04",
+    "name": "Barranquilla DC",
+    "municipalityCode": "08001",
+    "address": "Vía 40 # 73-290, Zona Industrial Vía 40",
+    "latitude": 11.0165,
+    "longitude": -74.797
+  }
+]
