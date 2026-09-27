@@ -337,7 +337,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. T
    Manual test: `test:int` green three runs in a row.
    Commit: `test(api): prove concurrent customer upserts end with one row`.
 
-9. [ ] **Customers endpoints.** `customers.controller.ts`, `customers-http.constants.ts` and the customer DTOs. `customers.controller.spec.ts` checks:
+9. [x] **Customers endpoints.** `customers.controller.ts`, `customers-http.constants.ts` and the customer DTOs. `customers.controller.spec.ts` checks:
    - 201 then 200 for the same body, and 409 for both conflict codes;
    - `"  Ana@Mail.COM "` stored and returned as `ana@mail.com`;
    - 400 with `errors[]` for each invalid field, and for an unknown field such as `id`;
