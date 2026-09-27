@@ -1,6 +1,6 @@
 # SPEC 05 — Web: catalog (product list and product detail)
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 03 (blocking: web app foundation must be merged). Runs in parallel with SPEC 04 (api catalog) in its own worktree, against MSW; checkpoint C1 runs after both merge.
 > **Date:** 2026-09-26
 > **Objective:** Turn the `/` and `/products/:id` placeholders into the first screen of the five-screen flow: a paginated, mobile-fast catalog, and a product page that shows everything needed to decide and starts the checkout with a chosen quantity.
@@ -149,7 +149,7 @@ Each step is one commit after review. Target ≤ ~300 changed lines per step (im
 2. [x] **Catalog endpoints and checkout quantity actions.** `catalog.api.ts`, `invalidateProduct`, the checkout slice actions and selectors, `catalog/index.ts` and `checkout/index.ts` exports.
    Tests: `getProducts` keeps `meta`; `getProduct` unwraps `data`; `invalidateProduct` triggers a refetch of a subscribed product; slice reducers and `selectQuantityFor` (match → saved value, other product → 1).
    Commit: `feat(web): add catalog endpoints and checkout quantity actions`.
-   Decision: `src/test/render-with-providers.spec.tsx` now preloads a full `CheckoutState` because its fields are required (outside the listed diff paths, approved by the user); web tests are named `*.spec.ts(x)`, not `*.test.ts`, because `apps/web/jest.config.js` only matches `.spec`.
+   Decision: `src/test/render-with-providers.spec.tsx` now preloads a full `CheckoutState` because its fields are required (outside the listed diff paths, approved by the user); web tests are named `*.spec.ts(x)`, not `*.test.ts`, because `apps/web/jest.config.js` only matches `.spec`; the tests next to allowed files (`checkout/checkout.slice.spec.ts`, `checkout/components/checkout-dialog.spec.tsx`) count as part of those files for the diff-paths criterion.
 
 3. [x] **Card components.** `stock-badge`, `product-image`, `product-card`, `product-grid` (+ skeleton), `lib/product-image-srcset.ts`, `catalog.constants.ts`.
    Tests: badge text for 0 / 1 / 7; `srcset` derivation and fallback; eager vs lazy by index; skeleton hidden after `load`; card links to `/products/:id` and shows `formatCop` price.
@@ -175,7 +175,7 @@ Each step is one commit after review. Target ≤ ~300 changed lines per step (im
 
 ### Close-out
 
-7. [ ] **Performance, PR and green CI.** `pnpm --filter @checkout/web build && preview`, Lighthouse mobile on `/` (LCP noted in the PR); `test:cov` ≥ 80 %; push, open the PR with `gh-cli` linking the evidence, wait for CI, fix whatever fails; mark this spec `Implemented` and tick its criteria. If SPEC 04 merged first and the lockfile conflicts, apply the lockfile protocol.
+7. [x] **Performance, PR and green CI.** `pnpm --filter @checkout/web build && preview`, Lighthouse mobile on `/` (LCP noted in the PR); `test:cov` ≥ 80 %; push, open the PR with `gh-cli` linking the evidence, wait for CI, fix whatever fails; mark this spec `Implemented` and tick its criteria. If SPEC 04 merged first and the lockfile conflicts, apply the lockfile protocol.
    Commit: `docs: mark spec 05 as Implemented`.
 
 Notes:
@@ -187,36 +187,36 @@ Notes:
 
 Catalog
 
-- [ ] `/` shows 10 cards on page 1 against MSW; each has image, brand, name, `formatCop` price and a stock badge.
-- [ ] 1 / 2 / 3 columns at 375 / 640 / 1024 px wide; no horizontal scroll at 320 px.
-- [ ] A product with `stockAvailable: 0` shows "Agotado".
-- [ ] Pagination is keyboard reachable, marks the active page with `aria-current="page"`, and `?page=2` survives a reload and a shared link.
-- [ ] `?page=abc`, `?page=0` and `?page=-1` show page 1.
-- [ ] Loading shows skeletons; an empty catalog and a page past the end show their messages; an error shows the `ErrorCode`-driven message and "Reintentar" recovers.
-- [ ] Every product `<img>` has `srcset` with 320w/640w/960w, `width` and `height`; only the first 3 on the list are not `lazy`.
+- [x] `/` shows 10 cards on page 1 against MSW; each has image, brand, name, `formatCop` price and a stock badge.
+- [x] 1 / 2 / 3 columns at 375 / 640 / 1024 px wide; no horizontal scroll at 320 px.
+- [x] A product with `stockAvailable: 0` shows "Agotado".
+- [x] Pagination is keyboard reachable, marks the active page with `aria-current="page"`, and `?page=2` survives a reload and a shared link.
+- [x] `?page=abc`, `?page=0` and `?page=-1` show page 1.
+- [x] Loading shows skeletons; an empty catalog and a page past the end show their messages; an error shows the `ErrorCode`-driven message and "Reintentar" recovers.
+- [x] Every product `<img>` has `srcset` with 320w/640w/960w, `width` and `height`; only the first 3 on the list are not `lazy`.
 
 Images
 
-- [ ] `public/images/products` holds exactly 45 files named `<sku>-<width>.webp` for the 15 seeded SKUs, totalling < 2 MB.
-- [ ] `CREDITS.md` lists the source of each image.
+- [x] `public/images/products` holds exactly 45 files named `<sku>-<width>.webp` for the 15 seeded SKUs, totalling < 2 MB.
+- [x] `CREDITS.md` lists the source of each image.
 
 Product page
 
-- [ ] `/products/:id` shows image, brand, name, description, price, "IVA incluido" amount and stock; two columns from 768 px.
-- [ ] The stepper never goes below 1 or above `maxPurchaseQuantity`; its buttons are ≥ 44 px.
-- [ ] At stock 0 the stepper and the CTA are disabled.
-- [ ] The CTA dispatches `startCheckout({ productId, quantity })` and the checkout dialog stub opens; Esc closes it.
-- [ ] Refreshing `/products/:id` restores the selected quantity; another product starts at 1.
-- [ ] An unknown id and a malformed id show "No encontramos este producto" with a link to `/`.
-- [ ] `invalidateProduct(id)` is exported from `@/features/catalog` and makes a mounted product page re-fetch (test).
+- [x] `/products/:id` shows image, brand, name, description, price, "IVA incluido" amount and stock; two columns from 768 px.
+- [x] The stepper never goes below 1 or above `maxPurchaseQuantity`; its buttons are ≥ 44 px.
+- [x] At stock 0 the stepper and the CTA are disabled.
+- [x] The CTA dispatches `startCheckout({ productId, quantity })` and the checkout dialog stub opens; Esc closes it.
+- [x] Refreshing `/products/:id` restores the selected quantity; another product starts at 1.
+- [x] An unknown id and a malformed id show "No encontramos este producto" with a link to `/`.
+- [x] `invalidateProduct(id)` is exported from `@/features/catalog` and makes a mounted product page re-fetch (test).
 
 Quality
 
-- [ ] `pnpm lint`, `pnpm typecheck` and `pnpm --filter @checkout/web test:cov` (≥ 80 % on all four metrics) exit 0.
-- [ ] No `useEffect` fetches data and no server data is copied into a slice (only `productId`/`quantity`).
-- [ ] Chrome evidence at 375×667 and 1440×900 in `docs/evidence/catalog/`; Lighthouse mobile LCP noted in the PR.
-- [ ] `git diff main --stat` touches only `apps/web/src/features/catalog/**`, `features/checkout/{checkout.slice.ts,index.ts,components/checkout-dialog.tsx}`, `app/router.tsx`, `app/placeholder-pages.tsx`, `apps/web/public/images/products/**`, `apps/web/scripts/**`, `apps/web/package.json`, `pnpm-lock.yaml`, `docs/evidence/catalog/**` and `specs/`.
-- [ ] A case-insensitive search for the payment provider's brand name in the branch diff returns no match.
+- [x] `pnpm lint`, `pnpm typecheck` and `pnpm --filter @checkout/web test:cov` (≥ 80 % on all four metrics) exit 0.
+- [x] No `useEffect` fetches data and no server data is copied into a slice (only `productId`/`quantity`).
+- [x] Chrome evidence at 375×667 and 1440×900 in `docs/evidence/catalog/`; Lighthouse mobile LCP noted in the PR.
+- [x] `git diff main --stat` touches only `apps/web/src/features/catalog/**`, `features/checkout/{checkout.slice.ts,index.ts,components/checkout-dialog.tsx}`, `app/router.tsx`, `app/placeholder-pages.tsx`, `apps/web/public/images/products/**`, `apps/web/scripts/**`, `apps/web/package.json`, `pnpm-lock.yaml`, `docs/evidence/catalog/**` and `specs/`.
+- [x] A case-insensitive search for the payment provider's brand name in the branch diff returns no match.
 
 ## Decisions
 
