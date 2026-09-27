@@ -23,8 +23,15 @@ describe('router', () => {
     expect(await screen.findAllByRole('heading', { level: 2 })).toHaveLength(10);
   });
 
+  it('renders the product page on /products/:id', async () => {
+    renderAt('/products/abc');
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'No encontramos este producto' }),
+    ).toBeInTheDocument();
+  });
+
   it.each([
-    ['/products/abc', 'Producto abc (placeholder)'],
     ['/transactions/abc', 'Transacción abc (placeholder)'],
     ['/nope', '404 - Página no encontrada'],
   ])('renders the placeholder for %s', (path, expectedText) => {
