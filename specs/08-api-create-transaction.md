@@ -394,7 +394,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
 
 ### HTTP and wiring
 
-12. [ ] **POST /transactions.** DTOs, `IdempotencyKeyPipe`, `transactions-http.constants.ts`, `transactions.controller.ts`, and the `TransactionsModule` wiring (imports, providers, `UNIT_OF_WORK` / `CLOCK` bindings, plus `SystemClock` if SPEC 06 did not add one). `transactions.controller.spec.ts` (`configureApp` + supertest + fakes) checks:
+12. [x] **POST /transactions.** DTOs, `IdempotencyKeyPipe`, `transactions-http.constants.ts`, `transactions.controller.ts`, and the `TransactionsModule` wiring (imports, providers, `UNIT_OF_WORK` / `CLOCK` bindings, plus `SystemClock` if SPEC 06 did not add one). `transactions.controller.spec.ts` (`configureApp` + supertest + fakes) checks:
     - 201 with `Location`, `no-store` and the `TransactionCreated` envelope;
     - 5 identical requests → 1 transaction, 1 gateway call, and `Idempotent-Replayed: true` on requests 2–5;
     - a missing or non-uuid key → 400 `MISSING_IDEMPOTENCY_KEY`;
