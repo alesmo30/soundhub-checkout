@@ -3,4 +3,5 @@ pnpm-lock.yaml
 coverage/
 dist/
 cdk.out/
+apps/web/public/mockServiceWorker.js
 .github/workflows/claude*.yml

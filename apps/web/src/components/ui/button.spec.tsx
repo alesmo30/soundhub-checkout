@@ -4,11 +4,14 @@ import userEvent from '@testing-library/user-event';
 import { Button } from './button';
 
 describe('Button', () => {
-  it.each(['primary', 'secondary', 'ghost', 'link'] as const)('renders the %s variant', (variant) => {
-    render(<Button variant={variant}>Click me</Button>);
+  it.each(['primary', 'secondary', 'ghost', 'link'] as const)(
+    'renders the %s variant',
+    (variant) => {
+      render(<Button variant={variant}>Click me</Button>);
 
-    expect(screen.getByRole('button', { name: 'Click me' })).toBeInTheDocument();
-  });
+      expect(screen.getByRole('button', { name: 'Click me' })).toBeInTheDocument();
+    },
+  );
 
   it.each(['default', 'compact', 'icon'] as const)('renders the %s size', (size) => {
     render(

@@ -18,7 +18,9 @@ export const api = createApi({
   endpoints: () => ({}),
 });
 
-export function isProblemDetails(error: unknown): error is { status: number; data: ProblemDetails } {
+export function isProblemDetails(
+  error: unknown,
+): error is { status: number; data: ProblemDetails } {
   if (typeof error !== 'object' || error === null || !('status' in error) || !('data' in error)) {
     return false;
   }
@@ -29,7 +31,9 @@ export function isProblemDetails(error: unknown): error is { status: number; dat
 
   const { data } = error;
 
-  return typeof data === 'object' && data !== null && 'code' in data && typeof data.code === 'string';
+  return (
+    typeof data === 'object' && data !== null && 'code' in data && typeof data.code === 'string'
+  );
 }
 
 export function getErrorCode(error: unknown): ErrorCode | null {

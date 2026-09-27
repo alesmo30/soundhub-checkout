@@ -3,7 +3,14 @@ import { useForm } from 'react-hook-form';
 import { customerSchema, type CustomerFormValues } from '@checkout/shared/validation';
 
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
 const DEFAULT_VALUES: CustomerFormValues = {

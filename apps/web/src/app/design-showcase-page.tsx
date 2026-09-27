@@ -110,7 +110,9 @@ export default function DesignShowcasePage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Resumen de tu pedido</DialogTitle>
-              <DialogDescription>Radio 20 (rounded-panel) y sombra shadow-overlay.</DialogDescription>
+              <DialogDescription>
+                Radio 20 (rounded-panel) y sombra shadow-overlay.
+              </DialogDescription>
             </DialogHeader>
           </DialogContent>
         </Dialog>
