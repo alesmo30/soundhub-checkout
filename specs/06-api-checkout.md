@@ -308,7 +308,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. T
 
 ### Customers
 
-6. [ ] **Customer repository.** `customer.mapper.ts`, `helpers/to-unique-violation.ts` and `TypeOrmCustomerRepository`, wired and exported from `customers.module.ts` (`forFeature`, `CUSTOMER_REPOSITORY` provider, export). `typeorm-customer.repository.int-spec.ts` runs each test inside a transaction that always rolls back, and proves:
+6. [x] **Customer repository.** `customer.mapper.ts`, `helpers/to-unique-violation.ts` and `TypeOrmCustomerRepository`, wired and exported from `customers.module.ts` (`forFeature`, `CUSTOMER_REPOSITORY` provider, export). `typeorm-customer.repository.int-spec.ts` runs each test inside a transaction that always rolls back, and proves:
    - `findById` and `findByDocumentNumber` return the row or `null`, and exclude soft-deleted rows;
    - `findByEmail('ANA@Mail.com')` finds `ana@mail.com`;
    - `insert` returns the created row;
