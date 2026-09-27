@@ -1,1 +1,10 @@
-export { checkoutReducer } from './checkout.slice';
+export {
+  checkoutReducer,
+  closeCheckout,
+  selectIsCheckoutOpen,
+  selectQuantityFor,
+  setQuantity,
+  startCheckout,
+  type CheckoutState,
+  type ProductQuantity,
+} from './checkout.slice';
