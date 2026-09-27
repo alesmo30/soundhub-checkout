@@ -3,9 +3,9 @@ import { Outlet, createBrowserRouter, type RouteObject } from 'react-router';
 
 import { AppShell } from '@/components/layout/app-shell';
 import { env } from '@/config/env';
+import { CatalogPage } from '@/features/catalog';
 
 import {
-  CatalogPlaceholderPage,
   NotFoundPage,
   ProductPlaceholderPage,
   TransactionPlaceholderPage,
@@ -21,7 +21,7 @@ export const routes: RouteObject[] = [
       </AppShell>
     ),
     children: [
-      { path: '/', element: <CatalogPlaceholderPage /> },
+      { path: '/', element: <CatalogPage /> },
       { path: '/products/:id', element: <ProductPlaceholderPage /> },
       { path: '/transactions/:id', element: <TransactionPlaceholderPage /> },
       ...(env.isDev
