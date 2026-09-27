@@ -359,7 +359,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
 
 ### Use cases
 
-9. [ ] **Minimal finalizer.** `FinalizeTransactionUseCase` (release branch), with unit specs over fake ports and a fake `UnitOfWork`. The specs cover:
+9. [x] **Minimal finalizer.** `FinalizeTransactionUseCase` (release branch), with unit specs over fake ports and a fake `UnitOfWork`. The specs cover:
    - `ERROR` → `finalize`, `release` and `transition(CANCELLED)` in one unit of work, returning `FINALIZED`;
    - an already-final transaction → `ALREADY_FINAL`, with no release and no transition;
    - `APPROVED` throws.
