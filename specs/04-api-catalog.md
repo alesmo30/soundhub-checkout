@@ -244,7 +244,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. N
    Manual test: `test:int` green.
    Commit: `feat(api): implement TypeORM municipality repository`.
 
-5. [ ] **Warehouse repository.** `warehouse.mapper.ts` and `TypeOrmWarehouseRepository`, wired and exported. The rollback int-spec proves:
+5. [x] **Warehouse repository.** `warehouse.mapper.ts` and `TypeOrmWarehouseRepository`, wired and exported. The rollback int-spec proves:
    - `listActive` excludes soft-deleted rows and is ordered by name;
    - `findById` returns the row, or `null` for an unknown id.
 
