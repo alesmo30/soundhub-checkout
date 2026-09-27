@@ -272,7 +272,7 @@ Each step is one commit after review. Target ≤ ~300 changed lines per step. Te
 
 ### State and data
 
-1. [ ] **Checkout endpoints.** `checkout.api.ts` with `getDepartments`, `getMunicipalities` and `getQuote`.
+1. [x] **Checkout endpoints.** `checkout.api.ts` with `getDepartments`, `getMunicipalities` and `getQuote`.
    Tests (MSW): departments and municipalities unwrap `data`; `getMunicipalities('99')` surfaces `DEPARTMENT_NOT_FOUND`; `getQuote` sends the three query params and unwraps `data`.
    Commit: `feat(web): add locations and quote endpoints to checkout`.
 
