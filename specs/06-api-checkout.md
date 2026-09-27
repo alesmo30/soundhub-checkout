@@ -257,13 +257,13 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. T
 
 ### Contract change
 
-1. [ ] **Customer port reports unique violations.** On a branch `chore/customers-port-insert-violation` cut from `main`, add `CustomerUniqueViolation` and change `insert`'s error type in `customer.repository.port.ts`. Nothing else changes: no implementation or fake of this port exists yet. Open the PR with `gh-cli`, merge it, and only then let `/spec-impl` create `spec-06-api-checkout` from the updated `main`. This PR carries only the port change, so this box is ticked in step 2's commit.
+1. [x] **Customer port reports unique violations.** On a branch `chore/customers-port-insert-violation` cut from `main`, add `CustomerUniqueViolation` and change `insert`'s error type in `customer.repository.port.ts`. Nothing else changes: no implementation or fake of this port exists yet. Open the PR with `gh-cli`, merge it, and only then let `/spec-impl` create `spec-06-api-checkout` from the updated `main`. This PR carries only the port change, so this box is ticked in step 2's commit.
    Manual test: `pnpm typecheck` green; the PR diff shows one file.
    Commit: `feat(api): let CustomerRepository.insert report unique violations`.
 
 ### Pricing
 
-2. [ ] **Base fee.** `pricing.constants.ts` and `base-fee.ts`, with a unit spec. The spec covers:
+2. [x] **Base fee.** `pricing.constants.ts` and `base-fee.ts`, with a unit spec. The spec covers:
    - `379_980_000 → 12_066_000` (the contract example);
    - a subtotal whose fee lands exactly on `.5` pesos;
    - the smallest subtotal (one unit of the cheapest seeded product).
