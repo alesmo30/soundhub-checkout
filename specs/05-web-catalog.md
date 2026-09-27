@@ -167,10 +167,11 @@ Each step is one commit after review. Target ≤ ~300 changed lines per step (im
    Tests: bounds (can't go below 1 or above max; max = 10 when stock is 25), disabled at stock 0, `aria-live` value; dialog opens when the slice says so and Esc dispatches `closeCheckout`.
    Commit: `feat(web): add quantity selector and checkout dialog stub`.
 
-6. [ ] **Product page.** `product-page.tsx`, `product-not-found.tsx`, and the `/products/:id` route pointing to it.
+6. [x] **Product page.** `product-page.tsx`, `product-not-found.tsx`, and the `/products/:id` route pointing to it.
    Tests (MSW): renders name, brand, description, price, "IVA incluido", stock; stepper bounded by `maxPurchaseQuantity`; CTA disabled at stock 0; CTA dispatches `startCheckout({ productId, quantity })` and the dialog opens; unknown id and `/products/abc` render the not-found state with a link to `/`; `preloadedState` with a saved quantity for this product restores it, and for another product starts at 1; saved quantity above the current max is clamped.
    Chrome: detail at both viewports, out-of-stock product, not-found, dialog stub open; a refresh keeps the quantity (and the open dialog).
    Commit: `feat(web): add product detail page`.
+   Decision: `app/router.spec.tsx` (outside the listed diff paths, same as step 4) now asserts the not-found state on `/products/abc` instead of the removed product placeholder; the dialog is mounted only for the product it was opened for (`selectCheckoutProductId`).
 
 ### Close-out
 

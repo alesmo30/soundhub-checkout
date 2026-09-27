@@ -47,9 +47,11 @@ export const checkoutSlice = createSlice({
     selectQuantityFor: (state, productId: string): number =>
       state.productId === productId ? state.quantity : MIN_QUANTITY,
     selectIsCheckoutOpen: (state): boolean => state.isDialogOpen,
+    selectCheckoutProductId: (state): string | null => state.productId,
   },
 });
 
 export const { setQuantity, startCheckout, closeCheckout } = checkoutSlice.actions;
-export const { selectQuantityFor, selectIsCheckoutOpen } = checkoutSlice.selectors;
+export const { selectQuantityFor, selectIsCheckoutOpen, selectCheckoutProductId } =
+  checkoutSlice.selectors;
 export const checkoutReducer = checkoutSlice.reducer;

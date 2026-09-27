@@ -3,13 +3,9 @@ import { Outlet, createBrowserRouter, type RouteObject } from 'react-router';
 
 import { AppShell } from '@/components/layout/app-shell';
 import { env } from '@/config/env';
-import { CatalogPage } from '@/features/catalog';
+import { CatalogPage, ProductPage } from '@/features/catalog';
 
-import {
-  NotFoundPage,
-  ProductPlaceholderPage,
-  TransactionPlaceholderPage,
-} from './placeholder-pages';
+import { NotFoundPage, TransactionPlaceholderPage } from './placeholder-pages';
 
 const DesignShowcasePage = lazy(() => import('./design-showcase-page'));
 
@@ -22,7 +18,7 @@ export const routes: RouteObject[] = [
     ),
     children: [
       { path: '/', element: <CatalogPage /> },
-      { path: '/products/:id', element: <ProductPlaceholderPage /> },
+      { path: '/products/:id', element: <ProductPage /> },
       { path: '/transactions/:id', element: <TransactionPlaceholderPage /> },
       ...(env.isDev
         ? [

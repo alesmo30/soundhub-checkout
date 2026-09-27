@@ -7,3 +7,6 @@ export const PRODUCT_IMAGE_SOURCE_WIDTH = 640;
 export const EAGER_IMAGE_COUNT = 3;
 
 export const PRODUCT_GRID_IMAGE_SIZES = '(min-width:1024px) 330px, (min-width:640px) 50vw, 100vw';
+
+// One of the two columns from `md`, capped by the 1040 px content width.
+export const PRODUCT_DETAIL_IMAGE_SIZES = '(min-width:1040px) 472px, (min-width:768px) 50vw, 100vw';

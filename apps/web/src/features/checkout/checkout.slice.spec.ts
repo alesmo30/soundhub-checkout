@@ -1,6 +1,7 @@
 import {
   checkoutReducer,
   closeCheckout,
+  selectCheckoutProductId,
   selectIsCheckoutOpen,
   selectQuantityFor,
   setQuantity,
@@ -66,5 +67,12 @@ describe('checkout selectors', () => {
 
     expect(selectIsCheckoutOpen({ checkout: opened })).toBe(true);
     expect(selectIsCheckoutOpen({ checkout: reduce() })).toBe(false);
+  });
+
+  it('selectCheckoutProductId returns the product the checkout belongs to', () => {
+    const started = reduce(startCheckout({ productId: PRODUCT_ID, quantity: 1 }));
+
+    expect(selectCheckoutProductId({ checkout: started })).toBe(PRODUCT_ID);
+    expect(selectCheckoutProductId({ checkout: reduce() })).toBeNull();
   });
 });
