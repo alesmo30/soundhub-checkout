@@ -20,13 +20,17 @@ describe('LegalAcceptance', () => {
     render(<LegalAcceptance {...BASE_PROPS} />);
 
     expect(screen.getByRole('checkbox', { name: /términos y condiciones/ })).toBeInTheDocument();
-    expect(screen.getByRole('checkbox', { name: /tratamiento de mis datos personales/ })).toBeInTheDocument();
+    expect(
+      screen.getByRole('checkbox', { name: /tratamiento de mis datos personales/ }),
+    ).toBeInTheDocument();
 
     const termsLink = screen.getByRole('link', { name: 'términos y condiciones' });
     expect(termsLink).toHaveAttribute('href', BASE_PROPS.termsUrl);
     expect(termsLink).toHaveAttribute('target', '_blank');
 
-    const personalDataLink = screen.getByRole('link', { name: 'tratamiento de mis datos personales' });
+    const personalDataLink = screen.getByRole('link', {
+      name: 'tratamiento de mis datos personales',
+    });
     expect(personalDataLink).toHaveAttribute('href', BASE_PROPS.personalDataUrl);
     expect(personalDataLink).toHaveAttribute('target', '_blank');
   });
@@ -40,7 +44,15 @@ describe('LegalAcceptance', () => {
   it('shows an error and calls onRefetch from "Reintentar"', async () => {
     const onRefetch = jest.fn();
     const user = userEvent.setup();
-    render(<LegalAcceptance {...BASE_PROPS} isError termsUrl={undefined} personalDataUrl={undefined} onRefetch={onRefetch} />);
+    render(
+      <LegalAcceptance
+        {...BASE_PROPS}
+        isError
+        termsUrl={undefined}
+        personalDataUrl={undefined}
+        onRefetch={onRefetch}
+      />,
+    );
 
     expect(screen.getByRole('alert')).toHaveTextContent(
       'No pudimos cargar los términos y condiciones.',

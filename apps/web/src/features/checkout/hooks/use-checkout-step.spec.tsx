@@ -34,7 +34,9 @@ function setup(arrange: (store: AppStore) => void) {
   const store = makeStore();
   arrange(store);
 
-  const wrapper = ({ children }: { children: ReactNode }) => <Provider store={store}>{children}</Provider>;
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <Provider store={store}>{children}</Provider>
+  );
 
   return renderHook(() => useCheckoutStep(), { wrapper }).result;
 }

@@ -139,7 +139,9 @@ describe('CheckoutDialog', () => {
       await user.tab();
       await settle();
       await user.click(await screen.findByRole('checkbox', { name: /términos y condiciones/ }));
-      await user.click(screen.getByRole('checkbox', { name: /tratamiento de mis datos personales/ }));
+      await user.click(
+        screen.getByRole('checkbox', { name: /tratamiento de mis datos personales/ }),
+      );
       await settle();
       await user.click(screen.getByRole('button', { name: 'Continuar' }));
     }
@@ -167,7 +169,9 @@ describe('CheckoutDialog', () => {
         store.dispatch(startCheckout({ productId: product.id, quantity: 2 }));
       });
 
-      expect(await screen.findByRole('heading', { name: 'Datos de tu tarjeta' })).toBeInTheDocument();
+      expect(
+        await screen.findByRole('heading', { name: 'Datos de tu tarjeta' }),
+      ).toBeInTheDocument();
       expect(screen.getByLabelText('Número de tarjeta')).toHaveValue('');
     });
   });

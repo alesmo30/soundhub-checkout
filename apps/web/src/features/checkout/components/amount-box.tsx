@@ -96,7 +96,9 @@ function CompactAmount({ status }: { status: AmountStatus }) {
       return <Skeleton className="h-5 w-24" />;
     case 'error':
     case 'outOfStock':
-      return <span className="text-xs font-semibold text-danger">No pudimos calcular el total.</span>;
+      return (
+        <span className="text-xs font-semibold text-danger">No pudimos calcular el total.</span>
+      );
     case 'success':
       return (
         <span className="font-heading text-base font-bold text-ink">

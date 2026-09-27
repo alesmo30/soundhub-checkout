@@ -14,17 +14,20 @@ const QUOTE_URL = '*/api/v1/quotes';
 const product = products.find((candidate) => candidate.sku === 'HP-SNY-WH1000XM5')!;
 
 function renderAmountBox(municipalityCode: string | null) {
-  return renderWithProviders(<AmountBox productId={product.id} quantity={quoteFixture.quantity} />, {
-    preloadedState: {
-      checkoutSession: {
-        contact: null,
-        quoteMunicipalityCode: municipalityCode,
-        card: null,
-        installments: 1,
-        acceptance: null,
+  return renderWithProviders(
+    <AmountBox productId={product.id} quantity={quoteFixture.quantity} />,
+    {
+      preloadedState: {
+        checkoutSession: {
+          contact: null,
+          quoteMunicipalityCode: municipalityCode,
+          card: null,
+          installments: 1,
+          acceptance: null,
+        },
       },
     },
-  });
+  );
 }
 
 function problemResponse(status: number, code: ErrorCode) {
@@ -38,9 +41,7 @@ describe('AmountBox', () => {
   it('asks for a municipality before fetching a quote', () => {
     renderAmountBox(null);
 
-    expect(
-      screen.getByText('Selecciona tu municipio para calcular el total'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Selecciona tu municipio para calcular el total')).toBeInTheDocument();
   });
 
   it('shows a skeleton and "Calculando total…" while the quote loads', () => {

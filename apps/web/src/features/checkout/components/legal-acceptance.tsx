@@ -43,7 +43,13 @@ export function LegalAcceptance({
         <p role="alert" className="text-sm font-semibold text-danger">
           No pudimos cargar los términos y condiciones.
         </p>
-        <Button type="button" variant="secondary" size="compact" onClick={onRefetch} className="self-start">
+        <Button
+          type="button"
+          variant="secondary"
+          size="compact"
+          onClick={onRefetch}
+          className="self-start"
+        >
           Reintentar
         </Button>
       </div>

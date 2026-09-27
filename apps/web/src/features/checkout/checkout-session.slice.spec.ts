@@ -33,11 +33,12 @@ const CONTACT: ContactDetails = {
 };
 
 const CARD = { token: 'tok_test_123', brand: CardBrand.VISA, last4: '4242' };
-const ACCEPTANCE = { acceptanceToken: 'test-acceptance-token', personalDataAuthToken: 'test-personal-data-token' };
+const ACCEPTANCE = {
+  acceptanceToken: 'test-acceptance-token',
+  personalDataAuthToken: 'test-personal-data-token',
+};
 
-function reduce(
-  ...actions: Parameters<typeof checkoutSessionReducer>[1][]
-): CheckoutSessionState {
+function reduce(...actions: Parameters<typeof checkoutSessionReducer>[1][]): CheckoutSessionState {
   return actions.reduce(
     checkoutSessionReducer,
     checkoutSessionReducer(undefined, { type: '@@init' }),

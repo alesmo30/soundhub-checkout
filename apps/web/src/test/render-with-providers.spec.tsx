@@ -24,7 +24,12 @@ describe('renderWithProviders', () => {
   });
 
   it('exposes a working store seeded with preloadedState', () => {
-    const checkout = { productId: null, quantity: 1, isDialogOpen: false, step: 'CONTACT' as const };
+    const checkout = {
+      productId: null,
+      quantity: 1,
+      isDialogOpen: false,
+      step: 'CONTACT' as const,
+    };
     const customer = { remembered: null };
     const { store } = renderWithProviders(<LocationProbe />, {
       preloadedState: { checkout, customer },

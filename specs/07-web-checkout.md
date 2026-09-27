@@ -1,6 +1,6 @@
 # SPEC 07 — Web: checkout (customer, delivery and card forms)
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 05 (blocking: the web catalog must be merged, since this spec replaces its checkout dialog stub and extends its slice). Runs in parallel with SPEC 06 (api checkout) in its own worktree, against MSW; checkpoint C2 runs after both merge.
 > **Date:** 2026-09-27
 > **Objective:** Turn the checkout dialog stub into step 2 of the flow: a two-step form that collects customer and delivery data, shows the server-computed total, and tokenizes the card directly with the payment gateway so only `{ token, brand, last4 }` ever reaches the app state, and only in memory.
@@ -336,7 +336,7 @@ Each step is one commit after review. Target ≤ ~300 changed lines per step. Te
 
 ### Close-out
 
-9. [ ] **Coverage and close-out.** `pnpm lint`, `pnpm typecheck` and `pnpm --filter @checkout/web test:cov` (≥ 80 % on all four metrics); check the evidence folder has every screenshot; mark this spec `Implemented` and tick its criteria. Push and open the PR only when the user asks. If SPEC 06 merged first and the lockfile conflicts, apply the lockfile protocol.
+9. [x] **Coverage and close-out.** `pnpm lint`, `pnpm typecheck` and `pnpm --filter @checkout/web test:cov` (≥ 80 % on all four metrics); check the evidence folder has every screenshot; mark this spec `Implemented` and tick its criteria. Push and open the PR only when the user asks. If SPEC 06 merged first and the lockfile conflicts, apply the lockfile protocol.
    Commit: `docs: mark spec 07 as Implemented`.
 
 Notes:
@@ -349,42 +349,42 @@ Notes:
 
 Dialog and amount
 
-- [ ] The CTA on `/products/:id` opens the dialog: two panels from 768 px, full screen below it, focus trapped, Esc closes it.
-- [ ] The amount box shows "Selecciona tu municipio…" until a municipality is chosen, then `formatCop(totalInCents)` from `GET /quotes`. No amount in the dialog is computed on the client.
-- [ ] `OUT_OF_STOCK` from the quote shows the "Solo quedan N unidades" message and disables 2a "Continuar"; any other quote error shows "Reintentar", and it recovers.
+- [x] The CTA on `/products/:id` opens the dialog: two panels from 768 px, full screen below it, focus trapped, Esc closes it.
+- [x] The amount box shows "Selecciona tu municipio…" until a municipality is chosen, then `formatCop(totalInCents)` from `GET /quotes`. No amount in the dialog is computed on the client.
+- [x] `OUT_OF_STOCK` from the quote shows the "Solo quedan N unidades" message and disables 2a "Continuar"; any other quote error shows "Reintentar", and it recovers.
 
 Customer and delivery
 
-- [ ] Every field shows its `VALIDATION_MESSAGES` text inline, linked with `aria-describedby`.
-- [ ] The municipality select lists only the chosen department's municipalities, and resets when the department changes.
-- [ ] "Continuar" is disabled (40 % opacity) until the form is valid.
-- [ ] Without "Recordarme", a refresh reopens the dialog on 2a with an empty form, and `localStorage` holds no document number, email or phone.
-- [ ] With "Recordarme", a refresh reopens on 2b with 2a pre-filled and the "¿No eres tú?" banner; "Olvidar mis datos" empties the form and removes the data from `localStorage`.
-- [ ] The recipient sent onwards is the customer's name and phone (`toDeliveryValues`).
+- [x] Every field shows its `VALIDATION_MESSAGES` text inline, linked with `aria-describedby`.
+- [x] The municipality select lists only the chosen department's municipalities, and resets when the department changes.
+- [x] "Continuar" is disabled (40 % opacity) until the form is valid.
+- [x] Without "Recordarme", a refresh reopens the dialog on 2a with an empty form, and `localStorage` holds no document number, email or phone.
+- [x] With "Recordarme", a refresh reopens on 2b with 2a pre-filled and the "¿No eres tú?" banner; "Olvidar mis datos" empties the form and removes the data from `localStorage`.
+- [x] The recipient sent onwards is the customer's name and phone (`toDeliveryValues`).
 
 Card and tokenization
 
-- [ ] Typing `4` shows the VISA logo, and `51`–`55` or `2221`–`2720` the Mastercard logo; `56` shows none.
-- [ ] The number is shown as `4242 4242 4242 4242`, and the expiry gets its `/` automatically.
-- [ ] Luhn, expiry, CVC and holder errors show inline; installments default to 1 and go up to 36.
-- [ ] Both legal checkboxes are required and link to the permalinks returned by `GET /merchants/{publicKey}`; the terms are fetched again every time 2b mounts.
-- [ ] 4242 tokenizes and moves to the summary stub showing `VISA •••• 4242`; a 422 shows "Revisa los datos de tu tarjeta…"; a 500 or network error shows "No pudimos validar tu tarjeta…".
-- [ ] The test-mode note with 4242 and 4111 is always visible in 2b.
+- [x] Typing `4` shows the VISA logo, and `51`–`55` or `2221`–`2720` the Mastercard logo; `56` shows none.
+- [x] The number is shown as `4242 4242 4242 4242`, and the expiry gets its `/` automatically.
+- [x] Luhn, expiry, CVC and holder errors show inline; installments default to 1 and go up to 36.
+- [x] Both legal checkboxes are required and link to the permalinks returned by `GET /merchants/{publicKey}`; the terms are fetched again every time 2b mounts.
+- [x] 4242 tokenizes and moves to the summary stub showing `VISA •••• 4242`; a 422 shows "Revisa los datos de tu tarjeta…"; a 500 or network error shows "No pudimos validar tu tarjeta…".
+- [x] The test-mode note with 4242 and 4111 is always visible in 2b.
 
 Sensitive data
 
-- [ ] After a successful tokenization, neither `store.getState()` (including the `api` slice) nor `localStorage` contains the card number or the CVC (test).
-- [ ] `localStorage` never contains the card token, `brand`/`last4` or the acceptance tokens (test).
-- [ ] A refresh on the summary stub lands on 2b with an empty card form; closing and reopening the dialog does too.
-- [ ] `tokenizeCard` is a plain function, and no RTK Query endpoint receives card data.
-- [ ] No `console` output happens during tokenization (test).
+- [x] After a successful tokenization, neither `store.getState()` (including the `api` slice) nor `localStorage` contains the card number or the CVC (test).
+- [x] `localStorage` never contains the card token, `brand`/`last4` or the acceptance tokens (test).
+- [x] A refresh on the summary stub lands on 2b with an empty card form; closing and reopening the dialog does too.
+- [x] `tokenizeCard` is a plain function, and no RTK Query endpoint receives card data.
+- [x] No `console` output happens during tokenization (test).
 
 Quality
 
-- [ ] `pnpm lint`, `pnpm typecheck` and `pnpm --filter @checkout/web test:cov` (≥ 80 % on all four metrics) exit 0.
-- [ ] Chrome evidence at 375×667 and 1440×900 in `docs/evidence/checkout/`.
-- [ ] `git diff main --stat` touches only `apps/web/src/features/checkout/**`, `apps/web/src/features/customer/**`, `apps/web/src/features/catalog/index.ts`, `apps/web/src/app/store.ts`, `apps/web/src/services/payment-gateway.ts` (+ spec), `apps/web/src/mocks/handlers/{payment-gateway.handlers.ts,index.ts}`, `docs/evidence/checkout/**` and `specs/`.
-- [ ] A case-insensitive search for the payment provider's brand name in the branch diff returns no match.
+- [x] `pnpm lint`, `pnpm typecheck` and `pnpm --filter @checkout/web test:cov` (≥ 80 % on all four metrics) exit 0.
+- [x] Chrome evidence at 375×667 and 1440×900 in `docs/evidence/checkout/`.
+- [x] `git diff main --stat` touches only `apps/web/src/features/checkout/**`, `apps/web/src/features/customer/**`, `apps/web/src/features/catalog/index.ts`, `apps/web/src/app/store.ts`, `apps/web/src/services/payment-gateway.ts` (+ spec), `apps/web/src/mocks/handlers/{payment-gateway.handlers.ts,index.ts}`, `docs/evidence/checkout/**` and `specs/`.
+- [x] A case-insensitive search for the payment provider's brand name in the branch diff returns no match.
 
 ## Decisions
 

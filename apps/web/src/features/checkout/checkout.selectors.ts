@@ -18,5 +18,9 @@ export function selectContactDetails(state: SelectorState): ContactDetails | nul
 }
 
 export function selectQuoteMunicipality(state: SelectorState): string | null {
-  return selectQuoteMunicipalityCode(state) ?? selectContactDetails(state)?.address.municipalityCode ?? null;
+  return (
+    selectQuoteMunicipalityCode(state) ??
+    selectContactDetails(state)?.address.municipalityCode ??
+    null
+  );
 }

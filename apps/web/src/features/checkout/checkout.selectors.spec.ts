@@ -4,7 +4,11 @@ import {
   type RememberedContactDetails,
 } from '@/features/customer';
 
-import { checkoutSessionReducer, saveContact, setQuoteMunicipality } from './checkout-session.slice';
+import {
+  checkoutSessionReducer,
+  saveContact,
+  setQuoteMunicipality,
+} from './checkout-session.slice';
 import { selectContactDetails, selectQuoteMunicipality } from './checkout.selectors';
 import type { ContactDetails } from './lib/contact-details';
 
@@ -41,7 +45,9 @@ const EMPTY_CUSTOMER = customerReducer(undefined, { type: '@@init' });
 
 describe('selectContactDetails', () => {
   it('returns null when there is neither a session contact nor a remembered one', () => {
-    expect(selectContactDetails({ checkoutSession: EMPTY_SESSION, customer: EMPTY_CUSTOMER })).toBeNull();
+    expect(
+      selectContactDetails({ checkoutSession: EMPTY_SESSION, customer: EMPTY_CUSTOMER }),
+    ).toBeNull();
   });
 
   it('falls back to the remembered customer when the session has no contact yet', () => {
@@ -71,16 +77,14 @@ describe('selectQuoteMunicipality', () => {
       setQuoteMunicipality('05001'),
     );
 
-    expect(
-      selectQuoteMunicipality({ checkoutSession, customer: EMPTY_CUSTOMER }),
-    ).toBe('05001');
+    expect(selectQuoteMunicipality({ checkoutSession, customer: EMPTY_CUSTOMER })).toBe('05001');
   });
 
   it('falls back to the contact details address when no municipality was explicitly chosen', () => {
     const checkoutSession = checkoutSessionReducer(EMPTY_SESSION, saveContact(CONTACT));
 
-    expect(
-      selectQuoteMunicipality({ checkoutSession, customer: EMPTY_CUSTOMER }),
-    ).toBe(CONTACT.address.municipalityCode);
+    expect(selectQuoteMunicipality({ checkoutSession, customer: EMPTY_CUSTOMER })).toBe(
+      CONTACT.address.municipalityCode,
+    );
   });
 });

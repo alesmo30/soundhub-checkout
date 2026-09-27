@@ -166,7 +166,9 @@ describe('CardForm', () => {
     server.resetHandlers();
     await user.click(screen.getByRole('button', { name: 'Reintentar' }));
 
-    expect(await screen.findByRole('checkbox', { name: /términos y condiciones/ })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('checkbox', { name: /términos y condiciones/ }),
+    ).toBeInTheDocument();
   });
 
   it('tokenizes 4242, saves the session and moves to SUMMARY', async () => {
