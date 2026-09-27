@@ -352,7 +352,7 @@ Quality and CI
 
 - [x] `pnpm lint`, `pnpm typecheck`, `pnpm --filter @checkout/api test:cov` and `pnpm --filter @checkout/api test:int` exit 0 locally.
 - [x] The coverage report shows `modules/catalog` and `modules/locations` each at ≥ 80 % on statements, branches, functions and lines, and `apps/api` stays at ≥ 80 % globally.
-- [ ] The PR shows green `lint`, `typecheck`, `coverage (api)` and `api-integration`.
+- [x] The PR shows green `lint`, `typecheck`, `coverage (api)` and `api-integration`.
 - [x] `git diff main --stat` shows changes only under `apps/api/src/modules/catalog/`, `apps/api/src/modules/locations/`, `apps/api/src/shared/infrastructure/http/respond.ts` (+ its spec) and `specs/`.
 
 ## Decisions
