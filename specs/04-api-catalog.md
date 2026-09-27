@@ -225,7 +225,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. N
 
 ### Persistence
 
-3. [ ] **Product repository.** `product.mapper.ts` and `TypeOrmProductRepository`, wired in `catalog.module.ts` (`forFeature`, `PRODUCT_REPOSITORY` provider, export). `typeorm-product.repository.int-spec.ts` runs inside a transaction that always rolls back and proves:
+3. [x] **Product repository.** `product.mapper.ts` and `TypeOrmProductRepository`, wired in `catalog.module.ts` (`forFeature`, `PRODUCT_REPOSITORY` provider, export). `typeorm-product.repository.int-spec.ts` runs inside a transaction that always rolls back and proves:
    - `(created_at, id)` order, including two rows with the same `created_at`;
    - `skip` / `take` and `totalItems`;
    - soft-deleted rows excluded from `findPage` and `findById`;
