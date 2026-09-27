@@ -262,7 +262,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. N
    Manual test: `test` green.
    Commit: `feat(api): add list products and product detail use cases`.
 
-7. [ ] **Products endpoints.** `respondPaginated()` in `shared/infrastructure/http/respond.ts` (with its spec extended), `products.controller.ts`, the catalog request and response DTOs and `catalog-http.constants.ts`. `products.controller.spec.ts` (`configureApp` + supertest + fake repository) checks:
+7. [x] **Products endpoints.** `respondPaginated()` in `shared/infrastructure/http/respond.ts` (with its spec extended), `products.controller.ts`, the catalog request and response DTOs and `catalog-http.constants.ts`. `products.controller.spec.ts` (`configureApp` + supertest + fake repository) checks:
    - the `{ data, meta }` envelope and the defaults 1/10;
    - 400 with `errors[]` for `page=0`, `limit=51` and `limit=abc`;
    - 400 for a non-uuid id and 404 `PRODUCT_NOT_FOUND`;
