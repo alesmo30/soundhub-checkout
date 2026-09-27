@@ -346,7 +346,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `test` green.
    Commit: `feat(api): map payment gateway responses and errors`.
 
-8. [ ] **Gateway HTTP adapter.** `HttpPaymentGatewayAdapter` and `payment-gateway.constants.ts`, over global `fetch` with `withTimeout`, `retryWithBackoff` (GETs only) and one `CircuitBreaker`. The unit specs with mocked `fetch` and fake timers cover:
+8. [x] **Gateway HTTP adapter.** `HttpPaymentGatewayAdapter` and `payment-gateway.constants.ts`, over global `fetch` with `withTimeout`, `retryWithBackoff` (GETs only) and one `CircuitBreaker`. The unit specs with mocked `fetch` and fake timers cover:
    - `createCharge` sends the signature, private key, both acceptance tokens, email, installments and token, and is never retried;
    - GETs retry on 5xx and not on 4xx;
    - an 8 s hang → `TIMEOUT`;
