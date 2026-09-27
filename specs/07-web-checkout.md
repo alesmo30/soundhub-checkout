@@ -311,9 +311,10 @@ Each step is one commit after review. Target ≤ ~300 changed lines per step. Te
 
 ### Part 2 — card and tokenization
 
-6. [ ] **Payment gateway service.** `services/payment-gateway.ts`, `payment-gateway.handlers.ts` with its registration, and the `getAcceptanceTokens` endpoint.
+6. [x] **Payment gateway service.** `services/payment-gateway.ts`, `payment-gateway.handlers.ts` with its registration, and the `getAcceptanceTokens` endpoint.
    Tests: acceptance terms mapped from the presigned fields; non-2xx makes the query fail; `tokenizeCard` returns `ok` with `{ token, brand, last4 }` for 4242, `INVALID_CARD` for a 422, `UNAVAILABLE` for a 500 and for a network error; the request body carries `exp_month`/`exp_year` split from `MM/AA`; a `console` spy sees nothing during any call.
    Manual test: one real sandbox call to `GET /merchants/{publicKey}` from the browser console with mocking off, checking the `permalink` key paths only.
+   Decision: manual sandbox call made with real credentials (2026-09-27). Confirmed `data.presigned_acceptance.permalink` and `data.presigned_personal_data_auth.permalink` both exist and are URLs, matching the assumed mapping — no mapper change needed. `exp_month`/`exp_year` as 2-digit strings also confirmed against SPEC 06's `scripts/gateway-spike.ts`.
    Commit: `feat(web): add payment gateway service`.
 
 7. [ ] **Card form fields.** `lib/masks.ts`, `card-brand-icon.tsx` and `card-form.tsx` (number, holder, expiry, CVC, installments), wired into the `CARD` sub-step with "Volver". No submit yet.

@@ -5,8 +5,17 @@ import type {
   Quote,
   QuoteQuery,
 } from '@checkout/shared/contracts';
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 
 import { api } from '@/services/api';
+import { fetchAcceptanceTokens, type AcceptanceTerms } from '@/services/payment-gateway';
+
+function toQueryError(error: unknown): FetchBaseQueryError {
+  return {
+    status: 'CUSTOM_ERROR',
+    error: error instanceof Error ? error.message : 'Failed to fetch acceptance tokens',
+  };
+}
 
 export const checkoutApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -27,7 +36,21 @@ export const checkoutApi = api.injectEndpoints({
       transformResponse: (response: ApiResponse<Quote>) => response.data,
       providesTags: [{ type: 'Quote' }],
     }),
+    getAcceptanceTokens: builder.query<AcceptanceTerms, void>({
+      queryFn: async () => {
+        try {
+          return { data: await fetchAcceptanceTokens() };
+        } catch (error) {
+          return { error: toQueryError(error) };
+        }
+      },
+    }),
   }),
 });
 
-export const { useGetDepartmentsQuery, useGetMunicipalitiesQuery, useGetQuoteQuery } = checkoutApi;
+export const {
+  useGetDepartmentsQuery,
+  useGetMunicipalitiesQuery,
+  useGetQuoteQuery,
+  useGetAcceptanceTokensQuery,
+} = checkoutApi;

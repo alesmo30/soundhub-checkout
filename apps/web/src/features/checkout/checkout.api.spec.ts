@@ -64,3 +64,29 @@ describe('getQuote', () => {
     expect(result.data).toEqual(quoteFixture);
   });
 });
+
+describe('getAcceptanceTokens', () => {
+  it('resolves with the acceptance terms mapped from fetchAcceptanceTokens', async () => {
+    const store = makeStore();
+
+    const result = await store.dispatch(checkoutApi.endpoints.getAcceptanceTokens.initiate());
+
+    expect(result.data).toEqual({
+      acceptanceToken: 'test-acceptance-token',
+      termsUrl: 'https://example.test/terms-and-conditions',
+      personalDataAuthToken: 'test-personal-data-token',
+      personalDataUrl: 'https://example.test/personal-data-auth',
+    });
+  });
+
+  it('fails when the gateway responds with a non-2xx status', async () => {
+    server.use(http.get('*/merchants/:publicKey', () => HttpResponse.json({}, { status: 500 })));
+
+    const store = makeStore();
+
+    const result = await store.dispatch(checkoutApi.endpoints.getAcceptanceTokens.initiate());
+
+    expect(result.data).toBeUndefined();
+    expect(result.error).toBeDefined();
+  });
+});
