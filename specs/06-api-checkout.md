@@ -349,7 +349,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. T
    Manual test: `curl -i -X POST localhost:3000/api/v1/customers -H 'content-type: application/json' -d '{"documentNumber":"1017234567","fullName":"Ana Pérez","email":"ana@mail.com","phone":"3001234567"}'` returns 201. The same call again returns 200. With `"email":"otra@mail.com"` it returns 409 `CUSTOMER_DATA_MISMATCH`.
    Commit: `feat(api): expose POST /customers and GET /customers/:id`.
 
-10. [ ] **Throttle hook.** Add `@nestjs/throttler` to `apps/api`, and `@Throttle(CUSTOMERS_THROTTLE)` on `POST /customers`. No `ThrottlerModule` or guard is registered. A controller spec asserts the metadata is present, and that 25 fast requests still get no 429.
+10. [x] **Throttle hook.** Add `@nestjs/throttler` to `apps/api`, and `@Throttle(CUSTOMERS_THROTTLE)` on `POST /customers`. No `ThrottlerModule` or guard is registered. A controller spec asserts the metadata is present, and that 25 fast requests still get no 429.
     Manual test: `test` green; `pnpm install --frozen-lockfile` green.
     Commit: `chore(api): prepare throttle hook on POST /customers`.
 

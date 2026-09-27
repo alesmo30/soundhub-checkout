@@ -7,13 +7,14 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import type { Customer } from '@checkout/shared/contracts';
 import type { Response } from 'express';
 
 import { respond } from '../../../../shared/infrastructure/http/respond';
 import { GetCustomerUseCase } from '../../application/use-cases/get-customer.use-case';
 import { UpsertCustomerUseCase } from '../../application/use-cases/upsert-customer.use-case';
-import { CUSTOMERS_CACHE_CONTROL } from './customers-http.constants';
+import { CUSTOMERS_CACHE_CONTROL, CUSTOMERS_THROTTLE } from './customers-http.constants';
 import { CustomerIdParamsDto } from './dto/customer-id.params.dto';
 import { CustomerResponseDto } from './dto/customer-response.dto';
 import { UpsertCustomerDto } from './dto/upsert-customer.dto';
@@ -30,6 +31,7 @@ export class CustomersController {
   // validation failures too. Setting it manually after a successful respond() call keeps
   // it off every 400/409, which the ProblemDetailsFilter builds from a thrown exception.
   @Post()
+  @Throttle(CUSTOMERS_THROTTLE)
   @ApiCreatedResponse({ description: 'A new customer was created.', type: CustomerResponseDto })
   @ApiOkResponse({
     description: 'An existing customer was found and its contact info updated.',

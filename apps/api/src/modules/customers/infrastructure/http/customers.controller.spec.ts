@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { Server } from 'node:http';
 
 import type { INestApplication } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import type { Customer, ProblemDetails } from '@checkout/shared/contracts';
 import request from 'supertest';
@@ -18,12 +19,20 @@ import type {
 import { GetCustomerUseCase } from '../../application/use-cases/get-customer.use-case';
 import { UpsertCustomerUseCase } from '../../application/use-cases/upsert-customer.use-case';
 import { UNIT_OF_WORK } from '../../../../shared/application/ports/unit-of-work.port';
+import { CUSTOMERS_THROTTLE } from './customers-http.constants';
 import { CustomersController } from './customers.controller';
 
 const DOC = '1017234567';
 const NAME = 'Ana Pérez';
 const EMAIL = 'ana@mail.com';
 const PHONE = '3001234567';
+
+// @nestjs/throttler's THROTTLER_LIMIT / THROTTLER_TTL constants
+// (node_modules/@nestjs/throttler/dist/throttler.constants.d.ts) are not
+// re-exported from the package's public index.ts, so @Throttle's metadata
+// keys are read here by their real literal values instead of an import.
+const THROTTLER_LIMIT_KEY = 'THROTTLER:LIMITdefault';
+const THROTTLER_TTL_KEY = 'THROTTLER:TTLdefault';
 
 // In-memory double for CustomerRepository, mirroring the fake used by
 // upsert-customer.use-case.spec.ts. It is duplicated rather than shared
@@ -282,6 +291,37 @@ describe('CustomersController', () => {
       expect(problem.errors).toEqual(
         expect.arrayContaining([expect.objectContaining({ field: 'email' })]),
       );
+    });
+
+    it('carries the @Throttle(CUSTOMERS_THROTTLE) metadata on the handler', () => {
+      const reflector = new Reflector();
+      // Reflect.defineMetadata (used by @Throttle) targets the raw function, so it is
+      // read the same way here, not through a property access that `unbound-method` flags.
+      const handler = Object.getOwnPropertyDescriptor(CustomersController.prototype, 'upsert')
+        ?.value as (...args: never[]) => unknown;
+
+      expect(reflector.get(THROTTLER_LIMIT_KEY, handler)).toBe(CUSTOMERS_THROTTLE.default.limit);
+      expect(reflector.get(THROTTLER_TTL_KEY, handler)).toBe(CUSTOMERS_THROTTLE.default.ttl);
+    });
+
+    // No ThrottlerModule/guard is registered yet (that's api 07's scope), so the
+    // metadata above is inert: 25 rapid requests must all go through untouched.
+    it('lets 25 rapid requests through with no 429, since no guard reads the metadata yet', async () => {
+      const responses = await Promise.all(
+        Array.from({ length: 25 }, (_unused, index) =>
+          request(server)
+            .post('/api/v1/customers')
+            .send(
+              validBody({
+                documentNumber: String(1_020_000_000 + index),
+                email: `ana${index}@mail.com`,
+              }),
+            ),
+        ),
+      );
+
+      expect(responses.every((response) => response.status === 201)).toBe(true);
+      expect(responses.some((response) => response.status === 429)).toBe(false);
     });
   });
 
