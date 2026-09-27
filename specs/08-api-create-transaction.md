@@ -297,7 +297,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
 
 ### Persistence
 
-3. [ ] **Stock reservation adapter.** `TypeOrmStockReservationRepository` in `catalog/infrastructure/persistence/`, wired and exported as `STOCK_RESERVATION` from `catalog.module.ts`. `reserve` / `release` / `commit` run the §4 statements verbatim. The rollback int-spec proves:
+3. [x] **Stock reservation adapter.** `TypeOrmStockReservationRepository` in `catalog/infrastructure/persistence/`, wired and exported as `STOCK_RESERVATION` from `catalog.module.ts`. `reserve` / `release` / `commit` run the §4 statements verbatim. The rollback int-spec proves:
    - `reserve` moves `available − q`, `reserved + q` and returns `RESERVED`;
    - `reserve` beyond stock returns `INSUFFICIENT_STOCK` and changes nothing;
    - `reserve` on a soft-deleted product returns `INSUFFICIENT_STOCK`;
