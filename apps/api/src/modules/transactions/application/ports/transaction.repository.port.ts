@@ -5,10 +5,18 @@ import type { StockLine } from './stock-reservation.port';
 
 export const TRANSACTION_REPOSITORY = Symbol('TRANSACTION_REPOSITORY');
 
+// transactions_idempotency_key_key | transactions_reference_key
+export interface TransactionUniqueViolation {
+  readonly constraint: 'IDEMPOTENCY_KEY' | 'REFERENCE';
+}
+
 export interface TransactionRepository {
   findById(id: string, tx?: TxContext): ResultAsync<Transaction | null, never>;
   findByIdempotencyKey(key: string, tx?: TxContext): ResultAsync<Transaction | null, never>;
-  insert(tx: TxContext, transaction: NewTransaction): ResultAsync<Transaction, never>;
+  insert(
+    tx: TxContext,
+    transaction: NewTransaction,
+  ): ResultAsync<Transaction, TransactionUniqueViolation>;
   recordGatewayResponse(
     tx: TxContext,
     response: { id: string; providerTransactionId: string; statusMessage: string | null },

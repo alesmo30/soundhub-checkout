@@ -279,7 +279,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
 
 ### Contract change
 
-1. [ ] **Transaction port reports unique violations.** On a branch `chore/transactions-port-insert-violation` cut from `main`, add `TransactionUniqueViolation` and change `insert`'s error type. Nothing else changes: no implementation or fake of this port exists yet. After the user merges that PR, `/spec-impl` creates `spec-08-api-create-transaction` from the updated `main`. This box is ticked in step 2's commit.
+1. [x] **Transaction port reports unique violations.** On a branch `chore/transactions-port-insert-violation` cut from `main`, add `TransactionUniqueViolation` and change `insert`'s error type. Nothing else changes: no implementation or fake of this port exists yet. After the user merges that PR, `/spec-impl` creates `spec-08-api-create-transaction` from the updated `main`. This box is ticked in step 2's commit.
    Manual test: `pnpm typecheck` green; the PR diff shows one file.
    Commit: `feat(api): let TransactionRepository.insert report unique violations`.
 
