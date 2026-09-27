@@ -1,6 +1,6 @@
 # SPEC 04 — API: catalog and locations (read endpoints and distance functions)
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 02 (blocking: this spec starts only after SPEC 02 merges; web 02 runs in parallel against MSW)
 > **Date:** 2026-09-26
 > **Objective:** Expose the storefront's read side (paginated products with available stock, product detail with its VAT breakdown, and the department → municipality catalog) and export the pure distance functions that pricing will reuse.
@@ -310,50 +310,50 @@ Notes:
 
 Products
 
-- [ ] `GET /api/v1/products` without a query returns 200 with `{ data, meta }` at the top level, `meta = { page: 1, limit: 10, totalItems, totalPages }`, and at most 10 items.
-- [ ] Every item has exactly the `ProductSummary` fields: `id, sku, name, brand, priceInCents, currency: "COP", imageUrl, stockAvailable`. It never includes `stockReserved`, `description` or timestamps.
-- [ ] Items are ordered by `(created_at, id)`, and a soft-deleted product never appears (proven by the int-spec).
-- [ ] `page=0`, `limit=0`, `limit=51` and `limit=abc` each return 400 `VALIDATION_ERROR` with an `errors[]` entry naming the field.
-- [ ] A page past the end returns 200 with `data: []` and the real `totalItems` / `totalPages`.
-- [ ] `GET /api/v1/products/:id` returns the `ProductSummary` fields plus `description`, `vatIncludedInCents` and `maxPurchaseQuantity`.
-- [ ] For `HP-SNY-WH1000XM5` (price `189990000`, stock 7) the detail returns `vatIncludedInCents: 30334500` and `maxPurchaseQuantity: 7`.
-- [ ] A product with stock 0 returns `maxPurchaseQuantity: 0`, and one with stock 25 returns `10`.
-- [ ] A non-uuid-v4 id returns 400 with `errors[]` for `id`. An unknown or soft-deleted id returns 404 `PRODUCT_NOT_FOUND` as Problem Details.
-- [ ] Both product endpoints send `Cache-Control: public, max-age=10` on 200 and no `public` cache header on 400 or 404.
+- [x] `GET /api/v1/products` without a query returns 200 with `{ data, meta }` at the top level, `meta = { page: 1, limit: 10, totalItems, totalPages }`, and at most 10 items.
+- [x] Every item has exactly the `ProductSummary` fields: `id, sku, name, brand, priceInCents, currency: "COP", imageUrl, stockAvailable`. It never includes `stockReserved`, `description` or timestamps.
+- [x] Items are ordered by `(created_at, id)`, and a soft-deleted product never appears (proven by the int-spec).
+- [x] `page=0`, `limit=0`, `limit=51` and `limit=abc` each return 400 `VALIDATION_ERROR` with an `errors[]` entry naming the field.
+- [x] A page past the end returns 200 with `data: []` and the real `totalItems` / `totalPages`.
+- [x] `GET /api/v1/products/:id` returns the `ProductSummary` fields plus `description`, `vatIncludedInCents` and `maxPurchaseQuantity`.
+- [x] For `HP-SNY-WH1000XM5` (price `189990000`, stock 7) the detail returns `vatIncludedInCents: 30334500` and `maxPurchaseQuantity: 7`.
+- [x] A product with stock 0 returns `maxPurchaseQuantity: 0`, and one with stock 25 returns `10`.
+- [x] A non-uuid-v4 id returns 400 with `errors[]` for `id`. An unknown or soft-deleted id returns 404 `PRODUCT_NOT_FOUND` as Problem Details.
+- [x] Both product endpoints send `Cache-Control: public, max-age=10` on 200 and no `public` cache header on 400 or 404.
 
 Locations
 
-- [ ] `GET /api/v1/locations/departments` returns every department once, as `{ code, name }`, sorted by name.
-- [ ] `GET /api/v1/locations/departments/05/municipalities` returns `{ code, name, isMetroArea }` items sorted by name, and `05001` Medellín has `isMetroArea: true`.
-- [ ] `:code` values `abc`, `5` and `123` return 400 `VALIDATION_ERROR`. A well-formed code with no municipalities (`99`) returns 404 `DEPARTMENT_NOT_FOUND`.
-- [ ] Both location endpoints send `Cache-Control: public, max-age=86400` on 200 and no `public` cache header on 400 or 404.
+- [x] `GET /api/v1/locations/departments` returns every department once, as `{ code, name }`, sorted by name.
+- [x] `GET /api/v1/locations/departments/05/municipalities` returns `{ code, name, isMetroArea }` items sorted by name, and `05001` Medellín has `isMetroArea: true`.
+- [x] `:code` values `abc`, `5` and `123` return 400 `VALIDATION_ERROR`. A well-formed code with no municipalities (`99`) returns 404 `DEPARTMENT_NOT_FOUND`.
+- [x] Both location endpoints send `Cache-Control: public, max-age=86400` on 200 and no `public` cache header on 400 or 404.
 
 Domain and exports
 
-- [ ] `vatIncludedInCents(379_980_000) === 60_669_100` and `vatIncludedInCents(189_990_000) === 30_334_500`. The function uses no floating-point VAT rate.
-- [ ] `haversineKm` for Medellín ↔ Bogotá is between 235 and 245 km.
-- [ ] `findNearestWarehouse` returns `null` for an empty list, picks the first warehouse on a tie, and returns an integer `distanceKm`.
-- [ ] `catalog/index.ts` exports `vatIncludedInCents` and `PRODUCT_REPOSITORY`.
-- [ ] `locations/index.ts` exports `haversineKm`, `findNearestWarehouse`, `GeoPoint`, `NearestWarehouse`, `MUNICIPALITY_REPOSITORY` and `WAREHOUSE_REPOSITORY`.
-- [ ] Each module provides and exports its repository tokens, so another module can inject them by importing `CatalogModule` / `LocationsModule`.
+- [x] `vatIncludedInCents(379_980_000) === 60_669_100` and `vatIncludedInCents(189_990_000) === 30_334_500`. The function uses no floating-point VAT rate.
+- [x] `haversineKm` for Medellín ↔ Bogotá is between 235 and 245 km.
+- [x] `findNearestWarehouse` returns `null` for an empty list, picks the first warehouse on a tie, and returns an integer `distanceKm`.
+- [x] `catalog/index.ts` exports `vatIncludedInCents` and `PRODUCT_REPOSITORY`.
+- [x] `locations/index.ts` exports `haversineKm`, `findNearestWarehouse`, `GeoPoint`, `NearestWarehouse`, `MUNICIPALITY_REPOSITORY` and `WAREHOUSE_REPOSITORY`.
+- [x] Each module provides and exports its repository tokens, so another module can inject them by importing `CatalogModule` / `LocationsModule`.
 
 Persistence
 
-- [ ] `TypeOrmProductRepository`, `TypeOrmMunicipalityRepository` and `TypeOrmWarehouseRepository` implement every method of their frozen ports, and each has an int-spec.
-- [ ] Every repository int-spec runs inside a transaction that rolls back. Running `test:int` leaves the row counts of `products`, `municipalities` and `warehouses` unchanged.
-- [ ] No raw SQL (`query(`, `manager.query`) exists under `modules/catalog` or `modules/locations`.
+- [x] `TypeOrmProductRepository`, `TypeOrmMunicipalityRepository` and `TypeOrmWarehouseRepository` implement every method of their frozen ports, and each has an int-spec.
+- [x] Every repository int-spec runs inside a transaction that rolls back. Running `test:int` leaves the row counts of `products`, `municipalities` and `warehouses` unchanged.
+- [x] No raw SQL (`query(`, `manager.query`) exists under `modules/catalog` or `modules/locations`.
 
 Swagger
 
-- [ ] `/api/docs` shows the four endpoints with their query and path constraints (`page ≥ 1`, `limit` 1–50, uuid, 2-digit code) and their 200 response schemas.
-- [ ] Every response DTO `implements` its `@checkout/shared/contracts` interface.
+- [x] `/api/docs` shows the four endpoints with their query and path constraints (`page ≥ 1`, `limit` 1–50, uuid, 2-digit code) and their 200 response schemas.
+- [x] Every response DTO `implements` its `@checkout/shared/contracts` interface.
 
 Quality and CI
 
-- [ ] `pnpm lint`, `pnpm typecheck`, `pnpm --filter @checkout/api test:cov` and `pnpm --filter @checkout/api test:int` exit 0 locally.
-- [ ] The coverage report shows `modules/catalog` and `modules/locations` each at ≥ 80 % on statements, branches, functions and lines, and `apps/api` stays at ≥ 80 % globally.
+- [x] `pnpm lint`, `pnpm typecheck`, `pnpm --filter @checkout/api test:cov` and `pnpm --filter @checkout/api test:int` exit 0 locally.
+- [x] The coverage report shows `modules/catalog` and `modules/locations` each at ≥ 80 % on statements, branches, functions and lines, and `apps/api` stays at ≥ 80 % globally.
 - [ ] The PR shows green `lint`, `typecheck`, `coverage (api)` and `api-integration`.
-- [ ] `git diff main --stat` shows changes only under `apps/api/src/modules/catalog/`, `apps/api/src/modules/locations/`, `apps/api/src/shared/infrastructure/http/respond.ts` (+ its spec) and `specs/`.
+- [x] `git diff main --stat` shows changes only under `apps/api/src/modules/catalog/`, `apps/api/src/modules/locations/`, `apps/api/src/shared/infrastructure/http/respond.ts` (+ its spec) and `specs/`.
 
 ## Decisions
 

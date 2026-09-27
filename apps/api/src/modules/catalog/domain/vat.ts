@@ -12,7 +12,8 @@ const PERCENT_SCALE = 100;
  */
 export function vatIncludedInCents(priceInCents: Cents): Cents {
   return (
-    Math.round((priceInCents * VAT_RATE_PERCENT) / ((PERCENT_SCALE + VAT_RATE_PERCENT) * PERCENT_SCALE)) *
-    PERCENT_SCALE
+    Math.round(
+      (priceInCents * VAT_RATE_PERCENT) / ((PERCENT_SCALE + VAT_RATE_PERCENT) * PERCENT_SCALE),
+    ) * PERCENT_SCALE
   );
 }
