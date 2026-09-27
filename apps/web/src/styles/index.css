@@ -1,0 +1,94 @@
+@import 'tailwindcss';
+
+@import '@fontsource/manrope/latin-700.css';
+@import '@fontsource/open-sans/latin-400.css';
+@import '@fontsource/open-sans/latin-600.css';
+@import '@fontsource/open-sans/latin-700.css';
+
+@theme {
+  /* Color (DESIGN.md §2) */
+  --color-ink: #2c2a29;
+  --color-brand-lime: #dfff61;
+  --color-brand-mint: #b0f2ae;
+  --color-brand-forest: #00825a;
+  --color-brand-sky: #99d1fc;
+  --color-paper: #fafafa;
+  --color-canvas: #f8f8f8;
+  --color-surface: #ffffff;
+  --color-surface-tint: #f8fff8;
+  --color-text-strong: #16181e;
+  --color-text: #3c3c3c;
+  /* shadcn's --border clashes with the border token; one definition covers both. */
+  --border: #cacaca;
+  --color-border: var(--border);
+  --color-border-subtle: #e4e4e4;
+  --color-selected-bg: #ebf6fe;
+  --color-selected-border: #7cb3dc;
+  --color-danger: #d93a3a;
+  --color-warning: #f5a524;
+
+  /* Radii */
+  --radius-input: 6px;
+  --radius-card: 16px;
+  --radius-panel: 20px;
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-overlay: 0 8px 32px rgba(0, 0, 0, 0.12);
+
+  /* Fonts */
+  --font-heading: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Open Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Breakpoints */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+
+  /* Max content width */
+  --container-content: 1040px;
+
+  /* shadcn semantic variables, aliased to the tokens above */
+  --color-background: var(--color-canvas);
+  --color-foreground: var(--color-ink);
+  --color-card: var(--color-surface);
+  --color-card-foreground: var(--color-ink);
+  --color-primary: var(--color-ink);
+  --color-primary-foreground: var(--color-brand-lime);
+  --color-secondary: var(--color-surface);
+  --color-secondary-foreground: var(--color-ink);
+  --color-muted: var(--color-paper);
+  --color-muted-foreground: var(--color-text);
+  --color-input: var(--color-border);
+  --color-ring: var(--color-brand-sky);
+  --color-destructive: var(--color-danger);
+  --color-destructive-foreground: var(--color-surface);
+  --color-popover: var(--color-surface);
+  --color-popover-foreground: var(--color-ink);
+  /* No "accent" token in DESIGN.md; reuses the selectable-option highlight. */
+  --color-accent: var(--color-selected-bg);
+  --color-accent-foreground: var(--color-ink);
+}
+
+body {
+  background-color: var(--color-canvas);
+  color: var(--color-text-strong);
+  font-family: var(--font-body);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand-sky);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

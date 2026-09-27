@@ -6,6 +6,7 @@
 node_modules
 dist
 cdk.out
+*.tsbuildinfo
 
 # Coverage and test artifacts
 coverage
