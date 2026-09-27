@@ -25,7 +25,7 @@ export const transactionViewFixture: TransactionView = {
   product: {
     id: PRODUCT_ID,
     name: 'WH-1000XM5',
-    imageUrl: '/images/products/hp-sny-wh1000xm5-640.webp',
+    imageUrl: '/images/products/HP-SNY-WH1000XM5-640.webp',
   },
   quantity: 2,
   installments: 1,

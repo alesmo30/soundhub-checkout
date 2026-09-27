@@ -21,9 +21,21 @@ describe('products fixture', () => {
     expect(products.filter((product) => product.stockAvailable === 0)).toHaveLength(1);
   });
 
+  it('keeps a product with a single unit left', () => {
+    expect(products.some((product) => product.stockAvailable === 1)).toBe(true);
+  });
+
+  it('caps maxPurchaseQuantity at 10, including a product whose stock is exactly 10', () => {
+    expect(products.some((product) => product.stockAvailable === 10)).toBe(true);
+    expect(products.some((product) => product.stockAvailable > 10)).toBe(true);
+    for (const product of products) {
+      expect(product.maxPurchaseQuantity).toBe(Math.min(product.stockAvailable, 10));
+    }
+  });
+
   it('points imageUrl at /images/products/<sku>-640.webp', () => {
     for (const product of products) {
-      expect(product.imageUrl).toBe(`/images/products/${product.sku.toLowerCase()}-640.webp`);
+      expect(product.imageUrl).toBe(`/images/products/${product.sku}-640.webp`);
     }
   });
 });
