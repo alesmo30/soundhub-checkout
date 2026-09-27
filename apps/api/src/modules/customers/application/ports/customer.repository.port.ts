@@ -6,11 +6,15 @@ export const CUSTOMER_REPOSITORY = Symbol('CUSTOMER_REPOSITORY');
 
 export type NewCustomer = Omit<Customer, 'id'>;
 
+export interface CustomerUniqueViolation {
+  readonly constraint: 'DOCUMENT' | 'EMAIL'; // uq_customers_document | uq_customers_email
+}
+
 export interface CustomerRepository {
   findById(id: string): ResultAsync<Customer | null, never>;
   findByDocumentNumber(documentNumber: string, tx?: TxContext): ResultAsync<Customer | null, never>;
   findByEmail(email: string, tx?: TxContext): ResultAsync<Customer | null, never>;
-  insert(tx: TxContext, customer: NewCustomer): ResultAsync<Customer, never>;
+  insert(tx: TxContext, customer: NewCustomer): ResultAsync<Customer, CustomerUniqueViolation>;
   updateContact(
     tx: TxContext,
     change: { id: string; fullName: string; phone: string },
