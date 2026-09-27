@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Outlet, createBrowserRouter, type RouteObject } from 'react-router';
 
+import { AppShell } from '@/components/layout/app-shell';
 import { env } from '@/config/env';
 
 import {
@@ -14,7 +15,11 @@ const DesignShowcasePage = lazy(() => import('./design-showcase-page'));
 
 export const routes: RouteObject[] = [
   {
-    element: <Outlet />,
+    element: (
+      <AppShell>
+        <Outlet />
+      </AppShell>
+    ),
     children: [
       { path: '/', element: <CatalogPlaceholderPage /> },
       { path: '/products/:id', element: <ProductPlaceholderPage /> },
