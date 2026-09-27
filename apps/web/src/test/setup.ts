@@ -17,6 +17,16 @@ if (!window.matchMedia) {
   });
 }
 
+// jsdom does not implement ResizeObserver; Radix's Checkbox measures its
+// hidden bubble input with it whenever the checkbox sits inside a <form>.
+if (!window.ResizeObserver) {
+  window.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
+
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());

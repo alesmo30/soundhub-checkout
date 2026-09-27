@@ -1,8 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -12,6 +14,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -19,11 +22,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { forgetDetails, rememberDetails, selectRememberedDetails } from '@/features/customer';
 
-import { saveContact, setQuoteMunicipality } from '../checkout-session.slice';
+import {
+  clearCheckoutSession,
+  saveContact,
+  selectSessionContact,
+  setQuoteMunicipality,
+} from '../checkout-session.slice';
 import { selectContactDetails } from '../checkout.selectors';
+import { goToStep } from '../checkout.slice';
 import { useGetDepartmentsQuery, useGetMunicipalitiesQuery } from '../checkout.api';
 import { contactFormSchema, type ContactDetails } from '../lib/contact-details';
+import { RememberedBanner } from './remembered-banner';
 
 const EMPTY_CONTACT_DETAILS: ContactDetails = {
   customer: { documentNumber: '', fullName: '', email: '', phone: '' },
@@ -36,6 +47,14 @@ const EMPTY_CONTACT_DETAILS: ContactDetails = {
 export function ContactForm() {
   const dispatch = useAppDispatch();
   const contactDetails = useAppSelector(selectContactDetails);
+  const sessionContact = useAppSelector(selectSessionContact);
+  const rememberedDetails = useAppSelector(selectRememberedDetails);
+  // The banner (and the checkbox's own default) fire only when the form was
+  // pre-filled from `customer.remembered`, not from a session that already
+  // holds `contact` this same visit (see specs/07-web-checkout.md, UI rules
+  // > Remembered banner).
+  const isPrefilledFromRemembered = sessionContact === null && rememberedDetails !== null;
+  const [rememberMe, setRememberMe] = useState(isPrefilledFromRemembered);
   const form = useForm<ContactDetails>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: contactDetails ?? EMPTY_CONTACT_DETAILS,
@@ -64,10 +83,25 @@ export function ContactForm() {
     dispatch(setQuoteMunicipality(value));
   }
 
-  // Step 5 wires "Recordarme" and `goToStep('CARD')`; here "Continuar" only
-  // saves the in-progress session (see specs/07-web-checkout.md, step 4).
+  // `forgetDetails` also resets the whole `checkoutSession` (see its
+  // extraReducers): dispatching it before `saveContact` means an unchecked
+  // "Recordarme" clears any previous remembered value without wiping out
+  // the contact details this same submit is about to save.
   function onSubmit(values: ContactDetails) {
+    if (rememberMe) {
+      dispatch(rememberDetails(values));
+    } else {
+      dispatch(forgetDetails());
+    }
     dispatch(saveContact(values));
+    dispatch(goToStep('CARD'));
+  }
+
+  function handleForget() {
+    dispatch(forgetDetails());
+    dispatch(clearCheckoutSession());
+    form.reset(EMPTY_CONTACT_DETAILS);
+    setRememberMe(false);
   }
 
   return (
@@ -77,6 +111,13 @@ export function ContactForm() {
         className="flex flex-col gap-6"
         noValidate
       >
+        {isPrefilledFromRemembered && (
+          <RememberedBanner
+            fullName={contactDetails?.customer.fullName ?? ''}
+            onForget={handleForget}
+          />
+        )}
+
         <section className="flex flex-col gap-4">
           <h2 className="font-heading text-xl font-bold text-text-strong">Tus datos</h2>
 
@@ -232,6 +273,15 @@ export function ContactForm() {
             )}
           />
         </section>
+
+        <div className="flex items-center gap-3">
+          <Checkbox
+            id="remember-me"
+            checked={rememberMe}
+            onCheckedChange={(checked) => setRememberMe(checked === true)}
+          />
+          <Label htmlFor="remember-me">Recordarme en este dispositivo</Label>
+        </div>
 
         <Button type="submit" disabled={!form.formState.isValid} className="self-end">
           Continuar

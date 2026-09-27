@@ -299,7 +299,7 @@ Each step is one commit after review. Target ≤ ~300 changed lines per step. Te
    Chrome: the empty form, a form with errors, and a filled form, at both viewports.
    Commit: `feat(web): add customer and delivery form`.
 
-5. [ ] **Remember me and continue.** The "Recordarme en este dispositivo" checkbox, `remembered-banner.tsx`, and the full "Continuar" (save the session, remember or forget, `goToStep('CARD')`).
+5. [x] **Remember me and continue.** The "Recordarme en este dispositivo" checkbox, `remembered-banner.tsx`, and the full "Continuar" (save the session, remember or forget, `goToStep('CARD')`).
    Tests:
    - checked → `customer.remembered` is set, and a new store preloaded with it pre-fills the form and shows the banner;
    - unchecked → nothing reaches `customer`, and a previously remembered value is forgotten;
