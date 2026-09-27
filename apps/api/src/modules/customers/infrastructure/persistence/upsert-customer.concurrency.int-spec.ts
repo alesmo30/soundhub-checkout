@@ -14,6 +14,7 @@ import type {
   NewCustomer,
 } from '../../application/ports/customer.repository.port';
 import type { Customer } from '../../domain/customer';
+import { CustomerOrmEntity } from './customer.orm-entity';
 import { TypeOrmCustomerRepository } from './typeorm-customer.repository';
 
 // document_number: CHECK (document_number ~ '^[0-9]{6,10}$'); 7 random digits
@@ -127,19 +128,8 @@ function expectSingle<T>(items: readonly T[]): T {
   return item;
 }
 
-interface CustomerRow {
-  readonly id: string;
-  readonly document_number: string;
-  readonly email: string;
-}
-
-async function findRowsByDocument(documentNumber: string): Promise<CustomerRow[]> {
-  const rows: CustomerRow[] = await dataSource.query(
-    `SELECT id, document_number, email FROM customers WHERE document_number = $1`,
-    [documentNumber],
-  );
-
-  return rows;
+async function findRowsByDocument(documentNumber: string): Promise<CustomerOrmEntity[]> {
+  return dataSource.manager.find(CustomerOrmEntity, { where: { documentNumber } });
 }
 
 describe('UpsertCustomerUseCase concurrency (real TypeOrmUnitOfWork + TypeOrmCustomerRepository)', () => {

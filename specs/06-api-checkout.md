@@ -417,7 +417,7 @@ Quality and CI
 - [ ] The coverage report shows `modules/pricing/domain` at ≥ 90 %, and `modules/pricing` and `modules/customers` at ≥ 80 %, on statements, branches, functions and lines. `apps/api` stays at ≥ 80 % globally.
 - [ ] No raw SQL (`query(`, `manager.query`) exists under `modules/pricing` or `modules/customers`.
 - [ ] The PR shows green `lint`, `typecheck`, `coverage (api)` and `api-integration`.
-- [ ] `git diff main --stat` shows changes only under `apps/api/src/modules/pricing/`, `apps/api/src/modules/customers/`, `apps/api/package.json`, `pnpm-lock.yaml` and `specs/`.
+- [ ] `git diff main --stat` shows changes only under `apps/api/src/modules/pricing/`, `apps/api/src/modules/customers/`, `apps/api/package.json`, `apps/api/eslint.config.mjs`, `pnpm-lock.yaml` and `specs/`. `eslint.config.mjs` was not anticipated when this spec was written: step 4 found that `PricingModule` needs to import `CatalogModule`/`LocationsModule` (real Nest `Module` classes, not their public `index.ts`) to share their DI tree, which the existing cross-module `no-restricted-imports` rule blocked for every file alike. The rule was widened, generically, to let only `*.module.ts` files import a sibling module's `Module` class — `domain/`, `application/` and `infrastructure/` still cross only through `index.ts`, unchanged. See the "Cross-module wiring" entry under Decisions.
 
 ## Decisions
 
@@ -452,6 +452,13 @@ Quote
 - **Yes:** no active warehouse throws, and the result is 500 `INTERNAL_ERROR`. It is a data misconfiguration the user cannot fix, and C9 reserves `throw` for truly unexpected failures. In api 04.1 it fires before any reservation, so nothing is created.
 - **No:** a new `NO_WAREHOUSE_AVAILABLE` code (a contract change for a case real data never reaches), or reusing `MUNICIPALITY_NOT_FOUND` (it would lie).
 - **Yes:** `GetQuoteUseCase` takes no `tx`. api 04.1 quotes before opening its reservation transaction.
+
+Cross-module wiring
+
+- **Yes:** `pricing.module.ts` imports `CatalogModule` and `LocationsModule` directly, so `GetQuoteUseCase` can inject `PRODUCT_REPOSITORY`, `MUNICIPALITY_REPOSITORY` and `WAREHOUSE_REPOSITORY` from Nest's DI tree. Sibling modules under `AppModule` do not share providers automatically, and neither module's `index.ts` exposes its own `Module` class (that would blur `index.ts`'s role as the public surface of domain/application code, not of Nest wiring).
+- **Yes:** the shared `no-restricted-imports` cross-module rule (C8, `apps/api/eslint.config.mjs`) was widened, generically, for this exact shape: a `*.module.ts` file may import a sibling module's `Module` class or its `index.ts`, but `domain/`, `application/` and `infrastructure/` of another module stay blocked for every file, `*.module.ts` included. The generator already builds these patterns per module from one list (`MODULES`), so the change is one new pattern variant, not a hardcoded exception for `pricing` → `catalog`/`locations`.
+- **No:** a local `eslint-disable-next-line no-restricted-imports` on the two `pricing.module.ts` import lines. It would silence the boundary check for this file with no record of why, and every future module that needs the same wiring would repeat the same disable instead of reusing one rule.
+- **Yes:** this reached `main` as part of this spec's own PR (not a separate contract-change PR): it edits neither a frozen port nor `packages/shared`, only a lint rule inside `apps/api`, so the lighter-weight path applies.
 
 Customers
 
