@@ -48,7 +48,7 @@ No persisted data structures. No new dependencies besides `jest-axe` (+ `@types/
    Manual test: trigger each documented error `code` (declined, out-of-stock, price-changed) — messages match DESIGN.md §6 wording.
    Commit: `fix(web): align error and empty-state copy with DESIGN.md`.
 
-5. [ ] **Code-split checkout dialog.** Wrap the checkout dialog's feature component in `lazy()` + `Suspense` on `ProductPage`, same pattern as `DesignShowcasePage`.
+5. [x] **Code-split checkout dialog.** Wrap the checkout dialog's feature component in `lazy()` + `Suspense` on `ProductPage`, same pattern as `DesignShowcasePage`.
    Manual test: `vite build` — checkout dialog appears as its own chunk in the build output.
    Commit: `perf(web): code-split checkout dialog`.
 

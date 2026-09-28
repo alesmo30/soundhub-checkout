@@ -1,4 +1,5 @@
 import { CreditCard } from 'lucide-react';
+import { lazy, Suspense } from 'react';
 import { useParams } from 'react-router';
 import type { ProductDetail } from '@checkout/shared/contracts';
 import { ErrorCode } from '@checkout/shared/enums';
@@ -7,7 +8,6 @@ import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  CheckoutDialog,
   selectCheckoutProductId,
   selectQuantityFor,
   setQuantity,
@@ -22,6 +22,15 @@ import { CatalogErrorState } from '../components/catalog-error-state';
 import { ProductImage } from '../components/product-image';
 import { ProductNotFound } from '../components/product-not-found';
 import { QuantitySelector } from '../components/quantity-selector';
+
+// Code-split: the checkout dialog (card form, summary, payment flow) is only
+// needed once the customer starts checking out, same pattern as
+// DesignShowcasePage in app/router.tsx.
+const CheckoutDialog = lazy(() =>
+  import('@/features/checkout/components/checkout-dialog').then((module) => ({
+    default: module.CheckoutDialog,
+  })),
+);
 
 const MIN_QUANTITY = 1;
 
@@ -104,7 +113,11 @@ function ProductDetails({ product }: { product: ProductDetail }) {
           Pagar con tarjeta de crédito
         </Button>
       </div>
-      {isOwnCheckout && <CheckoutDialog />}
+      {isOwnCheckout && (
+        <Suspense fallback={null}>
+          <CheckoutDialog />
+        </Suspense>
+      )}
     </div>
   );
 }
