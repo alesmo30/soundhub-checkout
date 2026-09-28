@@ -44,7 +44,7 @@ No persisted data structures. No new dependencies besides `jest-axe` (+ `@types/
    Manual test: keyboard-only run from catalog to final status, no mouse; every focused element visibly ringed.
    Commit: `fix(web): complete keyboard navigation and focus visibility`.
 
-4. [ ] **Microcopy review.** Diff every error and empty-state string against DESIGN.md §6; fix mismatches (wrong tone, generic "Error", message not driven by `code`).
+4. [x] **Microcopy review.** Diff every error and empty-state string against DESIGN.md §6; fix mismatches (wrong tone, generic "Error", message not driven by `code`).
    Manual test: trigger each documented error `code` (declined, out-of-stock, price-changed) — messages match DESIGN.md §6 wording.
    Commit: `fix(web): align error and empty-state copy with DESIGN.md`.
 
