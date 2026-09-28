@@ -257,7 +257,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `test` green.
    Commit: `feat(api): send one result email per finalized transaction`.
 
-6. [ ] **Use case against Postgres.** `send-transaction-email.int-spec.ts` runs the real use case, repositories and `TypeOrmUnitOfWork`, with a capturing fake `EmailSender`. The setup finalizes a transaction through SPEC 10's finalizer. It proves:
+6. [x] **Use case against Postgres.** `send-transaction-email.int-spec.ts` runs the real use case, repositories and `TypeOrmUnitOfWork`, with a capturing fake `EmailSender`. The setup finalizes a transaction through SPEC 10's finalizer. It proves:
    - one execute → 1 captured email and `email_sent_at` set;
    - a second execute → still 1 email;
    - with a failing sender → 0 emails, `email_sent_at` still null, and a later execute with a working sender sends it.
