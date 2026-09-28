@@ -30,6 +30,7 @@ export { APP_CONFIG };
           DB_USERNAME: configService.get('DB_USERNAME', { infer: true }),
           DB_PASSWORD: configService.get('DB_PASSWORD', { infer: true }),
           DB_NAME: configService.get('DB_NAME', { infer: true }),
+          DB_SSL: configService.get('DB_SSL', { infer: true }),
           PAYMENT_GATEWAY_URL: configService.get('PAYMENT_GATEWAY_URL', { infer: true }),
           PAYMENT_GATEWAY_PUBLIC_KEY: configService.get('PAYMENT_GATEWAY_PUBLIC_KEY', {
             infer: true,

@@ -16,6 +16,22 @@ describe('validateEnvironmentVariables', () => {
     expect(() => buildValidEnvironmentVariables({ DB_PORT: '999999' })).toThrow(/DB_PORT/);
   });
 
+  it('defaults DB_SSL to false when unset', () => {
+    const env = buildValidEnvironmentVariables();
+
+    expect(env.DB_SSL).toBe('false');
+  });
+
+  it('accepts an explicit DB_SSL of true', () => {
+    const env = buildValidEnvironmentVariables({ DB_SSL: 'true' });
+
+    expect(env.DB_SSL).toBe('true');
+  });
+
+  it('rejects a DB_SSL value that is neither true nor false', () => {
+    expect(() => buildValidEnvironmentVariables({ DB_SSL: 'yes' })).toThrow(/DB_SSL/);
+  });
+
   it('fails fast, naming every missing variable', () => {
     const incomplete = Object.fromEntries(
       Object.entries(VALID_ENV_RECORD).filter(([key]) => key !== 'DB_HOST' && key !== 'SMTP_HOST'),

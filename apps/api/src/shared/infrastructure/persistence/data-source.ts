@@ -5,6 +5,9 @@
 // module-load time, before any of our own code runs.
 import 'reflect-metadata';
 
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { DataSource, type DataSourceOptions } from 'typeorm';
 
 import type { DbConfig } from '../../../config/app-config';
@@ -17,6 +20,7 @@ import { DeliveryOrmEntity } from '../../../modules/deliveries/infrastructure/pe
 import { TransactionOrmEntity } from '../../../modules/transactions/infrastructure/persistence/transaction.orm-entity';
 
 const MIGRATIONS_GLOB = 'src/shared/infrastructure/persistence/migrations/*.ts';
+const RDS_CA_BUNDLE_PATH = join(__dirname, '../../../../certs/rds-global-bundle.pem');
 
 const ENTITIES = [
   ProductOrmEntity,
@@ -43,6 +47,9 @@ export function buildDataSourceOptions(config: DbConfig): DataSourceOptions {
     database: config.db.name,
     synchronize: false,
     entities: ENTITIES,
+    ...(config.db.ssl && {
+      ssl: { ca: readFileSync(RDS_CA_BUNDLE_PATH, 'utf8'), rejectUnauthorized: true },
+    }),
   };
 }
 

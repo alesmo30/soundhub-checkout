@@ -312,7 +312,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step.
 
 ### Part 2 — Backend and frontend
 
-6. [ ] **Database SSL.** Add `DB_SSL` to `environment-variables.ts` (optional, default `false`), `db.ssl` to `app-config.ts`, and the `ssl` option in `buildDataSourceOptions`, which reads `certs/rds-global-bundle.pem`. The unit specs cover:
+6. [x] **Database SSL.** Add `DB_SSL` to `environment-variables.ts` (optional, default `false`), `db.ssl` to `app-config.ts`, and the `ssl` option in `buildDataSourceOptions`, which reads `certs/rds-global-bundle.pem`. The unit specs cover:
    - no `ssl` key when false;
    - `{ ca, rejectUnauthorized: true }` when true;
    - `DB_SSL=yes` → validation error.
