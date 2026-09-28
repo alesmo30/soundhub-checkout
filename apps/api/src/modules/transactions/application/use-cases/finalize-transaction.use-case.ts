@@ -65,22 +65,18 @@ export class FinalizeTransactionUseCase {
 
             const settleStockAndDelivery =
               outcome.status === 'APPROVED'
-                ? stockReservation
-                    .commit(tx, line)
-                    .andThen(() =>
-                      deliveryRepository.transition(tx, {
-                        transactionId: outcome.id,
-                        to: 'READY_TO_SHIP',
-                      }),
-                    )
-                : stockReservation
-                    .release(tx, line)
-                    .andThen(() =>
-                      deliveryRepository.transition(tx, {
-                        transactionId: outcome.id,
-                        to: 'CANCELLED',
-                      }),
-                    );
+                ? stockReservation.commit(tx, line).andThen(() =>
+                    deliveryRepository.transition(tx, {
+                      transactionId: outcome.id,
+                      to: 'READY_TO_SHIP',
+                    }),
+                  )
+                : stockReservation.release(tx, line).andThen(() =>
+                    deliveryRepository.transition(tx, {
+                      transactionId: outcome.id,
+                      to: 'CANCELLED',
+                    }),
+                  );
 
             return settleStockAndDelivery.map((): FinalizeTransactionResult => 'FINALIZED');
           }),

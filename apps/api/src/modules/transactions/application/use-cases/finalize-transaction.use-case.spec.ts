@@ -1,6 +1,9 @@
 import { Logger } from '@nestjs/common';
 
-import type { EventPublishError, EventPublisher } from '../../../../shared/application/ports/event-publisher.port';
+import type {
+  EventPublishError,
+  EventPublisher,
+} from '../../../../shared/application/ports/event-publisher.port';
 import type { Clock } from '../../../../shared/application/ports/clock.port';
 import type { DeliveryRepository } from '../../../deliveries';
 import type { TxContext, UnitOfWork } from '../../../../shared/application/ports/unit-of-work.port';

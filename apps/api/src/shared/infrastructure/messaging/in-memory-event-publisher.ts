@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-import type { EventPublishError, EventPublisher } from '../../application/ports/event-publisher.port';
+import type {
+  EventPublishError,
+  EventPublisher,
+} from '../../application/ports/event-publisher.port';
 import type { DomainEvent } from '../../domain/domain-event';
 import { okAsync, ResultAsync } from '../../domain/result';
 
