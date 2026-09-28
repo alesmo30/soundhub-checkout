@@ -82,6 +82,7 @@ export class CheckoutBackendStack extends cdk.Stack {
       architecture: lambda.Architecture.ARM_64,
       memorySize: API_LAMBDA.memoryMb,
       timeout: cdk.Duration.seconds(API_LAMBDA.timeoutSeconds),
+      reservedConcurrentExecutions: API_LAMBDA.reservedConcurrency,
       handler: API_HANDLER,
       code,
       vpc,

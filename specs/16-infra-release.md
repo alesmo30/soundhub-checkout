@@ -141,7 +141,7 @@ Prerequisites (not commits):
    Manual test: with `ALARM_EMAIL` removed, `bash infra/scripts/deploy.sh` exits before building with `Missing deploy variable: ALARM_EMAIL`; with it set, `cdk synth` succeeds.
    Commit: `fix(infra): pass AlarmEmail parameter from .env to cdk deploy`.
 
-2. [ ] **Reserved concurrency 10.** `API_LAMBDA.reservedConcurrency = 10` in `constants.ts`, `reservedConcurrentExecutions` on the API Lambda. `backend-stack.test.ts` replaces the "no `ReservedConcurrentExecutions`" assertion with `ReservedConcurrentExecutions: 10` on the API Lambda only (the workers stay unreserved).
+2. [x] **Reserved concurrency 10.** `API_LAMBDA.reservedConcurrency = 10` in `constants.ts`, `reservedConcurrentExecutions` on the API Lambda. `backend-stack.test.ts` replaces the "no `ReservedConcurrentExecutions`" assertion with `ReservedConcurrentExecutions: 10` on the API Lambda only (the workers stay unreserved).
    Manual test: `pnpm --filter @checkout/infra test` green.
    Commit: `feat(infra): reserve concurrency 10 on the API Lambda`.
 

@@ -44,7 +44,7 @@ function synthBackendStack(): Template {
 }
 
 describe('CheckoutBackendStack', () => {
-  it('creates the API Lambda as arm64/nodejs22.x/1024MB in the VPC, without reserved concurrency', () => {
+  it('creates the API Lambda as arm64/nodejs22.x/1024MB in the VPC, with reserved concurrency 10', () => {
     const template = synthBackendStack();
 
     template.hasResourceProperties('AWS::Lambda::Function', {
@@ -56,7 +56,7 @@ describe('CheckoutBackendStack', () => {
         SecurityGroupIds: Match.anyValue(),
         SubnetIds: Match.anyValue(),
       }),
-      ReservedConcurrentExecutions: Match.absent(),
+      ReservedConcurrentExecutions: 10,
     });
   });
 

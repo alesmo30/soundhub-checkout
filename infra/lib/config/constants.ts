@@ -15,6 +15,7 @@ export const API_LAMBDA = {
   timeoutSeconds: 29,
   runtime: 'nodejs22.x',
   arch: 'arm64',
+  reservedConcurrency: 10, // 10 containers × TypeORM pool 2 = ≤ 20 RDS connections
 };
 export const MIGRATOR_LAMBDA = { memoryMb: 512, timeoutSeconds: 300 };
 export const LOG_RETENTION_DAYS = 14;
