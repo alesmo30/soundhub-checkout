@@ -16,14 +16,16 @@ import { SummarySheet } from './summary-sheet';
 
 const MIN_QUANTITY = 1;
 
+// The summary is a layer on top of this dialog, not a step's content: on
+// SUMMARY the card form keeps rendering underneath it (see
+// specs/11-web-payment.md#decisions, "Summary layout").
 function CheckoutStepContent({ step }: { step: CheckoutStep }) {
   switch (step) {
     case 'CONTACT':
       return <ContactForm />;
     case 'CARD':
-      return <CardForm />;
     case 'SUMMARY':
-      return <SummarySheet />;
+      return <CardForm />;
   }
 }
 
@@ -62,6 +64,9 @@ export function CheckoutDialog() {
             <OrderPanel productId={productId} quantity={quantity} />
             <CheckoutStepContent step={step} />
           </div>
+        )}
+        {productId && step === 'SUMMARY' && (
+          <SummarySheet productId={productId} quantity={quantity} />
         )}
       </DialogContent>
     </Dialog>

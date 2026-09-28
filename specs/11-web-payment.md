@@ -20,7 +20,7 @@ Part 1 — summary and pay (step 3, `features/checkout`)
 - `summary-sheet.tsx` replaces SPEC 07's stub with a **layer on top of** the checkout dialog: a `Drawer` (bottom sheet) below `md` and a `Dialog` from `md`. It shows:
   - product × quantity;
   - subtotal with "IVA incluido";
-  - base fee;
+  - the payment gateway's commission ("Comisión de la pasarela de pago");
   - delivery fee with its label;
   - the total at 36/700;
   - the masked card;
@@ -306,13 +306,15 @@ Each step is one commit after review. Frontend steps save Chrome screenshots at 
    Manual test: `test` green.
    Commit: `feat(web): add pay flow with idempotent retry`.
 
-4. [ ] **Summary layer.** `summary-sheet.tsx` (a `Drawer` below `md`, a `Dialog` from `md`, chosen by `use-is-desktop.ts`), `summary-breakdown.tsx`, `payment-problem.tsx`, and `checkout-dialog.tsx` rendering the card step under the layer on `SUMMARY`. The component specs cover:
+4. [x] **Summary layer.** `summary-sheet.tsx` (a `Drawer` below `md`, a `Dialog` from `md`, chosen by `use-is-desktop.ts`), `summary-breakdown.tsx`, `payment-problem.tsx`, and `checkout-dialog.tsx` rendering the card step under the layer on `SUMMARY`. The component specs cover:
    - every amount is rendered from the quote fixture with `formatCop`, including "IVA incluido" and each `FEE_RULE_LABEL`;
    - the masked card `•••• 4242` and the address with the municipality name;
    - "Editar" → step `CARD` and a rotated key;
    - "Pagar $ …" is disabled while the quote loads and while paying ("Procesando pago…");
    - each `paymentProblem` renders its copy and action (the price change highlights the new total, the out-of-stock case hides "Pagar", the uncertain case shows only "Reintentar");
    - Esc closes only the summary layer.
+
+   Decision: the base fee (`baseFeeInCents`) row stays in the summary — hiding it was tried and reverted, because then the subtotal and delivery rows no longer add up to the total with no visible reason, which reads worse than a named fee (an unexplained gap looks like a hidden charge; a labelled one doesn't). Its label is "Comisión de la pasarela de pago" instead of "Costo base", so the customer understands what it is without the payment gateway's brand name appearing (forbidden by CLAUDE.md; "pasarela de pago" is the generic term already used elsewhere in this codebase). Same label in Part 2's `transaction-breakdown.tsx` (step 8).
 
    Manual test: in Chrome, both viewports, the drawer on mobile, the dialog on desktop, and the price-changed and out-of-stock states (MSW overrides from the browser console). Screenshots saved.
    Commit: `feat(web): render the payment summary as a sheet and dialog`.
@@ -395,7 +397,7 @@ Summary
 
 - [ ] Below `md` the summary is a bottom sheet (`Drawer`). From `md` it is a `Dialog` on top of the checkout dialog, and Esc closes only the summary.
 - [ ] Every amount shown comes from the `GET /quotes` response. A spec with a quote fixture of unusual values shows exactly those values.
-- [ ] The summary shows product × quantity, the subtotal with "IVA incluido", the base fee, the delivery fee with its `FEE_RULE_LABEL`, the total at 36/700, `•••• <last4>` and the address with its municipality name.
+- [ ] The summary shows product × quantity, the subtotal with "IVA incluido", the payment gateway's commission labelled "Comisión de la pasarela de pago", the delivery fee with its `FEE_RULE_LABEL`, the total at 36/700, `•••• <last4>` and the address with its municipality name.
 - [ ] "Editar" returns to the card step and rotates the idempotency key.
 
 Pay and idempotency
