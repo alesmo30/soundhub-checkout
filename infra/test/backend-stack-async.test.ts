@@ -66,11 +66,15 @@ describe('CheckoutBackendStack — async queue', () => {
     interface PolicyResource {
       Properties: {
         PolicyDocument: { Statement: Array<{ Action: string | string[]; Resource: unknown }> };
+        Roles: Array<{ Ref: string }>;
       };
     }
 
     const policies = template.findResources('AWS::IAM::Policy') as Record<string, PolicyResource>;
-    const sendMessageStatements = Object.values(policies)
+    const apiLambdaPolicies = Object.values(policies).filter((policy) =>
+      policy.Properties.Roles.some((role) => role.Ref.startsWith('ApiLambdaServiceRole')),
+    );
+    const sendMessageStatements = apiLambdaPolicies
       .flatMap((policy) => policy.Properties.PolicyDocument.Statement)
       .filter((statement) => {
         const actions = Array.isArray(statement.Action) ? statement.Action : [statement.Action];
@@ -134,7 +138,7 @@ describe('CheckoutBackendStack — email worker Lambda', () => {
   it('keeps the email worker Lambda logs for 14 days in its own LogGroup', () => {
     const template = synthBackendStack();
 
-    template.resourcePropertiesCountIs('AWS::Logs::LogGroup', { RetentionInDays: 14 }, 3);
+    template.resourcePropertiesCountIs('AWS::Logs::LogGroup', { RetentionInDays: 14 }, 4);
   });
 
   it('consumes the transaction-finalized queue with batch size 5 and partial batch responses', () => {
@@ -196,5 +200,149 @@ describe('CheckoutBackendStack — email worker Lambda', () => {
     }
 
     expect(resourceArns).toHaveLength(2);
+  });
+});
+
+describe('CheckoutBackendStack — reconciler Lambda and schedule', () => {
+  it('creates the reconciler Lambda as arm64/nodejs22.x/512MB/1min in the VPC', () => {
+    const template = synthBackendStack();
+
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Handler: 'reconciler.handler.handler',
+      Architectures: ['arm64'],
+      Runtime: 'nodejs22.x',
+      MemorySize: ASYNC.RECONCILER.MEMORY_MB,
+      Timeout: 60,
+      VpcConfig: Match.objectLike({
+        SecurityGroupIds: Match.anyValue(),
+        SubnetIds: Match.anyValue(),
+      }),
+    });
+  });
+
+  it('gives the reconciler Lambda its own LogGroup with 14-day retention', () => {
+    const template = synthBackendStack();
+
+    const reconcilerLambdas = template.findResources('AWS::Lambda::Function', {
+      Properties: { Handler: 'reconciler.handler.handler' },
+    });
+    const reconcilerLambda = Object.values(reconcilerLambdas)[0] as {
+      Properties: { LoggingConfig?: { LogGroup?: { Ref: string } } };
+    };
+    const logGroupRef = reconcilerLambda.Properties.LoggingConfig?.LogGroup?.Ref;
+    expect(logGroupRef).toBeDefined();
+
+    const logGroups = template.findResources('AWS::Logs::LogGroup', {
+      Properties: { RetentionInDays: 14 },
+    });
+    expect(Object.keys(logGroups)).toContain(logGroupRef);
+  });
+
+  it("grants the reconciler Lambda read access to both secrets, scoped (no '*')", () => {
+    const template = synthBackendStack();
+
+    interface PolicyResource {
+      Properties: {
+        PolicyDocument: { Statement: Array<{ Action: string | string[]; Resource: unknown }> };
+        Roles: Array<{ Ref: string }>;
+      };
+    }
+
+    const policies = template.findResources('AWS::IAM::Policy') as Record<string, PolicyResource>;
+    const reconcilerPolicies = Object.values(policies).filter((policy) =>
+      policy.Properties.Roles.some((role) => role.Ref.startsWith('ReconcilerLambdaServiceRole')),
+    );
+
+    expect(reconcilerPolicies.length).toBeGreaterThan(0);
+
+    const resourceArns: unknown[] = [];
+    for (const policy of reconcilerPolicies) {
+      for (const statement of policy.Properties.PolicyDocument.Statement) {
+        const actions = Array.isArray(statement.Action) ? statement.Action : [statement.Action];
+        if (!actions.includes('secretsmanager:GetSecretValue')) {
+          continue;
+        }
+        expect(statement.Resource).not.toBe('*');
+        const resourceList: unknown[] = Array.isArray(statement.Resource)
+          ? (statement.Resource as unknown[])
+          : [statement.Resource];
+        resourceArns.push(...resourceList);
+      }
+    }
+
+    expect(resourceArns).toHaveLength(2);
+  });
+
+  it('creates an EventBridge Scheduler rate(1 minute) schedule targeting the reconciler Lambda', () => {
+    const template = synthBackendStack();
+
+    const reconcilerLambdas = template.findResources('AWS::Lambda::Function', {
+      Properties: { Handler: 'reconciler.handler.handler' },
+    });
+    const reconcilerLogicalId = Object.keys(reconcilerLambdas)[0] as string;
+
+    template.hasResourceProperties('AWS::Scheduler::Schedule', {
+      ScheduleExpression: ASYNC.RECONCILER.SCHEDULE_RATE,
+      FlexibleTimeWindow: { Mode: 'OFF' },
+      Target: Match.objectLike({
+        Arn: { 'Fn::GetAtt': [reconcilerLogicalId, 'Arn'] },
+        RetryPolicy: {
+          MaximumRetryAttempts: ASYNC.RECONCILER.MAX_RETRY_ATTEMPTS,
+          MaximumEventAgeInSeconds: ASYNC.RECONCILER.MAX_EVENT_AGE_SECONDS,
+        },
+      }),
+    });
+  });
+
+  it("scopes the schedule's invoke permission to a dedicated scheduler role, not public", () => {
+    const template = synthBackendStack();
+
+    const schedules = template.findResources('AWS::Scheduler::Schedule');
+    const schedule = Object.values(schedules)[0] as {
+      Properties: { Target: { RoleArn: unknown } };
+    };
+    expect(schedule.Properties.Target.RoleArn).not.toBe('*');
+
+    const roles = template.findResources('AWS::IAM::Role', {
+      Properties: {
+        AssumeRolePolicyDocument: {
+          Statement: [
+            Match.objectLike({
+              Principal: { Service: 'scheduler.amazonaws.com' },
+            }),
+          ],
+        },
+      },
+    });
+    expect(Object.keys(roles)).toHaveLength(1);
+    const scheduleRoleLogicalId = Object.keys(roles)[0] as string;
+
+    interface PolicyResource {
+      Properties: {
+        PolicyDocument: { Statement: Array<{ Action: string | string[]; Resource: unknown }> };
+        Roles: Array<{ Ref: string }>;
+      };
+    }
+    const policies = template.findResources('AWS::IAM::Policy') as Record<string, PolicyResource>;
+    const invokePolicies = Object.values(policies).filter((policy) =>
+      policy.Properties.Roles.some((role) => role.Ref === scheduleRoleLogicalId),
+    );
+    expect(invokePolicies.length).toBeGreaterThan(0);
+
+    const invokeStatements = invokePolicies.flatMap((policy) =>
+      policy.Properties.PolicyDocument.Statement.filter((statement) => {
+        const actions = Array.isArray(statement.Action) ? statement.Action : [statement.Action];
+        return actions.includes('lambda:InvokeFunction');
+      }),
+    );
+    expect(invokeStatements.length).toBeGreaterThan(0);
+    for (const statement of invokeStatements) {
+      const resourceList = Array.isArray(statement.Resource)
+        ? statement.Resource
+        : [statement.Resource];
+      for (const resource of resourceList) {
+        expect(resource).not.toBe('*');
+      }
+    }
   });
 });

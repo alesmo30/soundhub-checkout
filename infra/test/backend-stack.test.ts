@@ -130,10 +130,10 @@ describe('CheckoutBackendStack', () => {
     expect(resourceArns.size).toBe(2);
   });
 
-  it('keeps API, migrator and email worker Lambda logs for 14 days', () => {
+  it('keeps API, migrator, email worker and reconciler Lambda logs for 14 days', () => {
     const template = synthBackendStack();
 
-    template.resourcePropertiesCountIs('AWS::Logs::LogGroup', { RetentionInDays: 14 }, 3);
+    template.resourcePropertiesCountIs('AWS::Logs::LogGroup', { RetentionInDays: 14 }, 4);
   });
 
   it('never puts a secret value in the API Lambda environment', () => {

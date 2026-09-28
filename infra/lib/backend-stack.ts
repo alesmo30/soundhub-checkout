@@ -2,9 +2,11 @@ import * as cdk from 'aws-cdk-lib';
 import * as apigatewayv2 from 'aws-cdk-lib/aws-apigatewayv2';
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import * as logs from 'aws-cdk-lib/aws-logs';
+import * as scheduler from 'aws-cdk-lib/aws-scheduler';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as triggers from 'aws-cdk-lib/triggers';
@@ -30,6 +32,9 @@ const API_HANDLER = 'lambda.handler';
 const MIGRATOR_HANDLER = 'migrator.handler';
 const EMAIL_WORKER_HANDLER = 'email-worker.handler.handler';
 const EMAIL_DRIVER_SMTP = 'smtp';
+const RECONCILER_HANDLER = 'reconciler.handler.handler';
+const SCHEDULER_ASSUME_ROLE_SERVICE = 'scheduler.amazonaws.com';
+const SCHEDULER_FLEXIBLE_TIME_WINDOW_MODE = 'OFF';
 
 export interface DataStackOutputs {
   vpc: ec2.IVpc;
@@ -160,6 +165,55 @@ export class CheckoutBackendStack extends cdk.Stack {
         reportBatchItemFailures: true,
       }),
     );
+
+    const reconcilerLambda = new lambda.Function(this, 'ReconcilerLambda', {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      architecture: lambda.Architecture.ARM_64,
+      memorySize: ASYNC.RECONCILER.MEMORY_MB,
+      timeout: ASYNC.RECONCILER.TIMEOUT,
+      handler: RECONCILER_HANDLER,
+      code,
+      vpc,
+      vpcSubnets,
+      securityGroups: [lambdaSecurityGroup],
+      logGroup: new logs.LogGroup(this, 'ReconcilerLambdaLogGroup', {
+        retention: logs.RetentionDays.TWO_WEEKS,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+      }),
+      environment: {
+        DB_NAME,
+        DB_SSL: DB_SSL_ENABLED,
+        DB_SECRET_ARN: dbSecret.secretArn,
+        APP_SECRETS_ARN: appSecrets.secretArn,
+        PAYMENT_GATEWAY_URL: deployEnv.paymentGatewayUrl,
+        PAYMENT_GATEWAY_PUBLIC_KEY: deployEnv.paymentGatewayPublicKey,
+        TRANSACTION_FINALIZED_QUEUE_URL: transactionFinalizedQueue.queueUrl,
+      },
+    });
+    dbSecret.grantRead(reconcilerLambda);
+    appSecrets.grantRead(reconcilerLambda);
+    transactionFinalizedQueue.grantSendMessages(reconcilerLambda);
+
+    // The scheduler invokes the reconciler through this dedicated role rather
+    // than a Lambda resource policy, so the permission stays scoped to
+    // scheduler.amazonaws.com instead of being publicly invokable.
+    const reconcilerScheduleRole = new iam.Role(this, 'ReconcilerScheduleRole', {
+      assumedBy: new iam.ServicePrincipal(SCHEDULER_ASSUME_ROLE_SERVICE),
+    });
+    reconcilerLambda.grantInvoke(reconcilerScheduleRole);
+
+    new scheduler.CfnSchedule(this, 'ReconcilerSchedule', {
+      scheduleExpression: ASYNC.RECONCILER.SCHEDULE_RATE,
+      flexibleTimeWindow: { mode: SCHEDULER_FLEXIBLE_TIME_WINDOW_MODE },
+      target: {
+        arn: reconcilerLambda.functionArn,
+        roleArn: reconcilerScheduleRole.roleArn,
+        retryPolicy: {
+          maximumRetryAttempts: ASYNC.RECONCILER.MAX_RETRY_ATTEMPTS,
+          maximumEventAgeInSeconds: ASYNC.RECONCILER.MAX_EVENT_AGE_SECONDS,
+        },
+      },
+    });
 
     // Runs the migrator during every `cdk deploy` and re-runs it whenever the
     // migrator's code or config changes, so the schema/seed are applied

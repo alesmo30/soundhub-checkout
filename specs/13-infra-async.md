@@ -95,7 +95,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `cdk synth` succeeds against the test fixture bundle.
    Commit: `feat(infra): add email worker Lambda consuming the SQS queue`.
 
-4. [ ] **Reconciler Lambda and EventBridge Scheduler.** New Lambda (same runtime/subnet/SG pattern as step 3, `ASYNC.RECONCILER.MEMORY_MB`/`TIMEOUT`, handler `reconciler.handler.handler`, its own `LogGroup`), an IAM role letting `scheduler.amazonaws.com` invoke it, and a `CfnSchedule` (`ScheduleExpression: ASYNC.RECONCILER.SCHEDULE_RATE`, `FlexibleTimeWindow: { Mode: 'OFF' }`, target the reconciler Lambda's ARN with `RetryPolicy: { MaximumRetryAttempts: ASYNC.RECONCILER.MAX_RETRY_ATTEMPTS, MaximumEventAgeInSeconds: ASYNC.RECONCILER.MAX_EVENT_AGE_SECONDS }`). The specs cover:
+4. [x] **Reconciler Lambda and EventBridge Scheduler.** New Lambda (same runtime/subnet/SG pattern as step 3, `ASYNC.RECONCILER.MEMORY_MB`/`TIMEOUT`, handler `reconciler.handler.handler`, its own `LogGroup`), an IAM role letting `scheduler.amazonaws.com` invoke it, and a `CfnSchedule` (`ScheduleExpression: ASYNC.RECONCILER.SCHEDULE_RATE`, `FlexibleTimeWindow: { Mode: 'OFF' }`, target the reconciler Lambda's ARN with `RetryPolicy: { MaximumRetryAttempts: ASYNC.RECONCILER.MAX_RETRY_ATTEMPTS, MaximumEventAgeInSeconds: ASYNC.RECONCILER.MAX_EVENT_AGE_SECONDS }`). The specs cover:
    - the reconciler Lambda's runtime/memory/timeout/subnet/SG;
    - the schedule's rate expression, target ARN and retry policy values;
    - the invoke permission is scoped to the scheduler's role, not public.
