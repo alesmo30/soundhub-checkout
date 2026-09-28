@@ -243,21 +243,21 @@ describe('ContactForm', () => {
     expect(store.getState().checkoutSession.contact).toBeNull();
   });
 
-  it.each([
-    ['EMAIL_ALREADY_REGISTERED' as const],
-    ['CUSTOMER_DATA_MISMATCH' as const],
-  ])('shows the %s message on the email field, linked with aria-describedby', (code) => {
-    renderContactForm({
-      checkoutSession: { ...BASE_SESSION, contactFieldError: { field: 'email', code } },
-    });
+  it.each([['EMAIL_ALREADY_REGISTERED' as const], ['CUSTOMER_DATA_MISMATCH' as const]])(
+    'shows the %s message on the email field, linked with aria-describedby',
+    (code) => {
+      renderContactForm({
+        checkoutSession: { ...BASE_SESSION, contactFieldError: { field: 'email', code } },
+      });
 
-    const message = screen.getByRole('alert');
-    expect(message).toHaveTextContent(CONTACT_FIELD_ERROR_MESSAGES[code]);
+      const message = screen.getByRole('alert');
+      expect(message).toHaveTextContent(CONTACT_FIELD_ERROR_MESSAGES[code]);
 
-    const emailInput = screen.getByLabelText('Correo');
-    const describedBy = emailInput.getAttribute('aria-describedby') ?? '';
-    expect(describedBy.split(' ')).toContain(message.id);
-  });
+      const emailInput = screen.getByLabelText('Correo');
+      const describedBy = emailInput.getAttribute('aria-describedby') ?? '';
+      expect(describedBy.split(' ')).toContain(message.id);
+    },
+  );
 
   it('clears the email server error once the user edits the field and submits again', async () => {
     const { user, store } = renderContactForm({

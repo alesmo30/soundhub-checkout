@@ -8,7 +8,11 @@ import { closeCheckout } from '../checkout.slice';
 import { PAYMENT_PROBLEM_MESSAGES, PENDING_PAYMENT_RECOVERY_NOTICE } from '../checkout.constants';
 import { useCreateTransactionMutation } from '../checkout.api';
 import { mapErrorToOutcome } from '../lib/payment-outcome';
-import { clearPendingPayment, readPendingPayment, type PendingPayment } from '../lib/pending-payment';
+import {
+  clearPendingPayment,
+  readPendingPayment,
+  type PendingPayment,
+} from '../lib/pending-payment';
 
 // 'sending': the overlay, re-sending the stored request.
 // 'uncertain': a network/timeout/5xx reply — the entry stays, "Reintentar"

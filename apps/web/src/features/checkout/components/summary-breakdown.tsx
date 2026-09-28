@@ -33,7 +33,9 @@ export function SummaryBreakdown({ quote }: SummaryBreakdownProps) {
       <div className="flex items-center justify-between">
         <dt>
           Subtotal{' '}
-          <span className="text-xs text-text">(IVA incluido {formatCop(quote.vatIncludedInCents)})</span>
+          <span className="text-xs text-text">
+            (IVA incluido {formatCop(quote.vatIncludedInCents)})
+          </span>
         </dt>
         <dd className="font-semibold text-text-strong">{formatCop(quote.subtotalInCents)}</dd>
       </div>
@@ -50,7 +52,9 @@ export function SummaryBreakdown({ quote }: SummaryBreakdownProps) {
 
       <div className="flex items-center justify-between border-t border-border-subtle pt-3">
         <dt className="font-heading text-lg font-bold text-text-strong">Total</dt>
-        <dd className="font-heading text-4xl font-bold text-ink">{formatCop(quote.totalInCents)}</dd>
+        <dd className="font-heading text-4xl font-bold text-ink">
+          {formatCop(quote.totalInCents)}
+        </dd>
       </div>
     </dl>
   );

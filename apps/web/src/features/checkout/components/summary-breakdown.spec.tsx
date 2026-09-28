@@ -50,7 +50,10 @@ describe('SummaryBreakdown', () => {
   it('shows the FREE_METRO label without a distance suffix', () => {
     render(
       <SummaryBreakdown
-        quote={{ ...QUOTE, delivery: { ...QUOTE.delivery, rule: FeeRule.FREE_METRO, feeInCents: 0 } }}
+        quote={{
+          ...QUOTE,
+          delivery: { ...QUOTE.delivery, rule: FeeRule.FREE_METRO, feeInCents: 0 },
+        }}
       />,
     );
 

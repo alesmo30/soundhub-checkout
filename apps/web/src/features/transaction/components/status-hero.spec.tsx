@@ -5,7 +5,7 @@ import { STATUS_COPY } from '../transaction.constants';
 import { StatusHero } from './status-hero';
 
 describe('StatusHero', () => {
-  it.each(Object.values(TransactionStatus))('renders %s\'s title and reference', (status) => {
+  it.each(Object.values(TransactionStatus))("renders %s's title and reference", (status) => {
     render(<StatusHero status={status} reference="TX-20260926-ABC123" />);
 
     expect(

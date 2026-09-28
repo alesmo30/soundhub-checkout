@@ -167,7 +167,9 @@ describe('CheckoutDialog', () => {
       // only that layer, landing back on CARD; a second Esc then closes the
       // checkout dialog itself.
       await user.keyboard('{Escape}');
-      expect(await screen.findByRole('heading', { name: 'Datos de tu tarjeta' })).toBeInTheDocument();
+      expect(
+        await screen.findByRole('heading', { name: 'Datos de tu tarjeta' }),
+      ).toBeInTheDocument();
 
       await user.click(screen.getByRole('button', { name: 'Cerrar' }));
       expect(store.getState().checkout.isDialogOpen).toBe(false);

@@ -40,7 +40,8 @@ export const PENDING_PAYMENT_RECOVERY_NOTICE =
 // #outcome-table). The UI never renders the gateway's raw status message.
 export const PAYMENT_PROBLEM_MESSAGES = {
   OUT_OF_STOCK: 'Ya no hay unidades suficientes para tu pedido. No se hizo ningún cobro.',
-  UNAVAILABLE: 'Los pagos no están disponibles en este momento. Inténtalo de nuevo en unos segundos.',
+  UNAVAILABLE:
+    'Los pagos no están disponibles en este momento. Inténtalo de nuevo en unos segundos.',
   RATE_LIMITED: 'Hiciste demasiados intentos. Espera un momento e inténtalo de nuevo.',
   UNCERTAIN: 'No pudimos confirmar tu pago. No pagues de nuevo: toca Reintentar para verificarlo.',
   FAILED: 'No pudimos procesar tu pago. No se hizo ningún cobro.',

@@ -40,7 +40,9 @@ export function TransactionBreakdown({ view }: TransactionBreakdownProps) {
 
       <div className="flex items-center justify-between border-t border-border-subtle pt-3">
         <dt className="font-heading text-lg font-bold text-text-strong">Total</dt>
-        <dd className="font-heading text-4xl font-bold text-ink">{formatCop(amounts.totalInCents)}</dd>
+        <dd className="font-heading text-4xl font-bold text-ink">
+          {formatCop(amounts.totalInCents)}
+        </dd>
       </div>
     </dl>
   );

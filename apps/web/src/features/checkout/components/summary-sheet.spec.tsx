@@ -53,7 +53,9 @@ describe('SummarySheet', () => {
   it('renders every amount from the quote fixture with formatCop, including IVA incluido', async () => {
     renderSummary();
 
-    expect(await screen.findByText(`${quoteFixture.product.name} × ${quoteFixture.quantity}`)).toBeInTheDocument();
+    expect(
+      await screen.findByText(`${quoteFixture.product.name} × ${quoteFixture.quantity}`),
+    ).toBeInTheDocument();
     expect(screen.getByText(/IVA incluido/)).toBeInTheDocument();
     expect(screen.getByText('Envío gratis')).toBeInTheDocument();
   });

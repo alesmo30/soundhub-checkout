@@ -12,7 +12,11 @@ import { server } from '@/mocks/server';
 import { transactionProgressingId } from '@/mocks/fixtures/transaction';
 import { problem } from '@/mocks/problem';
 
-import { writePendingPayment, readPendingPayment, type PendingPayment } from '../lib/pending-payment';
+import {
+  writePendingPayment,
+  readPendingPayment,
+  type PendingPayment,
+} from '../lib/pending-payment';
 import { PendingPaymentRecovery } from './pending-payment-recovery';
 
 const IDEMPOTENCY_KEY = '11111111-2222-4333-8444-555555555555';
@@ -75,7 +79,10 @@ describe('PendingPaymentRecovery', () => {
     server.use(
       http.post('*/api/v1/transactions', () => {
         requested = true;
-        return HttpResponse.json({ data: { id: transactionProgressingId, status: 'PENDING' } }, { status: 201 });
+        return HttpResponse.json(
+          { data: { id: transactionProgressingId, status: 'PENDING' } },
+          { status: 201 },
+        );
       }),
     );
 
@@ -94,7 +101,10 @@ describe('PendingPaymentRecovery', () => {
       http.post('*/api/v1/transactions', async ({ request }) => {
         receivedKey = request.headers.get('Idempotency-Key');
         receivedBody = (await request.json()) as CreateTransactionRequest;
-        return HttpResponse.json({ data: { id: transactionProgressingId, status: 'PENDING' } }, { status: 201 });
+        return HttpResponse.json(
+          { data: { id: transactionProgressingId, status: 'PENDING' } },
+          { status: 201 },
+        );
       }),
     );
 
@@ -112,7 +122,10 @@ describe('PendingPaymentRecovery', () => {
     writeEntry();
     server.use(
       http.post('*/api/v1/transactions', () =>
-        HttpResponse.json({ data: { id: transactionProgressingId, status: 'PENDING' } }, { status: 201 }),
+        HttpResponse.json(
+          { data: { id: transactionProgressingId, status: 'PENDING' } },
+          { status: 201 },
+        ),
       ),
     );
 
@@ -136,7 +149,9 @@ describe('PendingPaymentRecovery', () => {
     setup();
 
     expect(
-      await screen.findByText('Tu pago anterior no se completó y no se hizo ningún cobro. Ingresa tu tarjeta de nuevo.'),
+      await screen.findByText(
+        'Tu pago anterior no se completó y no se hizo ningún cobro. Ingresa tu tarjeta de nuevo.',
+      ),
     ).toBeInTheDocument();
     expect(readPendingPayment()).toBeNull();
     expect(screen.queryByText('Recuperando tu pago…')).not.toBeInTheDocument();
@@ -155,7 +170,10 @@ describe('PendingPaymentRecovery', () => {
 
     server.use(
       http.post('*/api/v1/transactions', () =>
-        HttpResponse.json({ data: { id: transactionProgressingId, status: 'PENDING' } }, { status: 201 }),
+        HttpResponse.json(
+          { data: { id: transactionProgressingId, status: 'PENDING' } },
+          { status: 201 },
+        ),
       ),
     );
 

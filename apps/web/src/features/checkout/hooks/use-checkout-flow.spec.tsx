@@ -124,7 +124,10 @@ describe('useCheckoutFlow', () => {
       http.post('*/api/v1/customers', async ({ request }) => {
         calls.push('customer');
         const body = await request.json();
-        return HttpResponse.json({ data: { id: customerFixture.id, ...(body as object) } }, { status: 201 });
+        return HttpResponse.json(
+          { data: { id: customerFixture.id, ...(body as object) } },
+          { status: 201 },
+        );
       }),
       http.post('*/api/v1/transactions', () => {
         calls.push('transaction');
@@ -263,17 +266,20 @@ describe('useCheckoutFlow', () => {
     },
   );
 
-  it.each([503, 429])('a %s response clears the pending entry and keeps the key', async (status) => {
-    const code = status === 503 ? ErrorCode.PAYMENT_GATEWAY_UNAVAILABLE : ErrorCode.RATE_LIMITED;
-    server.use(transactionsHandler(status, code));
-    const { store, result } = setup();
-    const keyBefore = selectIdempotencyKey(store.getState());
+  it.each([503, 429])(
+    'a %s response clears the pending entry and keeps the key',
+    async (status) => {
+      const code = status === 503 ? ErrorCode.PAYMENT_GATEWAY_UNAVAILABLE : ErrorCode.RATE_LIMITED;
+      server.use(transactionsHandler(status, code));
+      const { store, result } = setup();
+      const keyBefore = selectIdempotencyKey(store.getState());
 
-    await act(() => result.current.pay(quoteFixture));
+      await act(() => result.current.pay(quoteFixture));
 
-    expect(readPendingPayment()).toBeNull();
-    expect(selectIdempotencyKey(store.getState())).toBe(keyBefore);
-  });
+      expect(readPendingPayment()).toBeNull();
+      expect(selectIdempotencyKey(store.getState())).toBe(keyBefore);
+    },
+  );
 
   it('a network error keeps the pending entry, and retry() re-sends the same key and body to a 201', async () => {
     server.use(http.post('*/api/v1/transactions', () => HttpResponse.error()));
@@ -309,17 +315,20 @@ describe('useCheckoutFlow', () => {
     expect(readPendingPayment()).toBeNull();
   });
 
-  it.each([400, 422])('a %s response rotates the key and clears the pending entry', async (status) => {
-    server.use(transactionsHandler(status));
-    const { store, result } = setup();
-    const keyBefore = selectIdempotencyKey(store.getState());
+  it.each([400, 422])(
+    'a %s response rotates the key and clears the pending entry',
+    async (status) => {
+      server.use(transactionsHandler(status));
+      const { store, result } = setup();
+      const keyBefore = selectIdempotencyKey(store.getState());
 
-    await act(() => result.current.pay(quoteFixture));
+      await act(() => result.current.pay(quoteFixture));
 
-    expect(selectPaymentProblem(store.getState())).toEqual({ kind: 'FAILED' });
-    expect(selectIdempotencyKey(store.getState())).not.toBe(keyBefore);
-    expect(readPendingPayment()).toBeNull();
-  });
+      expect(selectPaymentProblem(store.getState())).toEqual({ kind: 'FAILED' });
+      expect(selectIdempotencyKey(store.getState())).not.toBe(keyBefore);
+      expect(readPendingPayment()).toBeNull();
+    },
+  );
 
   it('pay() is a no-op while a request is in flight', async () => {
     let customerCalls = 0;

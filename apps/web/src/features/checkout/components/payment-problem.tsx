@@ -26,20 +26,35 @@ export function PaymentProblem({
   switch (problem.kind) {
     case 'PRICE_CHANGED':
       return (
-        <div role="alert" className="flex flex-col gap-2 rounded-panel border border-warning bg-warning/10 p-4">
+        <div
+          role="alert"
+          className="flex flex-col gap-2 rounded-panel border border-warning bg-warning/10 p-4"
+        >
           <p className="text-sm font-semibold text-text-strong">
-            El total cambió de <span className="line-through">{formatCop(problem.previousTotalInCents)}</span>{' '}
-            a <span className="font-bold text-text-strong">{formatCop(currentTotalInCents)}</span>. Revisa el
-            nuevo valor antes de pagar.
+            El total cambió de{' '}
+            <span className="line-through">{formatCop(problem.previousTotalInCents)}</span> a{' '}
+            <span className="font-bold text-text-strong">{formatCop(currentTotalInCents)}</span>.
+            Revisa el nuevo valor antes de pagar.
           </p>
         </div>
       );
 
     case 'OUT_OF_STOCK':
       return (
-        <div role="alert" className="flex flex-col gap-2 rounded-panel border border-danger bg-danger/10 p-4">
-          <p className="text-sm font-semibold text-danger">{PAYMENT_PROBLEM_MESSAGES.OUT_OF_STOCK}</p>
-          <Button type="button" variant="secondary" size="compact" onClick={onAdjustQuantity} className="self-start">
+        <div
+          role="alert"
+          className="flex flex-col gap-2 rounded-panel border border-danger bg-danger/10 p-4"
+        >
+          <p className="text-sm font-semibold text-danger">
+            {PAYMENT_PROBLEM_MESSAGES.OUT_OF_STOCK}
+          </p>
+          <Button
+            type="button"
+            variant="secondary"
+            size="compact"
+            onClick={onAdjustQuantity}
+            className="self-start"
+          >
             Ajustar cantidad
           </Button>
         </div>
@@ -61,7 +76,10 @@ export function PaymentProblem({
 
     case 'UNCERTAIN':
       return (
-        <div role="alert" className="flex flex-col gap-2 rounded-panel border border-danger bg-danger/10 p-4">
+        <div
+          role="alert"
+          className="flex flex-col gap-2 rounded-panel border border-danger bg-danger/10 p-4"
+        >
           <p className="text-sm font-semibold text-danger">{PAYMENT_PROBLEM_MESSAGES.UNCERTAIN}</p>
           <Button type="button" onClick={onRetry} className="self-start">
             Reintentar

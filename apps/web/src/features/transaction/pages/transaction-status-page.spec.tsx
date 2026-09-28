@@ -55,17 +55,22 @@ describe('TransactionStatusPage', () => {
     [transactionErrorFixture, 'No pudimos procesar tu pago'],
     [transactionVoidedFixture, 'El pago fue anulado'],
     [transactionExpiredFixture, 'El pago expiró'],
-  ])('renders $status title, reference, breakdown, masked card and delivery label', async (fixture, title) => {
-    renderAt(fixture.id);
+  ])(
+    'renders $status title, reference, breakdown, masked card and delivery label',
+    async (fixture, title) => {
+      renderAt(fixture.id);
 
-    await tick(50);
+      await tick(50);
 
-    expect(await screen.findByRole('heading', { level: 1, name: title })).toBeInTheDocument();
-    expect(screen.getByText(fixture.reference)).toBeInTheDocument();
-    expect(screen.getByText(`${fixture.product.name} × ${fixture.quantity}`)).toBeInTheDocument();
-    expect(screen.getByText(`${fixture.card.brand} •••• ${fixture.card.last4}`)).toBeInTheDocument();
-    expect(screen.getByText('Listo para envío')).toBeInTheDocument();
-  });
+      expect(await screen.findByRole('heading', { level: 1, name: title })).toBeInTheDocument();
+      expect(screen.getByText(fixture.reference)).toBeInTheDocument();
+      expect(screen.getByText(`${fixture.product.name} × ${fixture.quantity}`)).toBeInTheDocument();
+      expect(
+        screen.getByText(`${fixture.card.brand} •••• ${fixture.card.last4}`),
+      ).toBeInTheDocument();
+      expect(screen.getByText('Listo para envío')).toBeInTheDocument();
+    },
+  );
 
   it('wraps the status region in aria-live="polite"', async () => {
     renderAt(transactionApprovedFixture.id);
@@ -80,7 +85,9 @@ describe('TransactionStatusPage', () => {
     renderAt(transactionPendingFixture.id);
 
     await tick(50);
-    expect(await screen.findByRole('heading', { level: 1, name: 'Procesando tu pago…' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Procesando tu pago…' }),
+    ).toBeInTheDocument();
 
     await tick(POLL_TIMEOUT_MS);
 

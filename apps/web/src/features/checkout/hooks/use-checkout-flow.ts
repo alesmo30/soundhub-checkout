@@ -24,12 +24,21 @@ import {
   setPaymentProblem,
 } from '../checkout-session.slice';
 import { selectContactDetails } from '../checkout.selectors';
-import { closeCheckout, goToStep, selectCheckoutProductId, selectQuantityFor } from '../checkout.slice';
+import {
+  closeCheckout,
+  goToStep,
+  selectCheckoutProductId,
+  selectQuantityFor,
+} from '../checkout.slice';
 import { useCreateTransactionMutation, useUpsertCustomerMutation } from '../checkout.api';
 import type { ContactDetails } from '../lib/contact-details';
 import { toDeliveryValues } from '../lib/contact-details';
 import { mapErrorToOutcome } from '../lib/payment-outcome';
-import { clearPendingPayment, readPendingPayment, writePendingPayment } from '../lib/pending-payment';
+import {
+  clearPendingPayment,
+  readPendingPayment,
+  writePendingPayment,
+} from '../lib/pending-payment';
 
 export interface UseCheckoutFlowResult {
   isPaying: boolean;
