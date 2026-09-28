@@ -329,7 +329,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step.
    Manual test: `test` green.
    Commit: `feat(api): load AWS secrets into env at cold start`.
 
-8. [ ] **Lambda entry points.** `lambda.ts`: `loadSecretsIntoEnv` → `NestFactory.create` → `configureApp` → `serverlessExpress`, cached in a module-level promise. `workers/migrator.handler.ts`: `loadSecretsIntoEnv` → a `DataSource` with `[InitialSchema1790463118000]` → `runMigrations()` → `runSeed()` → returns the summary. Adds `@codegenie/serverless-express` and `@types/aws-lambda`.
+8. [x] **Lambda entry points.** `lambda.ts`: `loadSecretsIntoEnv` → `NestFactory.create` → `configureApp` → `serverlessExpress`, cached in a module-level promise. `workers/migrator.handler.ts`: `loadSecretsIntoEnv` → a `DataSource` with `[InitialSchema1790463118000]` → `runMigrations()` → `runSeed()` → returns the summary. Adds `@codegenie/serverless-express` and `@types/aws-lambda`.
    Manual test: `typecheck` green.
    Commit: `feat(api): add Lambda handler and migrator entry points`.
 

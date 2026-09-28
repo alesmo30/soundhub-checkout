@@ -34,6 +34,8 @@ const config: Config = {
   coveragePathIgnorePatterns: [
     '/node_modules/',
     '<rootDir>/src/main.ts',
+    '<rootDir>/src/lambda.ts',
+    '<rootDir>/src/workers/migrator.handler.ts',
     '<rootDir>/src/shared/infrastructure/persistence/migrations/',
     '<rootDir>/src/shared/infrastructure/persistence/seeds/',
   ],
