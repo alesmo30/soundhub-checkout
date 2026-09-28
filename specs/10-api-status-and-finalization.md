@@ -231,7 +231,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `pnpm --filter @checkout/api test:int` green.
    Commit: `test(api): prove finalization stock numbers against Postgres`.
 
-4. [ ] **Concurrent finalization proof.** `finalize-transaction.concurrency.int-spec.ts` uses the same setup as step 3. It fires **3** `execute({ status: 'APPROVED' })` calls in parallel, each through its own `TypeOrmUnitOfWork`. It proves:
+4. [x] **Concurrent finalization proof.** `finalize-transaction.concurrency.int-spec.ts` uses the same setup as step 3. It fires **3** `execute({ status: 'APPROVED' })` calls in parallel, each through its own `TypeOrmUnitOfWork`. It proves:
    - exactly 1 `FINALIZED` and 2 `ALREADY_FINAL`;
    - stock `8 / 0`;
    - delivery `READY_TO_SHIP`;
