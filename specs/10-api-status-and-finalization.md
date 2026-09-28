@@ -265,7 +265,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
 
 ### Delivery
 
-7. [ ] **Get delivery use case.** `deliveryNotFound`, `helpers/to-delivery-view.ts`, `GetDeliveryUseCase`, and `DeliveriesModule` importing `LocationsModule`. The unit specs cover:
+7. [x] **Get delivery use case.** `deliveryNotFound`, `helpers/to-delivery-view.ts`, `GetDeliveryUseCase`, and `DeliveriesModule` importing `LocationsModule`. The unit specs cover:
    - found → a `DeliveryView` with the warehouse name, the warehouse municipality name, and the destination municipality and department names;
    - an unknown id → `DELIVERY_NOT_FOUND`;
    - a missing warehouse, warehouse municipality or destination municipality → 1 `error` log and a rejection;
