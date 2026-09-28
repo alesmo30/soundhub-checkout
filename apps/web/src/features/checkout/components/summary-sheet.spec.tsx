@@ -15,6 +15,9 @@ describe('SummarySheet', () => {
           card: { token: 'tok_test_4242', brand: CardBrand.VISA, last4: '4242' },
           installments: 1,
           acceptance: null,
+          idempotencyKey: null,
+          paymentProblem: null,
+          contactFieldError: null,
         },
       },
     });
@@ -32,6 +35,9 @@ describe('SummarySheet', () => {
           card: { token: 'tok_test_4242', brand: CardBrand.VISA, last4: '4242' },
           installments: 1,
           acceptance: null,
+          idempotencyKey: null,
+          paymentProblem: null,
+          contactFieldError: null,
         },
       },
     });

@@ -280,7 +280,7 @@ Each step is one commit after review. Frontend steps save Chrome screenshots at 
    Manual test: `pnpm --filter @checkout/web test` green.
    Commit: `feat(web): add payment endpoints and MSW payment scenarios`.
 
-2. [ ] **Session payment state and pending entry.** `checkoutSession` gains `idempotencyKey`, `paymentProblem`, `contactFieldError` and their actions. `checkout` gains `resetCheckout`. Add `lib/pending-payment.ts` and `lib/payment-outcome.ts`. The specs cover:
+2. [x] **Session payment state and pending entry.** `checkoutSession` gains `idempotencyKey`, `paymentProblem`, `contactFieldError` and their actions. `checkout` gains `resetCheckout`. Add `lib/pending-payment.ts` and `lib/payment-outcome.ts`. The specs cover:
    - `ensureIdempotencyKey` keeps an existing key, and `rotateIdempotencyKey` replaces it;
    - `closeCheckout` clears the key and the problem;
    - the pending entry round-trips through `sessionStorage`;

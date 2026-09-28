@@ -50,6 +50,9 @@ export const checkoutSlice = createSlice({
     goToStep(state, action: PayloadAction<CheckoutStep>) {
       state.step = action.payload;
     },
+    resetCheckout() {
+      return initialState;
+    },
   },
   selectors: {
     // A quantity saved for another product must not leak into this one.
@@ -61,7 +64,8 @@ export const checkoutSlice = createSlice({
   },
 });
 
-export const { setQuantity, startCheckout, closeCheckout, goToStep } = checkoutSlice.actions;
+export const { setQuantity, startCheckout, closeCheckout, goToStep, resetCheckout } =
+  checkoutSlice.actions;
 export const {
   selectQuantityFor,
   selectIsCheckoutOpen,

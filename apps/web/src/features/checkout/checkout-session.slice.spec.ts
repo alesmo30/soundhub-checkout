@@ -6,13 +6,20 @@ import { closeCheckout } from './checkout.slice';
 import {
   checkoutSessionReducer,
   clearCheckoutSession,
+  ensureIdempotencyKey,
+  rotateIdempotencyKey,
   saveCard,
   saveContact,
   selectAcceptance,
   selectCard,
+  selectContactFieldError,
+  selectIdempotencyKey,
   selectInstallments,
+  selectPaymentProblem,
   selectQuoteMunicipalityCode,
   selectSessionContact,
+  setContactFieldError,
+  setPaymentProblem,
   setQuoteMunicipality,
   type CheckoutSessionState,
 } from './checkout-session.slice';
@@ -53,6 +60,9 @@ describe('checkoutSession slice', () => {
       card: null,
       installments: 1,
       acceptance: null,
+      idempotencyKey: null,
+      paymentProblem: null,
+      contactFieldError: null,
     });
   });
 
@@ -85,6 +95,9 @@ describe('checkoutSession slice', () => {
       card: null,
       installments: 1,
       acceptance: null,
+      idempotencyKey: null,
+      paymentProblem: null,
+      contactFieldError: null,
     });
   });
 
@@ -100,6 +113,60 @@ describe('checkoutSession slice', () => {
     expect(state.acceptance).toBeNull();
   });
 
+  it('closeCheckout clears the idempotency key and the payment problem', () => {
+    const state = reduce(
+      ensureIdempotencyKey(),
+      setPaymentProblem({ kind: 'RATE_LIMITED' }),
+      closeCheckout(),
+    );
+
+    expect(state.idempotencyKey).toBeNull();
+    expect(state.paymentProblem).toBeNull();
+  });
+
+  it('ensureIdempotencyKey sets a key only when there is none yet', () => {
+    const withKey = reduce(ensureIdempotencyKey());
+
+    expect(withKey.idempotencyKey).not.toBeNull();
+
+    const kept = checkoutSessionReducer(withKey, ensureIdempotencyKey());
+
+    expect(kept.idempotencyKey).toBe(withKey.idempotencyKey);
+  });
+
+  it('rotateIdempotencyKey always replaces the key', () => {
+    const withKey = reduce(ensureIdempotencyKey());
+    const rotated = checkoutSessionReducer(withKey, rotateIdempotencyKey());
+
+    expect(rotated.idempotencyKey).not.toBeNull();
+    expect(rotated.idempotencyKey).not.toBe(withKey.idempotencyKey);
+  });
+
+  it('setPaymentProblem stores and clears the problem', () => {
+    const withProblem = reduce(setPaymentProblem({ kind: 'OUT_OF_STOCK' }));
+
+    expect(withProblem.paymentProblem).toEqual({ kind: 'OUT_OF_STOCK' });
+
+    const cleared = checkoutSessionReducer(withProblem, setPaymentProblem(null));
+
+    expect(cleared.paymentProblem).toBeNull();
+  });
+
+  it('setContactFieldError stores and clears the field error', () => {
+    const withError = reduce(
+      setContactFieldError({ field: 'email', code: 'EMAIL_ALREADY_REGISTERED' }),
+    );
+
+    expect(withError.contactFieldError).toEqual({
+      field: 'email',
+      code: 'EMAIL_ALREADY_REGISTERED',
+    });
+
+    const cleared = checkoutSessionReducer(withError, setContactFieldError(null));
+
+    expect(cleared.contactFieldError).toBeNull();
+  });
+
   it('forgetDetails resets the whole session, contact included', () => {
     const state = reduce(
       saveContact(CONTACT),
@@ -113,6 +180,9 @@ describe('checkoutSession slice', () => {
       card: null,
       installments: 1,
       acceptance: null,
+      idempotencyKey: null,
+      paymentProblem: null,
+      contactFieldError: null,
     });
   });
 });
@@ -130,5 +200,20 @@ describe('checkoutSession selectors', () => {
     expect(selectCard({ checkoutSession })).toEqual(CARD);
     expect(selectInstallments({ checkoutSession })).toBe(6);
     expect(selectAcceptance({ checkoutSession })).toEqual(ACCEPTANCE);
+  });
+
+  it('selectIdempotencyKey / selectPaymentProblem / selectContactFieldError', () => {
+    const checkoutSession = reduce(
+      ensureIdempotencyKey(),
+      setPaymentProblem({ kind: 'UNCERTAIN' }),
+      setContactFieldError({ field: 'email', code: 'CUSTOMER_DATA_MISMATCH' }),
+    );
+
+    expect(selectIdempotencyKey({ checkoutSession })).not.toBeNull();
+    expect(selectPaymentProblem({ checkoutSession })).toEqual({ kind: 'UNCERTAIN' });
+    expect(selectContactFieldError({ checkoutSession })).toEqual({
+      field: 'email',
+      code: 'CUSTOMER_DATA_MISMATCH',
+    });
   });
 });
