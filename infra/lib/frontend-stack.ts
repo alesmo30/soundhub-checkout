@@ -85,12 +85,16 @@ export class CheckoutFrontendStack extends cdk.Stack {
         },
       },
       customHeadersBehavior: {
-        customHeaders: [{ header: 'Permissions-Policy', value: PERMISSIONS_POLICY_VALUE, override: false }],
+        customHeaders: [
+          { header: 'Permissions-Policy', value: PERMISSIONS_POLICY_VALUE, override: false },
+        ],
       },
     });
 
     const s3Origin = origins.S3BucketOrigin.withOriginAccessControl(bucket);
-    const apiOrigin = new origins.HttpOrigin(cdk.Fn.select(2, cdk.Fn.split('/', httpApi.apiEndpoint)));
+    const apiOrigin = new origins.HttpOrigin(
+      cdk.Fn.select(2, cdk.Fn.split('/', httpApi.apiEndpoint)),
+    );
 
     const distribution = new cloudfront.Distribution(this, 'Distribution', {
       defaultBehavior: {
@@ -109,7 +113,10 @@ export class CheckoutFrontendStack extends cdk.Stack {
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           responseHeadersPolicy: strictSpaHeadersPolicy,
           functionAssociations: [
-            { function: spaRewriteFunction, eventType: cloudfront.FunctionEventType.VIEWER_REQUEST },
+            {
+              function: spaRewriteFunction,
+              eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+            },
           ],
         },
         '/api/*': {
@@ -130,7 +137,9 @@ export class CheckoutFrontendStack extends cdk.Stack {
       distributionPaths: ['/*'],
     });
 
-    new cdk.CfnOutput(this, 'CloudFrontUrl', { value: `https://${distribution.distributionDomainName}` });
+    new cdk.CfnOutput(this, 'CloudFrontUrl', {
+      value: `https://${distribution.distributionDomainName}`,
+    });
     new cdk.CfnOutput(this, 'ApiUrl', { value: httpApi.apiEndpoint });
   }
 }

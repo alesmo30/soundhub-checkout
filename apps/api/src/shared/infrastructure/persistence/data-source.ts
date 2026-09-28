@@ -35,7 +35,9 @@ const RDS_CA_BUNDLE_CANDIDATES = [
 function resolveRdsCaBundlePath(): string {
   const found = RDS_CA_BUNDLE_CANDIDATES.find(existsSync);
   if (!found) {
-    throw new Error('rds-global-bundle.pem not found next to data-source.ts or in dist-lambda/certs');
+    throw new Error(
+      'rds-global-bundle.pem not found next to data-source.ts or in dist-lambda/certs',
+    );
   }
   return found;
 }

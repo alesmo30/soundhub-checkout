@@ -8,7 +8,13 @@ import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as triggers from 'aws-cdk-lib/triggers';
 import type { Construct } from 'constructs';
 import type { DeployEnv } from './config/deploy-env';
-import { API_LAMBDA, DB_NAME, HTTP_API_THROTTLE, MIGRATOR_LAMBDA, PROJECT_TAG } from './config/constants';
+import {
+  API_LAMBDA,
+  DB_NAME,
+  HTTP_API_THROTTLE,
+  MIGRATOR_LAMBDA,
+  PROJECT_TAG,
+} from './config/constants';
 
 // logs.RetentionDays.TWO_WEEKS matches the LOG_RETENTION_DAYS (14) constant;
 // the CDK enum has no arbitrary-day variant to reference it directly.

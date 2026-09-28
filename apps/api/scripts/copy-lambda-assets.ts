@@ -19,9 +19,7 @@ const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const API_ROOT = join(SCRIPT_DIR, '..');
 const OUTPUT_DIR = join(API_ROOT, 'dist-lambda');
 
-const SWAGGER_UI_DIST_SOURCE = join(
-  dirname(require.resolve('swagger-ui-dist/absolute-path.js')),
-);
+const SWAGGER_UI_DIST_SOURCE = join(dirname(require.resolve('swagger-ui-dist/absolute-path.js')));
 
 function copySwaggerUiAssets(): void {
   cpSync(SWAGGER_UI_DIST_SOURCE, OUTPUT_DIR, { recursive: true });
@@ -35,11 +33,9 @@ function copyRdsCaBundle(): void {
 
 function copySeedData(): void {
   const dataDir = join(OUTPUT_DIR, 'data');
-  cpSync(
-    join(API_ROOT, 'src/shared/infrastructure/persistence/seeds/data'),
-    dataDir,
-    { recursive: true },
-  );
+  cpSync(join(API_ROOT, 'src/shared/infrastructure/persistence/seeds/data'), dataDir, {
+    recursive: true,
+  });
 }
 
 copySwaggerUiAssets();

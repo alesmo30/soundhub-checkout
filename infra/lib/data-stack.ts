@@ -3,7 +3,15 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as rds from 'aws-cdk-lib/aws-rds';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import type { Construct } from 'constructs';
-import { APP_SECRET_KEYS, DB_BACKUP_DAYS, DB_INSTANCE, DB_NAME, DB_STORAGE_GB, NAT_INSTANCE, PROJECT_TAG } from './config/constants';
+import {
+  APP_SECRET_KEYS,
+  DB_BACKUP_DAYS,
+  DB_INSTANCE,
+  DB_NAME,
+  DB_STORAGE_GB,
+  NAT_INSTANCE,
+  PROJECT_TAG,
+} from './config/constants';
 
 const PUBLIC_SUBNET_NAME = 'public';
 const PRIVATE_SUBNET_NAME = 'private-with-egress';
@@ -77,7 +85,10 @@ export class CheckoutDataStack extends cdk.Stack {
     this.appSecrets = new secretsmanager.Secret(this, 'AppSecrets', {
       secretName: APP_SECRETS_SECRET_NAME,
       secretObjectValue: Object.fromEntries(
-        APP_SECRET_KEYS.map((key) => [key, cdk.SecretValue.unsafePlainText(PLACEHOLDER_SECRET_VALUE)]),
+        APP_SECRET_KEYS.map((key) => [
+          key,
+          cdk.SecretValue.unsafePlainText(PLACEHOLDER_SECRET_VALUE),
+        ]),
       ),
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });

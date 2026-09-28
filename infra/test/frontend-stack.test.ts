@@ -42,7 +42,9 @@ interface DistributionResource {
   };
 }
 
-function getDistributionConfig(template: Template): DistributionResource['Properties']['DistributionConfig'] {
+function getDistributionConfig(
+  template: Template,
+): DistributionResource['Properties']['DistributionConfig'] {
   const distributions = template.findResources('AWS::CloudFront::Distribution');
   const distribution = Object.values(distributions)[0] as DistributionResource;
   return distribution.Properties.DistributionConfig;
@@ -120,8 +122,8 @@ describe('CheckoutFrontendStack', () => {
 
     const policies = template.findResources('AWS::CloudFront::ResponseHeadersPolicy');
     const apiHeadersPolicy = Object.values(policies).find((policy) => {
-      const config = (policy as { Properties: { ResponseHeadersPolicyConfig: { Name: string } } }).Properties
-        .ResponseHeadersPolicyConfig;
+      const config = (policy as { Properties: { ResponseHeadersPolicyConfig: { Name: string } } })
+        .Properties.ResponseHeadersPolicyConfig;
       return config.Name.includes('ApiHeaders');
     }) as {
       Properties: {
@@ -132,7 +134,8 @@ describe('CheckoutFrontendStack', () => {
     };
 
     expect(apiHeadersPolicy).toBeDefined();
-    const securityHeaders = apiHeadersPolicy.Properties.ResponseHeadersPolicyConfig.SecurityHeadersConfig ?? {};
+    const securityHeaders =
+      apiHeadersPolicy.Properties.ResponseHeadersPolicyConfig.SecurityHeadersConfig ?? {};
     expect(securityHeaders).not.toHaveProperty('ContentSecurityPolicy');
 
     const hsts = securityHeaders['StrictTransportSecurity'] as { Override: boolean } | undefined;

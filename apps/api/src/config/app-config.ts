@@ -21,7 +21,14 @@ export const APP_CONFIG = Symbol('APP_CONFIG');
 
 export interface AppConfig {
   app: { nodeEnv: NodeEnv; port: number; logLevel: LogLevel };
-  db: { host: string; port: number; username: string; password: string; name: string; ssl: boolean };
+  db: {
+    host: string;
+    port: number;
+    username: string;
+    password: string;
+    name: string;
+    ssl: boolean;
+  };
   paymentGateway: {
     url: string;
     publicKey: string;

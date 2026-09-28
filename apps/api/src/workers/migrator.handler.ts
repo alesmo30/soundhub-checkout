@@ -32,9 +32,8 @@ async function runMigrator(): Promise<MigratorSummary> {
   // instead of reusing data-source.ts's glob-based resolution: the `*.ts`
   // glob does not exist inside a webpack bundle, so the migrator imports the
   // migration classes explicitly by name.
-  const { buildDataSourceOptions } = await import(
-    '../shared/infrastructure/persistence/data-source'
-  );
+  const { buildDataSourceOptions } =
+    await import('../shared/infrastructure/persistence/data-source');
 
   const dataSource = new DataSource({
     ...buildDataSourceOptions(loadDbConfig()),

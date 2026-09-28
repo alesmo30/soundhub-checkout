@@ -107,7 +107,9 @@ describe('CheckoutBackendStack', () => {
     const template = synthBackendStack();
 
     interface PolicyResource {
-      Properties: { PolicyDocument: { Statement: Array<{ Action: string | string[]; Resource: unknown }> } };
+      Properties: {
+        PolicyDocument: { Statement: Array<{ Action: string | string[]; Resource: unknown }> };
+      };
     }
 
     const policies = template.findResources('AWS::IAM::Policy') as Record<string, PolicyResource>;
@@ -138,7 +140,9 @@ describe('CheckoutBackendStack', () => {
     const apiLambdas = template.findResources('AWS::Lambda::Function', {
       Properties: { Handler: 'lambda.handler' },
     });
-    const apiLambda = Object.values(apiLambdas)[0] as { Properties: { Environment: { Variables: Record<string, unknown> } } };
+    const apiLambda = Object.values(apiLambdas)[0] as {
+      Properties: { Environment: { Variables: Record<string, unknown> } };
+    };
     const envKeys = Object.keys(apiLambda.Properties.Environment.Variables);
 
     expect(envKeys).toEqual(expect.arrayContaining(['DB_SECRET_ARN', 'APP_SECRETS_ARN']));
@@ -153,7 +157,9 @@ describe('CheckoutBackendStack', () => {
     const migratorLambdas = template.findResources('AWS::Lambda::Function', {
       Properties: { Handler: 'migrator.handler' },
     });
-    const migratorLambda = Object.values(migratorLambdas)[0] as { Properties: { Environment: { Variables: Record<string, unknown> } } };
+    const migratorLambda = Object.values(migratorLambdas)[0] as {
+      Properties: { Environment: { Variables: Record<string, unknown> } };
+    };
     const envKeys = Object.keys(migratorLambda.Properties.Environment.Variables);
 
     expect(envKeys).toEqual(expect.arrayContaining(['DB_SECRET_ARN', 'APP_SECRETS_ARN']));

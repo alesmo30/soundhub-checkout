@@ -8,7 +8,12 @@ export const DB_BACKUP_DAYS = 1;
 // t4g.micro, not nano: Amazon Linux 2023's dnf needs more than nano's 512 MB
 // to install iptables, and the OOM kill leaves the NAT silently not routing.
 export const NAT_INSTANCE = 't4g.micro';
-export const API_LAMBDA = { memoryMb: 1024, timeoutSeconds: 29, runtime: 'nodejs22.x', arch: 'arm64' };
+export const API_LAMBDA = {
+  memoryMb: 1024,
+  timeoutSeconds: 29,
+  runtime: 'nodejs22.x',
+  arch: 'arm64',
+};
 export const MIGRATOR_LAMBDA = { memoryMb: 512, timeoutSeconds: 300 };
 export const LOG_RETENTION_DAYS = 14;
 export const HTTP_API_THROTTLE = { rateLimit: 50, burstLimit: 100 };

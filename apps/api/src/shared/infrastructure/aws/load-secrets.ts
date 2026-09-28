@@ -1,7 +1,4 @@
-import {
-  GetSecretValueCommand,
-  type SecretsManagerClient,
-} from '@aws-sdk/client-secrets-manager';
+import { GetSecretValueCommand, type SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 
 export const APP_SECRET_KEYS = [
   'PAYMENT_GATEWAY_PRIVATE_KEY',
@@ -51,10 +48,7 @@ async function fetchSecretJson(
 // caching the fetch here avoids re-reading Secrets Manager on every request.
 let cachedLoad: Promise<void> | null = null;
 
-async function loadSecrets(
-  client: SecretsManagerClient,
-  env: NodeJS.ProcessEnv,
-): Promise<void> {
+async function loadSecrets(client: SecretsManagerClient, env: NodeJS.ProcessEnv): Promise<void> {
   const dbCredentials = await fetchSecretJson(client, DB_SECRET_ARN_VAR, env);
   env.DB_HOST = readSecretField(dbCredentials, 'host');
   env.DB_PORT = readSecretField(dbCredentials, 'port');
