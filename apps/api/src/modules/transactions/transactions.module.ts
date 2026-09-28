@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import type { ProductRepository } from '../catalog';
+import { PRODUCT_REPOSITORY } from '../catalog';
 import { CatalogModule } from '../catalog/catalog.module';
 import type { CustomerRepository } from '../customers';
 import { CUSTOMER_REPOSITORY } from '../customers';
@@ -33,6 +35,11 @@ import {
   FINALIZE_TRANSACTION_DEPENDENCIES,
   FinalizeTransactionUseCase,
 } from './application/use-cases/finalize-transaction.use-case';
+import type { GetTransactionStatusDependencies } from './application/use-cases/get-transaction-status.use-case';
+import {
+  GET_TRANSACTION_STATUS_DEPENDENCIES,
+  GetTransactionStatusUseCase,
+} from './application/use-cases/get-transaction-status.use-case';
 import { TransactionsController } from './infrastructure/http/transactions.controller';
 import { IdempotencyKeyPipe } from './infrastructure/http/idempotency-key.pipe';
 import { HttpPaymentGatewayAdapter } from './infrastructure/payment-gateway/http-payment-gateway.adapter';
@@ -58,6 +65,21 @@ interface FinalizeRuntime {
   readonly unitOfWork: UnitOfWork;
   readonly clock: Clock;
   readonly eventPublisher: EventPublisher;
+}
+
+const GET_STATUS_REPOSITORIES = Symbol('GET_STATUS_REPOSITORIES');
+
+interface GetStatusRepositories {
+  readonly transactionRepository: TransactionRepository;
+  readonly productRepository: ProductRepository;
+  readonly deliveryRepository: DeliveryRepository;
+}
+
+const GET_STATUS_SERVICES = Symbol('GET_STATUS_SERVICES');
+
+interface GetStatusServices {
+  readonly paymentGateway: PaymentGatewayPort;
+  readonly finalizeTransactionUseCase: FinalizeTransactionUseCase;
 }
 
 const CREATE_TRANSACTION_REPOSITORIES = Symbol('CREATE_TRANSACTION_REPOSITORIES');
@@ -130,6 +152,36 @@ interface CreateTransactionRuntime {
       inject: [FINALIZE_COLLABORATORS, FINALIZE_RUNTIME],
     },
     FinalizeTransactionUseCase,
+    {
+      provide: GET_STATUS_REPOSITORIES,
+      useFactory: (
+        transactionRepository: TransactionRepository,
+        productRepository: ProductRepository,
+        deliveryRepository: DeliveryRepository,
+      ): GetStatusRepositories => ({
+        transactionRepository,
+        productRepository,
+        deliveryRepository,
+      }),
+      inject: [TRANSACTION_REPOSITORY, PRODUCT_REPOSITORY, DELIVERY_REPOSITORY],
+    },
+    {
+      provide: GET_STATUS_SERVICES,
+      useFactory: (
+        paymentGateway: PaymentGatewayPort,
+        finalizeTransactionUseCase: FinalizeTransactionUseCase,
+      ): GetStatusServices => ({ paymentGateway, finalizeTransactionUseCase }),
+      inject: [PAYMENT_GATEWAY, FinalizeTransactionUseCase],
+    },
+    {
+      provide: GET_TRANSACTION_STATUS_DEPENDENCIES,
+      useFactory: (
+        repositories: GetStatusRepositories,
+        services: GetStatusServices,
+      ): GetTransactionStatusDependencies => ({ ...repositories, ...services }),
+      inject: [GET_STATUS_REPOSITORIES, GET_STATUS_SERVICES],
+    },
+    GetTransactionStatusUseCase,
     {
       provide: CREATE_TRANSACTION_REPOSITORIES,
       useFactory: (

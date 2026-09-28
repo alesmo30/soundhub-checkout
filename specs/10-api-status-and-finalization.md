@@ -243,7 +243,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
 
 ### Transaction status
 
-5. [ ] **Get transaction status use case.** `transactionNotFound`, `helpers/to-transaction-view.ts` and `GetTransactionStatusUseCase` (load → sync → present). The use case injects the transaction repository, the payment gateway, `FinalizeTransactionUseCase`, `PRODUCT_REPOSITORY` and `DELIVERY_REPOSITORY`. The unit specs cover every row of the sync decision table, plus:
+5. [x] **Get transaction status use case.** `transactionNotFound`, `helpers/to-transaction-view.ts` and `GetTransactionStatusUseCase` (load → sync → present). The use case injects the transaction repository, the payment gateway, `FinalizeTransactionUseCase`, `PRODUCT_REPOSITORY` and `DELIVERY_REPOSITORY`. The unit specs cover every row of the sync decision table, plus:
    - an unknown id → `TRANSACTION_NOT_FOUND`;
    - a gateway final status → finalize called with `{ id, status, statusMessage }`, and the response built from the re-read;
    - `getCharge` resolves before finalize is called, and the use case never opens a `UnitOfWork` itself;

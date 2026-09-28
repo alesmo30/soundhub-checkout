@@ -42,3 +42,11 @@ export function paymentGatewayUnavailable(): DomainError {
     'The payment gateway is temporarily unavailable',
   );
 }
+
+export function transactionNotFound(id: string): DomainError {
+  return new DomainError(
+    ErrorCode.TRANSACTION_NOT_FOUND,
+    'NOT_FOUND',
+    `Transaction ${id} not found`,
+  );
+}
