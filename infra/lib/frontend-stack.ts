@@ -49,7 +49,12 @@ export class CheckoutFrontendStack extends cdk.Stack {
         contentSecurityPolicy: {
           override: true,
           contentSecurityPolicy:
-            `default-src 'self'; connect-src 'self' ${deployEnv.paymentGatewayUrl}; ` +
+            // Trailing slash required: CSP treats a path with no trailing
+            // slash as an exact-resource match, not a directory prefix, so
+            // without it only the bare /v1 path (no subpaths) would be
+            // allowed and every gateway call (e.g. /v1/merchants/{key},
+            // /v1/tokens/cards) would be blocked.
+            `default-src 'self'; connect-src 'self' ${deployEnv.paymentGatewayUrl}/; ` +
             "img-src 'self' data:; font-src 'self'; object-src 'none'; " +
             "frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
         },
