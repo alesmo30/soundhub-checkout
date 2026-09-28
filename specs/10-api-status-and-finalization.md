@@ -274,7 +274,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `test` green.
    Commit: `feat(api): add get delivery use case`.
 
-8. [ ] **GET /deliveries/:id.** `delivery-id.params.dto.ts`, `delivery-view.dto.ts`, `delivery-view-response.dto.ts`, `deliveries-http.constants.ts`, `deliveries.controller.ts`, and the controller and use case registered in `DeliveriesModule`. `deliveries.controller.spec.ts` checks:
+8. [x] **GET /deliveries/:id.** `delivery-id.params.dto.ts`, `delivery-view.dto.ts`, `delivery-view-response.dto.ts`, `deliveries-http.constants.ts`, `deliveries.controller.ts`, and the controller and use case registered in `DeliveriesModule`. `deliveries.controller.spec.ts` checks:
    - 200 with `Cache-Control: no-store` and the `DeliveryView` envelope;
    - a non-uuid id → 400;
    - an unknown id → 404 `DELIVERY_NOT_FOUND`, with no `no-store` on it.
