@@ -1,6 +1,6 @@
 # SPEC 15 — Web hardening: responsive, accessibility and bundle
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 11 (web payment)
 > **Date:** 2026-09-28
 > **Objective:** Full flow polished 320–1440 px, keyboard-accessible with zero axe violations, error/empty microcopy matching DESIGN.md §6, checkout code-split, and web coverage ≥80% with margin.
