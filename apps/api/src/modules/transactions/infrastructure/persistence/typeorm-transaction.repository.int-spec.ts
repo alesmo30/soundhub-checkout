@@ -239,11 +239,55 @@ describe('TypeOrmTransactionRepository', () => {
     });
   });
 
-  describe('the api 06 stubs', () => {
-    it('markEmailSent throws', () => {
-      expect(() => repository.markEmailSent()).toThrow(NOT_IMPLEMENTED_MESSAGE);
+  describe('findByProviderTransactionId', () => {
+    it('finds a transaction by its stored provider id', async () => {
+      const { customerId, productId } = await buildFixtureIds(queryRunner.manager);
+      const inserted = (
+        await repository.insert(tx, buildNewTransaction({ customerId, productId }))
+      )._unsafeUnwrap();
+      await repository.recordGatewayResponse(tx, {
+        id: inserted.id,
+        providerTransactionId: 'gw-lookup-1',
+        statusMessage: null,
+      });
+
+      const found = (
+        await repository.findByProviderTransactionId('gw-lookup-1')
+      )._unsafeUnwrap();
+
+      expect(found?.id).toBe(inserted.id);
     });
 
+    it('returns null for an unknown provider id', async () => {
+      const found = (
+        await repository.findByProviderTransactionId('unknown-provider-id')
+      )._unsafeUnwrap();
+
+      expect(found).toBeNull();
+    });
+  });
+
+  describe('markEmailSent', () => {
+    it('sets email_sent_at once, and a second call leaves the first timestamp untouched', async () => {
+      const { customerId, productId } = await buildFixtureIds(queryRunner.manager);
+      const inserted = (
+        await repository.insert(tx, buildNewTransaction({ customerId, productId }))
+      )._unsafeUnwrap();
+      await repository.finalize(tx, { id: inserted.id, status: 'ERROR', statusMessage: null });
+
+      await repository.markEmailSent(tx, inserted.id);
+      const afterFirst = (await repository.findById(inserted.id, tx))._unsafeUnwrap();
+      const firstTimestamp = afterFirst?.emailSentAt;
+      expect(firstTimestamp).not.toBeNull();
+
+      await repository.markEmailSent(tx, inserted.id);
+      const afterSecond = (await repository.findById(inserted.id, tx))._unsafeUnwrap();
+
+      expect(afterSecond?.emailSentAt).toEqual(firstTimestamp);
+    });
+  });
+
+  describe('the api 06 stubs', () => {
     it('claimPendingForSync throws', () => {
       expect(() => repository.claimPendingForSync()).toThrow(NOT_IMPLEMENTED_MESSAGE);
     });

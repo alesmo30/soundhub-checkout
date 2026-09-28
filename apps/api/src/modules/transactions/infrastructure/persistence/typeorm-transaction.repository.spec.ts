@@ -214,6 +214,21 @@ describe('TypeOrmTransactionRepository', () => {
     });
   });
 
+  describe('findByProviderTransactionId', () => {
+    it('reads through the constructor manager, keyed by the provider id', async () => {
+      const { manager, findOne } = buildManagerMock();
+      findOne.mockResolvedValue(null);
+      const repository = new TypeOrmTransactionRepository(manager);
+
+      const result = await repository.findByProviderTransactionId('gw-1');
+
+      expect(findOne).toHaveBeenCalledWith(TransactionOrmEntity, {
+        where: { providerTransactionId: 'gw-1' },
+      });
+      expect(result._unsafeUnwrap()).toBeNull();
+    });
+  });
+
   describe('insert', () => {
     it('inserts through the tx manager and maps the RETURNING row back to a Transaction', async () => {
       const { manager: constructorManager } = buildManagerMock();
@@ -391,14 +406,37 @@ describe('TypeOrmTransactionRepository', () => {
     });
   });
 
-  describe('the api 06 stubs', () => {
-    it('markEmailSent throws', () => {
-      const { manager } = buildManagerMock();
-      const repository = new TypeOrmTransactionRepository(manager);
+  describe('markEmailSent', () => {
+    it('sets email_sent_at conditionally through the tx manager', async () => {
+      const { manager: constructorManager } = buildManagerMock();
+      const { manager: txManager, createQueryBuilder } = buildManagerMock();
+      const execute = jest.fn().mockResolvedValue(undefined);
+      const builder = buildUpdateQueryBuilderMock(execute);
+      createQueryBuilder.mockReturnValue(builder);
+      const repository = new TypeOrmTransactionRepository(constructorManager);
 
-      expect(() => repository.markEmailSent()).toThrow(NOT_IMPLEMENTED_MESSAGE);
+      const result = await repository.markEmailSent(new TypeOrmTxContext(txManager), 'tx-1');
+
+      expect(builder.set).toHaveBeenCalledWith({ emailSentAt: expect.any(Function) });
+      expect(builder.where).toHaveBeenCalledWith('id = :id AND email_sent_at IS NULL', {
+        id: 'tx-1',
+      });
+      expect(result._unsafeUnwrap()).toBeUndefined();
     });
 
+    it('falls back to the constructor manager when tx is not a TypeOrmTxContext', async () => {
+      const { manager, createQueryBuilder } = buildManagerMock();
+      const execute = jest.fn().mockResolvedValue(undefined);
+      createQueryBuilder.mockReturnValue(buildUpdateQueryBuilderMock(execute));
+      const repository = new TypeOrmTransactionRepository(manager);
+
+      await repository.markEmailSent({ __brand: 'TxContext' }, 'tx-1');
+
+      expect(createQueryBuilder).toHaveBeenCalled();
+    });
+  });
+
+  describe('the api 06 stubs', () => {
     it('claimPendingForSync throws', () => {
       const { manager } = buildManagerMock();
       const repository = new TypeOrmTransactionRepository(manager);

@@ -139,15 +139,28 @@ export class TypeOrmTransactionRepository implements TransactionRepository {
     return ResultAsync.fromSafePromise(query);
   }
 
-  findByProviderTransactionId(): ResultAsync<Transaction | null, never> {
-    throw new Error('Not implemented — spec 12a');
+  findByProviderTransactionId(providerTransactionId: string): ResultAsync<Transaction | null, never> {
+    const query = this.manager
+      .findOne(TransactionOrmEntity, { where: { providerTransactionId } })
+      .then((entity) => (entity ? toTransaction(entity) : null));
+
+    return ResultAsync.fromSafePromise(query);
   }
 
-  // The reconciler's own shape (locking strategy, batching, retry policy)
-  // is not decided by this spec — it belongs to api 06 (see
-  // specs/08-api-create-transaction.md, "Adapters").
-  markEmailSent(): ResultAsync<void, never> {
-    throw new Error(NOT_IMPLEMENTED_MESSAGE);
+  // Conditional on email_sent_at IS NULL so a second call (e.g. two
+  // reconciler runs racing after the lease expired) leaves the first
+  // timestamp untouched rather than bumping it.
+  markEmailSent(tx: TxContext, id: string): ResultAsync<void, never> {
+    const manager = tx instanceof TypeOrmTxContext ? tx.manager : this.manager;
+    const query: Promise<void> = manager
+      .createQueryBuilder()
+      .update(TransactionOrmEntity)
+      .set({ emailSentAt: () => 'now()' })
+      .where('id = :id AND email_sent_at IS NULL', { id })
+      .execute()
+      .then(() => undefined);
+
+    return ResultAsync.fromSafePromise(query);
   }
 
   claimPendingForSync(): ResultAsync<Transaction[], never> {
