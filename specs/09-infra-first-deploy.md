@@ -342,7 +342,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step.
    Record the bundle size.
    Commit: `build(api): bundle NestJS for Lambda with webpack`.
 
-10. [ ] **Backend stack.** API Lambda, HTTP API with throttling, migrator Lambda with `triggers.Trigger`, log retention and secret grants. `backend-stack.test.ts` asserts:
+10. [x] **Backend stack.** API Lambda, HTTP API with throttling, migrator Lambda with `triggers.Trigger`, log retention and secret grants. `backend-stack.test.ts` asserts:
     - arm64, `nodejs22.x`, 1024 MB, VPC config with the Lambda security group, and no `ReservedConcurrentExecutions`;
     - throttling 50 / 100;
     - the trigger depends on the migrator;

@@ -11,6 +11,7 @@ export default defineConfig(
       '**/coverage/**',
       '**/node_modules/**',
       '**/cdk.out/**',
+      'infra/test/fixtures/**',
       '**/*.d.ts',
       'pnpm-lock.yaml',
     ],
