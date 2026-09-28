@@ -1,6 +1,6 @@
 # SPEC 09 — Infra: first deploy (data, backend and frontend stacks)
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 01 (workspace, CI, `.env` conventions), SPEC 02 (API bootstrap, `configureApp`, data source, migrations and `runSeed`), SPEC 03 (web build)
 > **Date:** 2026-09-27
 > **Objective:** A public HTTPS CloudFront URL serves the SPA and proxies `/api/*` to the real NestJS app running in a Lambda inside a private VPC against a non-public RDS PostgreSQL, all created and destroyed through CDK.
@@ -388,7 +388,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step.
 
 ### Close-out
 
-14. [ ] **Evidence and PR.**
+14. [x] **Evidence and PR.**
     - Run Mozilla Observatory on the CloudFront URL (target A, findings listed if lower).
     - Note the API Lambda cold start (the `Init Duration` of the first REPORT line in CloudWatch) and the bundle size.
     - Check the quota request status.

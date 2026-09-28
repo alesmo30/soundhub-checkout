@@ -196,6 +196,13 @@ Postman collection itself lives with api spec 07; the root README links it.
 - `CloudFrontUrl`: https://d2dponv42xzzpw.cloudfront.net
 - `ApiUrl`: https://rz9wrfmlj8.execute-api.us-east-1.amazonaws.com
 
+### Evidence (first deploy, 2026-09-28)
+
+- Mozilla Observatory: **A+** (score 125/100, 12/12 tests passed).
+- API Lambda cold start (`Init Duration`, first `REPORT` line): **595.62 ms**.
+- Lambda bundle size: `lambda.js` 4.6 MB, `migrator.js` 4.7 MB, `dist-lambda/` total 27 MB.
+- Lambda concurrency quota increase (request `5748b3c72b314c8fb36167d73d5adc52YXKB9cGl`): **approved**, limit is now 1000. Reserved concurrency itself stays out of this spec's scope (infra 09).
+
 ## 7. Destroy
 
 Destructive. Only run this when you decide to tear the sandbox down —
