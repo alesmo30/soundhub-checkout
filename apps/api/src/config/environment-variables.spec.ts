@@ -41,9 +41,9 @@ describe('validateEnvironmentVariables', () => {
   });
 
   it('rejects EVENT_PUBLISHER_DRIVER=sqs without TRANSACTION_FINALIZED_QUEUE_URL', () => {
-    expect(() =>
-      buildValidEnvironmentVariables({ EVENT_PUBLISHER_DRIVER: 'sqs' }),
-    ).toThrow(/TRANSACTION_FINALIZED_QUEUE_URL/);
+    expect(() => buildValidEnvironmentVariables({ EVENT_PUBLISHER_DRIVER: 'sqs' })).toThrow(
+      /TRANSACTION_FINALIZED_QUEUE_URL/,
+    );
   });
 
   it('accepts EVENT_PUBLISHER_DRIVER=sqs with a queue URL', () => {

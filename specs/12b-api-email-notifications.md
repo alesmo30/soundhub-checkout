@@ -211,7 +211,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `pnpm dev` boots with the default `.env`.
    Commit: `feat(api): add messaging and email driver configuration`.
 
-2. [ ] **SQS publisher and messaging module.** Add `@aws-sdk/client-sqs`. `SqsEventPublisher` and `MessagingModule` (a factory by driver), and `TransactionsModule` importing it instead of binding `EVENT_PUBLISHER` itself. The specs, with a mocked `SQSClient.send`, cover:
+2. [x] **SQS publisher and messaging module.** Add `@aws-sdk/client-sqs`. `SqsEventPublisher` and `MessagingModule` (a factory by driver), and `TransactionsModule` importing it instead of binding `EVENT_PUBLISHER` itself. The specs, with a mocked `SQSClient.send`, cover:
    - the body is the event JSON, sent to the configured URL;
    - an SDK rejection → `Err` with a message that has no body;
    - the module resolves `InMemoryEventPublisher` for `memory` and `SqsEventPublisher` for `sqs`.
