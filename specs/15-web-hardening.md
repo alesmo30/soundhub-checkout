@@ -36,7 +36,7 @@ No persisted data structures. No new dependencies besides `jest-axe` (+ `@types/
    Manual test: Chrome DevTools device toolbar at all five widths — no horizontal scrollbar, no clipped text/buttons.
    Commit: `fix(web): resolve responsive overflow across viewports`.
 
-2. [ ] **jest-axe setup.** Add `jest-axe` devDependency, `toHaveNoViolations` matcher in Jest setup, one `expect(await axe(container)).toHaveNoViolations()` test per page (catalog, product/checkout, transaction status).
+2. [x] **jest-axe setup.** Add `jest-axe` devDependency, `toHaveNoViolations` matcher in Jest setup, one `expect(await axe(container)).toHaveNoViolations()` test per page (catalog, product/checkout, transaction status).
    Manual test: `pnpm --filter @checkout/web test` — new axe tests green.
    Commit: `test(web): add jest-axe suite for catalog, checkout and status pages`.
 
