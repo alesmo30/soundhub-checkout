@@ -1,6 +1,6 @@
 # SPEC 12b — API: transaction result emails
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 12a (blocking: conditional `markEmailSent`, re-publish task), SPEC 10 (blocking: `transaction.finalized` event and the `EventPublisher` binding), SPEC 09 (blocking only for the email worker Lambda step: `@types/aws-lambda`, `load-secrets.ts`, `build:lambda`).
 > **Date:** 2026-09-27
 > **Objective:** Every finalized transaction produces exactly one result email in the customer's inbox — published to SQS, sent by a batch worker through Gmail SMTP with a check-send-mark flow on `email_sent_at`, and rendered from five branded, PII-safe templates — without the payment path ever waiting for email.
@@ -287,7 +287,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
 
 ### Close-out
 
-9. [ ] **Real inbox check, coverage and CI.**
+9. [x] **Real inbox check, coverage and CI.**
     - With `EMAIL_DRIVER=smtp` and a real app password, run `email:send-once <id>` for an APPROVED and a DECLINED transaction whose customer email is the user's own. Both arrive, and a second run sends nothing.
     - Screenshots of both received emails (Gmail web and mobile) go to `docs/evidence/emails/`.
     - `test:cov`: `modules/notifications` ≥ 85 % and `sqs-event-publisher.ts` ≥ 85 % on all four metrics. `apps/api` stays ≥ 80 %.
@@ -307,44 +307,44 @@ Notes:
 
 Configuration
 
-- [ ] With the default `.env`, the app boots with `InMemoryEventPublisher` and `LoggingEmailSender`, and never contacts SQS or SMTP.
-- [ ] `EVENT_PUBLISHER_DRIVER=sqs` without `TRANSACTION_FINALIZED_QUEUE_URL` fails at boot with a message naming the variable.
-- [ ] `EMAIL_DRIVER=smtp` selects `NodemailerGmailAdapter` on port 465 with `secure: true`.
+- [x] With the default `.env`, the app boots with `InMemoryEventPublisher` and `LoggingEmailSender`, and never contacts SQS or SMTP.
+- [x] `EVENT_PUBLISHER_DRIVER=sqs` without `TRANSACTION_FINALIZED_QUEUE_URL` fails at boot with a message naming the variable.
+- [x] `EMAIL_DRIVER=smtp` selects `NodemailerGmailAdapter` on port 465 with `secure: true`.
 
 Publishing and idempotency
 
-- [ ] With the `sqs` driver, a finalization sends one SQS message whose body is the `transaction.finalized` event JSON.
-- [ ] Delivering the same message twice sends one email (unit and int-spec).
-- [ ] A send failure leaves `email_sent_at` null, and a later delivery sends the email.
-- [ ] A batch of 5 with one failing record reports only that record's `messageId` in `batchItemFailures`.
-- [ ] A malformed record is logged and not reported, and the other records are processed.
-- [ ] Records within a batch are processed sequentially.
+- [x] With the `sqs` driver, a finalization sends one SQS message whose body is the `transaction.finalized` event JSON.
+- [x] Delivering the same message twice sends one email (unit and int-spec).
+- [x] A send failure leaves `email_sent_at` null, and a later delivery sends the email.
+- [x] A batch of 5 with one failing record reports only that record's `messageId` in `batchItemFailures`.
+- [x] A malformed record is logged and not reported, and the other records are processed.
+- [x] Records within a batch are processed sequentially.
 
 Templates
 
-- [ ] Each of APPROVED, DECLINED, ERROR, VOIDED and EXPIRED renders its subject, chip, lead line, reference, product × quantity, the four amounts in COP format, `BRAND •••• last4` and the delivery status label, in both HTML and text.
-- [ ] No template output contains the customer's national ID, email, phone or delivery address.
-- [ ] Variable values are HTML-escaped.
-- [ ] With `PUBLIC_WEB_URL`, APPROVED links to `/transactions/:id` and the failed statuses link to `/products/:productId`. Without it, there is no button.
-- [ ] `docs/evidence/emails/` holds the 5 previews at 375×667 and 1440×900, and the two real received emails.
+- [x] Each of APPROVED, DECLINED, ERROR, VOIDED and EXPIRED renders its subject, chip, lead line, reference, product × quantity, the four amounts in COP format, `BRAND •••• last4` and the delivery status label, in both HTML and text.
+- [x] No template output contains the customer's national ID, email, phone or delivery address.
+- [x] Variable values are HTML-escaped.
+- [x] With `PUBLIC_WEB_URL`, APPROVED links to `/transactions/:id` and the failed statuses link to `/products/:productId`. Without it, there is no button.
+- [x] `docs/evidence/emails/` holds the 5 previews at 375×667 and 1440×900. The two real received emails were verified by the user directly in Gmail (web and mobile) rather than screenshotted — see Decisions.
 
 Security and logging
 
-- [ ] No log line contains the SMTP password, a full recipient address, or an email body sent through SMTP.
-- [ ] The logging sender masks the recipient.
+- [x] No log line contains the SMTP password, a full recipient address, or an email body sent through SMTP.
+- [x] The logging sender masks the recipient.
 
 Architecture
 
-- [ ] `modules/transactions` changed only by replacing its `EVENT_PUBLISHER` binding with the `MessagingModule` import (and, if needed, exporting `TRANSACTION_REPOSITORY`).
-- [ ] The only new dependencies are `nodemailer`, `@aws-sdk/client-sqs` and `@types/nodemailer`.
-- [ ] `email-worker.handler.ts`, `email-send-once.cli.ts` and `email-preview.ts` are the only new coverage exclusions.
+- [x] `modules/transactions` changed only by replacing its `EVENT_PUBLISHER` binding with the `MessagingModule` import (and, if needed, exporting `TRANSACTION_REPOSITORY`).
+- [x] The only new dependencies are `nodemailer`, `@aws-sdk/client-sqs` and `@types/nodemailer`.
+- [x] `email-worker.handler.ts`, `email-send-once.cli.ts` and `email-preview.ts` are the only new coverage exclusions.
 
 Quality and CI
 
-- [ ] `pnpm lint`, `pnpm typecheck`, `pnpm --filter @checkout/api test:cov` and `test:int` exit 0 locally.
-- [ ] `modules/notifications` ≥ 85 % on statements, branches, functions and lines, and `apps/api` ≥ 80 %.
-- [ ] A real Gmail inbox receives the APPROVED and DECLINED emails, and a second `email:send-once` sends nothing.
-- [ ] The PR shows green `lint`, `typecheck`, `coverage (api)` and `api-integration`.
+- [x] `pnpm lint`, `pnpm typecheck`, `pnpm --filter @checkout/api test:cov` and `test:int` exit 0 locally.
+- [x] `modules/notifications` ≥ 85 % on statements, branches, functions and lines, and `apps/api` ≥ 80 %.
+- [x] A real Gmail inbox receives the APPROVED and DECLINED emails, and a second `email:send-once` sends nothing.
+- [ ] The PR shows green `lint`, `typecheck`, `coverage (api)` and `api-integration`. Not applicable yet: no PR opened (pushing/opening a PR happens only when the user asks).
 
 ## Decisions
 
@@ -353,6 +353,7 @@ Spec and dependencies
 - **Yes:** this is SPEC 12b, the second half of `phases/sunday/api/06-async.md`. It goes after SPEC 12a, which implements `markEmailSent` and the re-publish task in `modules/transactions`.
 - **Yes:** the Lambda handler step waits for SPEC 09. Everything before it runs locally.
 - **Yes:** the clarification ran question by question, and the sections after the header were written in one pass at the user's request.
+- **Decision (step 9):** the two real received emails were verified by the user directly in their Gmail inbox (web and mobile), not screenshotted into `docs/evidence/emails/`. The user explicitly waived the screenshot after confirming both looked correct.
 
 Idempotency
 
