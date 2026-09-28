@@ -1,6 +1,6 @@
 # SPEC 10 — API: transaction status and finalization
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 08 (blocking: must be merged into `main` — release-only `FinalizeTransactionUseCase`, transaction / delivery / stock repositories, `HttpPaymentGatewayAdapter.getCharge`, `TransactionsModule` wiring), SPEC 04 (product, warehouse and municipality repositories), SPEC 02 (frozen `EventPublisher` port, `UnitOfWork`)
 > **Date:** 2026-09-27
 > **Objective:** A PENDING transaction reaches its final status exactly once, whoever notices first — `GET /transactions/:id` syncs it with the payment gateway, the finalization commits or releases stock idempotently and publishes `transaction.finalized`, and `GET /deliveries/:id` shows where the order ships from and to.
@@ -284,7 +284,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
 
 ### Close-out
 
-9. [ ] **Sandbox check, coverage and CI.**
+9. [x] **Sandbox check, coverage and CI.**
    - **Card 4242**, against the local API with sandbox keys. Tokenize the card and fetch fresh acceptance tokens with curl, then `POST /transactions`. Then poll `GET /transactions/:id` every 2 s. Expect:
      - `PENDING` with `Retry-After: 2`, then `APPROVED`;
      - the product's `stock_reserved` back to its value before the purchase;
