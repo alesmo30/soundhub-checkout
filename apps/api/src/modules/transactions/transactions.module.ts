@@ -12,8 +12,10 @@ import { GetQuoteUseCase } from '../pricing';
 import { PricingModule } from '../pricing/pricing.module';
 import type { Clock } from '../../shared/application/ports/clock.port';
 import { CLOCK } from '../../shared/application/ports/clock.port';
+import { EVENT_PUBLISHER } from '../../shared/application/ports/event-publisher.port';
 import type { UnitOfWork } from '../../shared/application/ports/unit-of-work.port';
 import { UNIT_OF_WORK } from '../../shared/application/ports/unit-of-work.port';
+import { InMemoryEventPublisher } from '../../shared/infrastructure/messaging/in-memory-event-publisher';
 import { TypeOrmUnitOfWork } from '../../shared/infrastructure/persistence/typeorm-unit-of-work';
 import { SystemClock } from '../../shared/infrastructure/time/system-clock';
 import { CREATE_TRANSACTION_DEPENDENCIES } from './application/ports/create-transaction.dependencies';
@@ -87,6 +89,7 @@ interface CreateTransactionRuntime {
     { provide: PAYMENT_GATEWAY, useClass: HttpPaymentGatewayAdapter },
     { provide: UNIT_OF_WORK, useClass: TypeOrmUnitOfWork },
     { provide: CLOCK, useClass: SystemClock },
+    { provide: EVENT_PUBLISHER, useClass: InMemoryEventPublisher },
     {
       provide: FINALIZE_COLLABORATORS,
       useFactory: (

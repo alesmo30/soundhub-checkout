@@ -205,7 +205,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
 
 ### Finalization
 
-1. [ ] **In-memory event publisher.** `InMemoryEventPublisher` in `shared/infrastructure/messaging/`, bound as `EVENT_PUBLISHER` in `TransactionsModule`. The unit spec checks, with a captured logger:
+1. [x] **In-memory event publisher.** `InMemoryEventPublisher` in `shared/infrastructure/messaging/`, bound as `EVENT_PUBLISHER` in `TransactionsModule`. The unit spec checks, with a captured logger:
    - `publish` returns `Ok`;
    - the log line carries the event's `type`, `transactionId` and `status`.
 
