@@ -4,12 +4,14 @@ import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as logs from 'aws-cdk-lib/aws-logs';
+import * as sqs from 'aws-cdk-lib/aws-sqs';
 import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as triggers from 'aws-cdk-lib/triggers';
 import type { Construct } from 'constructs';
 import type { DeployEnv } from './config/deploy-env';
 import {
   API_LAMBDA,
+  ASYNC,
   DB_NAME,
   HTTP_API_THROTTLE,
   MIGRATOR_LAMBDA,
@@ -108,6 +110,19 @@ export class CheckoutBackendStack extends cdk.Stack {
     appSecrets.grantRead(apiLambda);
     dbSecret.grantRead(migratorLambda);
     appSecrets.grantRead(migratorLambda);
+
+    const transactionFinalizedDlq = new sqs.Queue(this, 'TransactionFinalizedDlq');
+
+    const transactionFinalizedQueue = new sqs.Queue(this, 'TransactionFinalizedQueue', {
+      queueName: ASYNC.QUEUE_NAME,
+      visibilityTimeout: ASYNC.QUEUE_VISIBILITY_TIMEOUT,
+      deadLetterQueue: {
+        queue: transactionFinalizedDlq,
+        maxReceiveCount: ASYNC.DLQ_MAX_RECEIVE_COUNT,
+      },
+    });
+    transactionFinalizedQueue.grantSendMessages(apiLambda);
+    apiLambda.addEnvironment('TRANSACTION_FINALIZED_QUEUE_URL', transactionFinalizedQueue.queueUrl);
 
     // Runs the migrator during every `cdk deploy` and re-runs it whenever the
     // migrator's code or config changes, so the schema/seed are applied

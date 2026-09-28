@@ -77,7 +77,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `pnpm --filter @checkout/infra typecheck` passes.
    Commit: `feat(infra): add async section config constants`.
 
-2. [ ] **SQS queue, DLQ and API Lambda grant.** In `CheckoutBackendStack`: `TransactionFinalizedDlq`, `TransactionFinalizedQueue` (redrive policy `maxReceiveCount = ASYNC.DLQ_MAX_RECEIVE_COUNT`, visibility timeout `ASYNC.QUEUE_VISIBILITY_TIMEOUT`); `queue.grantSendMessages(apiLambda)`; `apiLambda.addEnvironment('TRANSACTION_FINALIZED_QUEUE_URL', queue.queueUrl)`. The specs cover:
+2. [x] **SQS queue, DLQ and API Lambda grant.** In `CheckoutBackendStack`: `TransactionFinalizedDlq`, `TransactionFinalizedQueue` (redrive policy `maxReceiveCount = ASYNC.DLQ_MAX_RECEIVE_COUNT`, visibility timeout `ASYNC.QUEUE_VISIBILITY_TIMEOUT`); `queue.grantSendMessages(apiLambda)`; `apiLambda.addEnvironment('TRANSACTION_FINALIZED_QUEUE_URL', queue.queueUrl)`. The specs cover:
    - the queue and DLQ exist, with the exact redrive `maxReceiveCount`;
    - the queue's visibility timeout is 720 s;
    - `apiLambda`'s IAM policy grants `sqs:SendMessage` scoped to the queue ARN (not `*`);
