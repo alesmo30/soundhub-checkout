@@ -40,7 +40,7 @@ No persisted data structures. No new dependencies besides `jest-axe` (+ `@types/
    Manual test: `pnpm --filter @checkout/web test` — new axe tests green.
    Commit: `test(web): add jest-axe suite for catalog, checkout and status pages`.
 
-3. [ ] **Keyboard and focus pass.** Walk the full flow keyboard-only; add/fix `aria-describedby`, missing `<label>`s, focus-trap on dialog/sheet (Esc closes), visible focus ring where default outline was suppressed.
+3. [x] **Keyboard and focus pass.** Walk the full flow keyboard-only; add/fix `aria-describedby`, missing `<label>`s, focus-trap on dialog/sheet (Esc closes), visible focus ring where default outline was suppressed.
    Manual test: keyboard-only run from catalog to final status, no mouse; every focused element visibly ringed.
    Commit: `fix(web): complete keyboard navigation and focus visibility`.
 
