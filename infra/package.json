@@ -5,7 +5,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "jest -c jest.config.ts",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "deploy": "bash scripts/deploy.sh"
   },
   "dependencies": {
     "aws-cdk-lib": "^2.271.0",

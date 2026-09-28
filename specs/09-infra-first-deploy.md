@@ -23,7 +23,7 @@ Part 1 — Data stack (`infra/`)
   - Nothing brand-related is committed.
 - `CheckoutDataStack`:
   - VPC with 2 AZs and public, private-with-egress and isolated subnets.
-  - NAT **instance** t4g.nano via `NatProvider.instanceV2`. No NAT Gateway.
+  - NAT **instance** t4g.micro via `NatProvider.instanceV2`. No NAT Gateway.
   - RDS PostgreSQL 16 db.t4g.micro, gp3 20 GB, single-AZ, in the isolated subnets. Not publicly accessible. Parameter group with `rds.force_ssl=1`. 1-day backups. Credentials generated into Secrets Manager (`db-credentials`).
   - `LambdaSecurityGroup` (exported). It is the only source allowed to reach 5432.
   - `app-secrets` created with the expected keys and placeholder values: `PAYMENT_GATEWAY_PRIVATE_KEY`, `PAYMENT_GATEWAY_INTEGRITY_SECRET`, `PAYMENT_GATEWAY_EVENTS_SECRET`, `SMTP_USER`, `SMTP_PASSWORD`. Real values are set by hand with the AWS CLI and never committed.
@@ -164,7 +164,7 @@ export const DB_NAME = 'checkout';
 export const DB_INSTANCE = 'db.t4g.micro';
 export const DB_STORAGE_GB = 20;
 export const DB_BACKUP_DAYS = 1;
-export const NAT_INSTANCE = 't4g.nano';
+export const NAT_INSTANCE = 't4g.micro';
 export const API_LAMBDA = { memoryMb: 1024, timeoutSeconds: 29, runtime: 'nodejs22.x', arch: 'arm64' };
 export const MIGRATOR_LAMBDA = { memoryMb: 512, timeoutSeconds: 300 };
 export const LOG_RETENTION_DAYS = 14;
@@ -280,8 +280,8 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step.
    Manual test: `pnpm --filter @checkout/infra test` is green locally.
    Commit: `ci: run infra tests`.
 
-3. [x] **Network.** In `CheckoutDataStack`: VPC with 2 AZs and 3 subnet tiers, the NAT instance t4g.nano through `NatProvider.instanceV2`, and the exported `LambdaSecurityGroup`. `data-stack.test.ts` asserts:
-   - 0 `AWS::EC2::NatGateway` and 1 `AWS::EC2::Instance` of type `t4g.nano`;
+3. [x] **Network.** In `CheckoutDataStack`: VPC with 2 AZs and 3 subnet tiers, the NAT instance t4g.micro through `NatProvider.instanceV2`, and the exported `LambdaSecurityGroup`. `data-stack.test.ts` asserts:
+   - 0 `AWS::EC2::NatGateway` and 1 `AWS::EC2::Instance` of type `t4g.micro`;
    - 6 subnets in 2 AZs;
    - the project tag on the VPC.
 
@@ -371,7 +371,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step.
     Manual test: `test` green.
     Commit: `feat(infra): add CloudFront distribution for SPA and API`.
 
-13. [ ] **Build-and-deploy and first full deploy.** A `deploy` script in `infra`:
+13. [x] **Build-and-deploy and first full deploy.** A `deploy` script in `infra`:
     1. build the web with `VITE_API_BASE_URL=/api/v1`, `VITE_API_MOCKING=false` and the `VITE_*` values from `.env`;
     2. `build:lambda`;
     3. `cdk deploy --all`.
@@ -411,7 +411,7 @@ Data stack
 - [ ] `cdk deploy CheckoutDataStack` succeeds with the `soundhub` profile.
 - [ ] `aws rds describe-db-instances` reports `PubliclyAccessible: false`, engine `postgres` 16, class `db.t4g.micro`, 20 GB gp3, 1-day backup retention.
 - [ ] The RDS endpoint resolves only to a private (10.x) address, and a `psql` attempt from the laptop times out.
-- [ ] `cdk synth` output contains no `AWS::EC2::NatGateway`, and it contains one `t4g.nano` NAT instance.
+- [ ] `cdk synth` output contains no `AWS::EC2::NatGateway`, and it contains one `t4g.micro` NAT instance.
 - [ ] The only ingress rule on 5432 has the Lambda security group as its source.
 - [ ] A connection without SSL is rejected (`rds.force_ssl=1` is in effect).
 - [ ] `app-secrets` exists with the 5 expected keys, and no real value appears in git, the templates or the CI logs.
@@ -495,7 +495,8 @@ Bundling
 
 Networking and edge
 
-- **Yes:** a NAT instance (t4g.nano, ~USD 7/month with its public IPv4) instead of a NAT Gateway (~USD 35/month), as designed in `04-aws-architecture.md` §4.
+- **Yes:** a NAT instance instead of a NAT Gateway (~USD 35/month), as designed in `04-aws-architecture.md` §4.
+- **Yes:** t4g.micro (~USD 10/month with its public IPv4), deviating from the t4g.nano this spec first named. The first deploy of step 13 timed out on every outbound call from the private subnets: nano's 512 MB is not enough for Amazon Linux 2023's `dnf` to install `iptables-services`, so the OOM killer stopped it (`yum install iptables-services -y` → `Killed`, then `/sbin/iptables: command not found` in the instance console). The instance still booted and the routes still pointed at it, so the failure was silent — CloudFormation only surfaced it as `ETIMEDOUT` from the migrator's Secrets Manager call. **No:** keeping nano with a swap file added ahead of the install (works, but trades USD 3/month for custom user data that CDK does not maintain). **No:** the fck-nat AMI (purpose-built and cheapest, but a third-party AMI with per-region ids).
 - **Yes:** two Response Headers Policies. S3 gets the strict §5 set with override, which is what Observatory grades. `/api/*` gets HSTS, Referrer and Permissions without override and without CSP, so helmet keeps its per-path CSP and Swagger UI's inline scripts work.
 - **No:** one policy with override everywhere. It would blank `/api/docs`, a deliverable.
 - **Yes:** the SPA rewrite function only on the S3 behaviors. **No:** a distribution-wide 403/404 → `index.html`, which would turn API 404s into HTML.

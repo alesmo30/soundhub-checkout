@@ -64,7 +64,7 @@ describe('CheckoutBackendStack', () => {
     const template = synthBackendStack();
 
     template.hasResourceProperties('AWS::Lambda::Function', {
-      Handler: 'migrator.handler.handler',
+      Handler: 'migrator.handler',
       Architectures: ['arm64'],
       Runtime: 'nodejs22.x',
       MemorySize: 512,
@@ -151,7 +151,7 @@ describe('CheckoutBackendStack', () => {
     const template = synthBackendStack();
 
     const migratorLambdas = template.findResources('AWS::Lambda::Function', {
-      Properties: { Handler: 'migrator.handler.handler' },
+      Properties: { Handler: 'migrator.handler' },
     });
     const migratorLambda = Object.values(migratorLambdas)[0] as { Properties: { Environment: { Variables: Record<string, unknown> } } };
     const envKeys = Object.keys(migratorLambda.Properties.Environment.Variables);

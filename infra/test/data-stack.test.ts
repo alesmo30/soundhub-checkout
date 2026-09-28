@@ -18,12 +18,12 @@ describe('CheckoutDataStack', () => {
     template.resourceCountIs('AWS::EC2::NatGateway', 0);
   });
 
-  it('creates a single t4g.nano NAT instance', () => {
+  it('creates a single t4g.micro NAT instance', () => {
     const template = synthDataStack();
 
     template.resourceCountIs('AWS::EC2::Instance', 1);
     template.hasResourceProperties('AWS::EC2::Instance', {
-      InstanceType: 't4g.nano',
+      InstanceType: 't4g.micro',
     });
   });
 

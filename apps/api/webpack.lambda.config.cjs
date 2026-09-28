@@ -97,7 +97,7 @@ module.exports = [
     buildEntryConfig(options, webpack, { name: 'lambda', sourcePath: 'src/lambda.ts' }),
   (options, webpack) =>
     buildEntryConfig(options, webpack, {
-      name: 'migrator.handler',
+      name: 'migrator',
       sourcePath: 'src/workers/migrator.handler.ts',
     }),
 ];

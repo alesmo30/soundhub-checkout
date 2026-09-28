@@ -1,15 +1,15 @@
 # infra
 
 AWS CDK (TypeScript) app that deploys SoundHub's sandbox environment: a
-private VPC, RDS PostgreSQL, and (in later steps of this spec) the API
-Lambda, HTTP API and CloudFront distribution. Region `us-east-1`. Every
-resource is tagged `project=headphones-checkout` and every stack name is
-prefixed `Checkout`.
+private VPC, RDS PostgreSQL, the API Lambda behind an HTTP API, and a
+CloudFront distribution serving the SPA. Region `us-east-1`. Every resource
+is tagged `project=headphones-checkout` and every stack name is prefixed
+`Checkout`.
 
-This section covers **`CheckoutDataStack`** only (VPC, NAT instance, RDS,
-`db-credentials` and `app-secrets`). The backend and frontend stacks land in
-later steps of spec 09 and will extend this README with their own deploy,
-outputs and destroy commands.
+Besides `CheckoutDataStack` (VPC, NAT instance, RDS, `db-credentials` and
+`app-secrets`), it also deploys `CheckoutBackendStack` (API + migrator
+Lambdas behind an HTTP API) and `CheckoutFrontendStack` (S3 + CloudFront
+serving the SPA and proxying `/api/*` to the HTTP API).
 
 ## Prerequisites
 
@@ -138,14 +138,74 @@ returned endpoint, and note that a `psql` connection attempt from your
 laptop times out (there is no route from the public internet into the
 isolated subnet).
 
-## 6. Destroy
+## 6. Build and deploy everything (data + backend + frontend)
+
+`pnpm --filter @checkout/infra run deploy` runs `infra/scripts/deploy.sh`, which:
+
+1. builds `apps/web` with `VITE_API_BASE_URL=/api/v1` and
+   `VITE_API_MOCKING=false` (the other `VITE_*` values — payment gateway URL
+   and public key — are read from the root `.env`, same as local dev);
+2. builds the API Lambda bundle (`pnpm --filter @checkout/api build:lambda`);
+3. runs `cdk deploy --all --profile soundhub`, deploying `CheckoutDataStack`,
+   `CheckoutBackendStack` and `CheckoutFrontendStack` in dependency order.
+
+Step 3 is interactive on purpose — it does **not** pass
+`--require-approval never`, so CDK stops and shows every IAM/security-group
+change before applying it. Confirm each prompt by hand.
+
+**Cost: ~USD 23–25/month total**, essentially unchanged from the data-stack
+cost in step 3 above. CloudFront and S3 have generous free tiers at this
+traffic volume, the HTTP API is USD 1 per million requests, and both Lambdas
+(API + migrator) run well within the Lambda free tier. The delta over the
+data-stack-only estimate is small and dominated by rounding, not by new
+paid resources.
+
+```bash
+pnpm --filter @checkout/infra run deploy
+```
+
+Run this only after confirming the price above and getting explicit
+approval — it deploys real AWS resources.
+
+### Stack outputs and the Postman `{{baseUrl}}`
+
+After a successful deploy, read the outputs from the frontend and backend
+stacks:
+
+```bash
+aws cloudformation describe-stacks \
+  --stack-name CheckoutFrontendStack \
+  --profile soundhub \
+  --query "Stacks[0].Outputs"
+
+aws cloudformation describe-stacks \
+  --stack-name CheckoutBackendStack \
+  --profile soundhub \
+  --query "Stacks[0].Outputs"
+```
+
+The frontend stack's `CloudFrontUrl` output is the entry point for the
+deployed environment — the SPA is served from it, and it proxies `/api/*`
+to the HTTP API. The backend stack's `ApiUrl` output is the HTTP API's own
+invoke URL, useful for isolated backend checks but not the URL end users
+(or Postman) should hit.
+
+`CloudFrontUrl` is the Postman `{{baseUrl}}` for the AWS environment. The
+Postman collection itself lives with api spec 07; the root README links it.
+
+- `CloudFrontUrl`: https://d2dponv42xzzpw.cloudfront.net
+- `ApiUrl`: https://rz9wrfmlj8.execute-api.us-east-1.amazonaws.com
+
+## 7. Destroy
 
 Destructive. Only run this when you decide to tear the sandbox down —
 there is no final RDS snapshot and no deletion protection, so the data is
-gone for good.
+gone for good. Once the backend and frontend stacks have been deployed,
+`cdk destroy --all` tears down all three stacks (data, backend, frontend),
+not just the data stack.
 
 ```bash
-pnpm --filter @checkout/infra exec cdk destroy CheckoutDataStack --profile soundhub
+pnpm --filter @checkout/infra exec cdk destroy --all --profile soundhub
 ```
 
 **Secrets Manager recovery-window nuance:** CloudFormation (and therefore
@@ -170,10 +230,3 @@ aws secretsmanager delete-secret \
 Otherwise the secret names stay reserved (pending deletion) for the
 duration of the recovery window, and a redeploy that tries to recreate a
 secret with the same name fails.
-
-## What's next
-
-Steps 6–13 of spec 09 add the backend Lambda + HTTP API and the frontend
-CloudFront distribution, a combined `deploy` script (`cdk deploy --all`),
-and the stack outputs (CloudFront URL, API URL). This README will grow to
-cover those once those steps land.

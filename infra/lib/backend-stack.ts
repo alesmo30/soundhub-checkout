@@ -18,7 +18,7 @@ const LOG_LEVEL_INFO = 'info';
 const API_PORT = '3000';
 const DB_SSL_ENABLED = 'true';
 const API_HANDLER = 'lambda.handler';
-const MIGRATOR_HANDLER = 'migrator.handler.handler';
+const MIGRATOR_HANDLER = 'migrator.handler';
 
 export interface DataStackOutputs {
   vpc: ec2.IVpc;
