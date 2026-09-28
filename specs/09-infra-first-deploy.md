@@ -288,7 +288,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step.
    Manual test: `test` green, and `cdk synth CheckoutDataStack` contains no `NatGateway`.
    Commit: `feat(infra): add VPC with NAT instance`.
 
-4. [ ] **Database and secrets.** RDS PostgreSQL 16 with its parameter group (`rds.force_ssl=1`), the `db-credentials` secret, the security group rule (5432 only from `LambdaSecurityGroup`), the `app-secrets` placeholders and the destroy policies. The tests assert:
+4. [x] **Database and secrets.** RDS PostgreSQL 16 with its parameter group (`rds.force_ssl=1`), the `db-credentials` secret, the security group rule (5432 only from `LambdaSecurityGroup`), the `app-secrets` placeholders and the destroy policies. The tests assert:
    - `PubliclyAccessible: false`, isolated subnets, `db.t4g.micro`, 20 GB gp3, 1-day backups;
    - `rds.force_ssl: '1'`;
    - exactly one ingress on 5432, sourced from the Lambda security group;
