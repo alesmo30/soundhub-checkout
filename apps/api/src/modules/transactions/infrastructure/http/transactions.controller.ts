@@ -54,8 +54,7 @@ export class TransactionsController {
   })
   @ApiConflictResponse({ description: 'OUT_OF_STOCK or PRICE_CHANGED.' })
   @ApiUnprocessableEntityResponse({
-    description:
-      'IDEMPOTENCY_KEY_REUSED, or an unknown customerId/productId/municipalityCode.',
+    description: 'IDEMPOTENCY_KEY_REUSED, or an unknown customerId/productId/municipalityCode.',
   })
   @ApiServiceUnavailableResponse({ description: 'PAYMENT_GATEWAY_UNAVAILABLE.' })
   async create(

@@ -121,7 +121,10 @@ class FakeTransactionRepository implements TransactionRepository {
     throw new Error('not used by this spec');
   }
 
-  insert(_tx: TxContext, values: NewTransaction): ResultAsync<Transaction, TransactionUniqueViolation> {
+  insert(
+    _tx: TxContext,
+    values: NewTransaction,
+  ): ResultAsync<Transaction, TransactionUniqueViolation> {
     const inserted: Transaction = {
       id: randomUUID(),
       status: 'PENDING',
@@ -319,7 +322,8 @@ function buildUseCase(): CreateTransactionUseCase {
     stockReservation: new FakeStockReservation(),
     unitOfWork: new FakeUnitOfWork(),
     clock: new FakeClock(),
-    finalizeTransactionUseCase: new FakeFinalizeTransactionUseCase() as unknown as FinalizeTransactionUseCase,
+    finalizeTransactionUseCase:
+      new FakeFinalizeTransactionUseCase() as unknown as FinalizeTransactionUseCase,
     random: Math.random,
   });
 }
@@ -335,7 +339,10 @@ async function buildApp(stream: MemoryStream): Promise<INestApplication> {
       }),
     ],
     controllers: [TransactionsController],
-    providers: [{ provide: CreateTransactionUseCase, useValue: buildUseCase() }, IdempotencyKeyPipe],
+    providers: [
+      { provide: CreateTransactionUseCase, useValue: buildUseCase() },
+      IdempotencyKeyPipe,
+    ],
   }).compile();
 
   const app = moduleRef.createNestApplication();

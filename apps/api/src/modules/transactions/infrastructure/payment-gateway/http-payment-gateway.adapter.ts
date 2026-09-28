@@ -1,13 +1,15 @@
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { CURRENCY } from '@checkout/shared/constants';
 
-import type { AppConfig } from '../../../../config/app-config';
-import { APP_CONFIG } from '../../../../config/config.module';
+import { APP_CONFIG, type AppConfig } from '../../../../config/app-config';
 import { err, errAsync, ok, ResultAsync } from '../../../../shared/domain/result';
 import type { Result } from '../../../../shared/domain/result';
 import { CircuitBreaker } from '../../../../shared/infrastructure/resilience/circuit-breaker';
 import { retryWithBackoff } from '../../../../shared/infrastructure/resilience/retry-with-backoff';
-import { TimeoutError, withTimeout } from '../../../../shared/infrastructure/resilience/with-timeout';
+import {
+  TimeoutError,
+  withTimeout,
+} from '../../../../shared/infrastructure/resilience/with-timeout';
 import { integritySignature } from '../../domain/integrity-signature';
 import type {
   CreateChargeRequest,
@@ -147,9 +149,7 @@ export class HttpPaymentGatewayAdapter implements PaymentGatewayPort {
     );
   }
 
-  findChargeByReference(
-    reference: string,
-  ): ResultAsync<GatewayCharge | null, PaymentGatewayError> {
+  findChargeByReference(reference: string): ResultAsync<GatewayCharge | null, PaymentGatewayError> {
     const availability = this.ensureAvailable();
     if (availability.isErr()) return errAsync(availability.error);
 
@@ -218,15 +218,24 @@ export class HttpPaymentGatewayAdapter implements PaymentGatewayPort {
     return this.toOutcome(status, body, parse);
   }
 
-  private async fetchJson(url: string, init: RequestInit): Promise<{ status: number; body: unknown }> {
+  private async fetchJson(
+    url: string,
+    init: RequestInit,
+  ): Promise<{ status: number; body: unknown }> {
     let response: Response;
 
     try {
       response = await withTimeout((signal) => fetch(url, { ...init, signal }), this.timeoutMs);
     } catch (error) {
       throw error instanceof TimeoutError
-        ? new GatewayBreakerFailure({ kind: 'TIMEOUT', message: 'The payment gateway request timed out' })
-        : new GatewayBreakerFailure({ kind: 'UNAVAILABLE', message: 'The payment gateway is unreachable' });
+        ? new GatewayBreakerFailure({
+            kind: 'TIMEOUT',
+            message: 'The payment gateway request timed out',
+          })
+        : new GatewayBreakerFailure({
+            kind: 'UNAVAILABLE',
+            message: 'The payment gateway is unreachable',
+          });
     }
 
     const body: unknown = await response.json().catch(() => null);
@@ -235,7 +244,11 @@ export class HttpPaymentGatewayAdapter implements PaymentGatewayPort {
 
   // 2xx resolves; a 4xx resolves too (as a REJECTED outcome) so the breaker
   // never counts it as a failure; a 5xx throws so the breaker does.
-  private toOutcome<T>(status: number, body: unknown, parse: (body: unknown) => T): GatewayOutcome<T> {
+  private toOutcome<T>(
+    status: number,
+    body: unknown,
+    parse: (body: unknown) => T,
+  ): GatewayOutcome<T> {
     if (status >= 200 && status < 300) {
       return { kind: 'ok', status, charge: parse(body) };
     }

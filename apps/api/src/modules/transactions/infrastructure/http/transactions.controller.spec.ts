@@ -126,7 +126,10 @@ class FakeTransactionRepository implements TransactionRepository {
     throw new Error('not used by this spec');
   }
 
-  insert(_tx: TxContext, values: NewTransaction): ResultAsync<Transaction, TransactionUniqueViolation> {
+  insert(
+    _tx: TxContext,
+    values: NewTransaction,
+  ): ResultAsync<Transaction, TransactionUniqueViolation> {
     this.insertCalls.push(values);
     const inserted: Transaction = {
       id: randomUUID(),
@@ -328,9 +331,7 @@ interface BuildAppParams {
   readonly paymentGateway?: FakePaymentGateway;
 }
 
-async function buildApp(
-  params: BuildAppParams = {},
-): Promise<{
+async function buildApp(params: BuildAppParams = {}): Promise<{
   app: INestApplication;
   server: Server;
   transactionRepo: FakeTransactionRepository;
@@ -352,7 +353,8 @@ async function buildApp(
     stockReservation,
     unitOfWork: new FakeUnitOfWork(),
     clock: new FakeClock(),
-    finalizeTransactionUseCase: new FakeFinalizeTransactionUseCase() as unknown as FinalizeTransactionUseCase,
+    finalizeTransactionUseCase:
+      new FakeFinalizeTransactionUseCase() as unknown as FinalizeTransactionUseCase,
     random: Math.random,
   });
 
@@ -526,7 +528,7 @@ describe('TransactionsController', () => {
     const response = await request(server)
       .post('/api/v1/transactions')
       .set(IDEMPOTENCY_KEY_HEADER, IDEMPOTENCY_KEY)
-      .send(validBody({ delivery: { ...validBody()['delivery'] as object, phone: '123' } }));
+      .send(validBody({ delivery: { ...(validBody()['delivery'] as object), phone: '123' } }));
 
     expect(response.status).toBe(400);
     expect(asProblem(response.body).errors).toEqual(
@@ -536,7 +538,9 @@ describe('TransactionsController', () => {
 
   it('returns 409 OUT_OF_STOCK when the quote reports insufficient stock', async () => {
     const quoteError = new DomainError(ErrorCode.OUT_OF_STOCK, 'CONFLICT', 'Only 1 unit available');
-    const { server } = await build({ getQuoteUseCase: new FakeGetQuoteUseCase(errAsync(quoteError)) });
+    const { server } = await build({
+      getQuoteUseCase: new FakeGetQuoteUseCase(errAsync(quoteError)),
+    });
 
     const response = await request(server)
       .post('/api/v1/transactions')
@@ -549,7 +553,9 @@ describe('TransactionsController', () => {
 
   it('returns 409 PRICE_CHANGED when the recomputed total differs from expectedTotalInCents', async () => {
     const { server } = await build({
-      getQuoteUseCase: new FakeGetQuoteUseCase(okAsync(buildQuote({ totalInCents: TOTAL_IN_CENTS + 1_000 }))),
+      getQuoteUseCase: new FakeGetQuoteUseCase(
+        okAsync(buildQuote({ totalInCents: TOTAL_IN_CENTS + 1_000 })),
+      ),
     });
 
     const response = await request(server)
@@ -574,8 +580,14 @@ describe('TransactionsController', () => {
   });
 
   it('returns 422 PRODUCT_NOT_FOUND when the quote reports an unknown product', async () => {
-    const quoteError = new DomainError(ErrorCode.PRODUCT_NOT_FOUND, 'UNPROCESSABLE', 'Product not found');
-    const { server } = await build({ getQuoteUseCase: new FakeGetQuoteUseCase(errAsync(quoteError)) });
+    const quoteError = new DomainError(
+      ErrorCode.PRODUCT_NOT_FOUND,
+      'UNPROCESSABLE',
+      'Product not found',
+    );
+    const { server } = await build({
+      getQuoteUseCase: new FakeGetQuoteUseCase(errAsync(quoteError)),
+    });
 
     const response = await request(server)
       .post('/api/v1/transactions')

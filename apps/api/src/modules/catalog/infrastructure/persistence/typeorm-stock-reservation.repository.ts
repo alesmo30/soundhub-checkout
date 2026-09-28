@@ -5,7 +5,11 @@ import type { EntityManager } from 'typeorm';
 import type { TxContext } from '../../../../shared/application/ports/unit-of-work.port';
 import { ResultAsync } from '../../../../shared/domain/result';
 import { TypeOrmTxContext } from '../../../../shared/infrastructure/persistence/typeorm-tx-context';
-import type { StockLine, StockReservationOutcome, StockReservationPort } from '../../../transactions';
+import type {
+  StockLine,
+  StockReservationOutcome,
+  StockReservationPort,
+} from '../../../transactions';
 
 // `EntityManager.query` on an UPDATE with no RETURNING resolves to
 // `[rows, affectedRowCount]` (see PostgresQueryRunner); rows is always `[]`

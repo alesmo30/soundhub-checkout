@@ -22,5 +22,7 @@ function canonicalize(value: unknown): unknown {
 // body re-serialized by a different client) while still noticing an array
 // element that moved (a different `payment`/`delivery` choice).
 export function requestHash(body: unknown): string {
-  return createHash('sha256').update(JSON.stringify(canonicalize(body))).digest('hex');
+  return createHash('sha256')
+    .update(JSON.stringify(canonicalize(body)))
+    .digest('hex');
 }

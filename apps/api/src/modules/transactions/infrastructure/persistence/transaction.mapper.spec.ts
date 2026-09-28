@@ -66,7 +66,9 @@ function buildNewTransaction(overrides: Partial<NewTransaction> = {}): NewTransa
   };
 }
 
-function buildReturningRow(overrides: Partial<TransactionReturningRow> = {}): TransactionReturningRow {
+function buildReturningRow(
+  overrides: Partial<TransactionReturningRow> = {},
+): TransactionReturningRow {
   return {
     id: 'tx-1',
     reference: 'TX-20260927-ABC123',

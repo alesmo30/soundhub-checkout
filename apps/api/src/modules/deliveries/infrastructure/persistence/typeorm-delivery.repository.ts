@@ -62,9 +62,7 @@ export class TypeOrmDeliveryRepository implements DeliveryRepository {
   ): ResultAsync<void, never> {
     const manager = tx instanceof TypeOrmTxContext ? tx.manager : this.manager;
     const sql = change.to === 'READY_TO_SHIP' ? READY_TO_SHIP_SQL : CANCELLED_SQL;
-    const query: Promise<void> = manager
-      .query(sql, [change.transactionId])
-      .then(() => undefined);
+    const query: Promise<void> = manager.query(sql, [change.transactionId]).then(() => undefined);
 
     return ResultAsync.fromSafePromise(query);
   }

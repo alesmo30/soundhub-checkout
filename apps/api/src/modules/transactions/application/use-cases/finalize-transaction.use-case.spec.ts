@@ -96,7 +96,10 @@ class FakeUnitOfWork implements UnitOfWork {
   }
 }
 
-function buildUseCase(ports: RecordingPorts, unitOfWork: FakeUnitOfWork): FinalizeTransactionUseCase {
+function buildUseCase(
+  ports: RecordingPorts,
+  unitOfWork: FakeUnitOfWork,
+): FinalizeTransactionUseCase {
   return new FinalizeTransactionUseCase({
     transactionRepository: ports,
     stockReservation: ports,

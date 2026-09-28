@@ -152,7 +152,11 @@ interface CreateTransactionRuntime {
         ...runtime,
         random: () => Math.random(),
       }),
-      inject: [CREATE_TRANSACTION_REPOSITORIES, CREATE_TRANSACTION_SERVICES, CREATE_TRANSACTION_RUNTIME],
+      inject: [
+        CREATE_TRANSACTION_REPOSITORIES,
+        CREATE_TRANSACTION_SERVICES,
+        CREATE_TRANSACTION_RUNTIME,
+      ],
     },
     CreateTransactionUseCase,
     IdempotencyKeyPipe,

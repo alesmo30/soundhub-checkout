@@ -33,7 +33,9 @@ function buildNewTransaction(overrides: Partial<NewTransaction> = {}): NewTransa
   };
 }
 
-function buildReturningRow(overrides: Partial<TransactionReturningRow> = {}): TransactionReturningRow {
+function buildReturningRow(
+  overrides: Partial<TransactionReturningRow> = {},
+): TransactionReturningRow {
   return {
     id: 'tx-1',
     reference: 'TX-20260927-ABC123',
@@ -261,9 +263,7 @@ describe('TypeOrmTransactionRepository', () => {
       const driverError = { code: '23505', constraint: 'transactions_idempotency_key_key' };
       const execute = jest
         .fn()
-        .mockRejectedValue(
-          new QueryFailedError('INSERT ...', [], driverError as unknown as Error),
-        );
+        .mockRejectedValue(new QueryFailedError('INSERT ...', [], driverError as unknown as Error));
       createQueryBuilder.mockReturnValue(buildInsertQueryBuilderMock(execute));
       const repository = new TypeOrmTransactionRepository(manager);
 
@@ -277,9 +277,7 @@ describe('TypeOrmTransactionRepository', () => {
       const driverError = { code: '23505', constraint: 'transactions_reference_key' };
       const execute = jest
         .fn()
-        .mockRejectedValue(
-          new QueryFailedError('INSERT ...', [], driverError as unknown as Error),
-        );
+        .mockRejectedValue(new QueryFailedError('INSERT ...', [], driverError as unknown as Error));
       createQueryBuilder.mockReturnValue(buildInsertQueryBuilderMock(execute));
       const repository = new TypeOrmTransactionRepository(manager);
 

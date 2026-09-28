@@ -111,7 +111,11 @@ describe('HttpPaymentGatewayAdapter', () => {
           currency: CURRENCY,
           secret: INTEGRITY_SECRET,
         }),
-        payment_method: { type: 'CARD', token: request.cardToken, installments: request.installments },
+        payment_method: {
+          type: 'CARD',
+          token: request.cardToken,
+          installments: request.installments,
+        },
         acceptance_token: request.acceptanceToken,
         accept_personal_auth: request.personalAuthToken,
       });
@@ -354,9 +358,9 @@ describe('HttpPaymentGatewayAdapter', () => {
       // Timeout
       fetchMock = mockFetch();
       fetchMock.mockImplementation(() => new Promise<never>(() => {}));
-      await new HttpPaymentGatewayAdapter(buildConfig(), { timeoutMs: TEST_TIMEOUT_MS }).createCharge(
-        request,
-      );
+      await new HttpPaymentGatewayAdapter(buildConfig(), {
+        timeoutMs: TEST_TIMEOUT_MS,
+      }).createCharge(request);
 
       // Network error
       fetchMock = mockFetch();

@@ -75,9 +75,7 @@ describe('toGatewayCharge', () => {
 
   it('defaults the provider transaction id to an empty string when the field is missing or not a string', () => {
     expect(toGatewayCharge({ data: { status: 'PENDING' } }).providerTransactionId).toBe('');
-    expect(toGatewayCharge({ data: { id: 42, status: 'PENDING' } }).providerTransactionId).toBe(
-      '',
-    );
+    expect(toGatewayCharge({ data: { id: 42, status: 'PENDING' } }).providerTransactionId).toBe('');
   });
 
   it('falls back to an empty charge when the body is not an object at all', () => {
