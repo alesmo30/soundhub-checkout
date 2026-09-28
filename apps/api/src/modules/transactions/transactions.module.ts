@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import type { ProductRepository } from '../catalog';
+import { PRODUCT_REPOSITORY } from '../catalog';
 import { CatalogModule } from '../catalog/catalog.module';
 import type { CustomerRepository } from '../customers';
 import { CUSTOMER_REPOSITORY } from '../customers';
@@ -12,8 +14,11 @@ import { GetQuoteUseCase } from '../pricing';
 import { PricingModule } from '../pricing/pricing.module';
 import type { Clock } from '../../shared/application/ports/clock.port';
 import { CLOCK } from '../../shared/application/ports/clock.port';
+import type { EventPublisher } from '../../shared/application/ports/event-publisher.port';
+import { EVENT_PUBLISHER } from '../../shared/application/ports/event-publisher.port';
 import type { UnitOfWork } from '../../shared/application/ports/unit-of-work.port';
 import { UNIT_OF_WORK } from '../../shared/application/ports/unit-of-work.port';
+import { InMemoryEventPublisher } from '../../shared/infrastructure/messaging/in-memory-event-publisher';
 import { TypeOrmUnitOfWork } from '../../shared/infrastructure/persistence/typeorm-unit-of-work';
 import { SystemClock } from '../../shared/infrastructure/time/system-clock';
 import { CREATE_TRANSACTION_DEPENDENCIES } from './application/ports/create-transaction.dependencies';
@@ -30,6 +35,11 @@ import {
   FINALIZE_TRANSACTION_DEPENDENCIES,
   FinalizeTransactionUseCase,
 } from './application/use-cases/finalize-transaction.use-case';
+import type { GetTransactionStatusDependencies } from './application/use-cases/get-transaction-status.use-case';
+import {
+  GET_TRANSACTION_STATUS_DEPENDENCIES,
+  GetTransactionStatusUseCase,
+} from './application/use-cases/get-transaction-status.use-case';
 import { TransactionsController } from './infrastructure/http/transactions.controller';
 import { IdempotencyKeyPipe } from './infrastructure/http/idempotency-key.pipe';
 import { HttpPaymentGatewayAdapter } from './infrastructure/payment-gateway/http-payment-gateway.adapter';
@@ -47,6 +57,29 @@ interface FinalizeCollaborators {
   readonly transactionRepository: TransactionRepository;
   readonly stockReservation: StockReservationPort;
   readonly deliveryRepository: DeliveryRepository;
+}
+
+const FINALIZE_RUNTIME = Symbol('FINALIZE_RUNTIME');
+
+interface FinalizeRuntime {
+  readonly unitOfWork: UnitOfWork;
+  readonly clock: Clock;
+  readonly eventPublisher: EventPublisher;
+}
+
+const GET_STATUS_REPOSITORIES = Symbol('GET_STATUS_REPOSITORIES');
+
+interface GetStatusRepositories {
+  readonly transactionRepository: TransactionRepository;
+  readonly productRepository: ProductRepository;
+  readonly deliveryRepository: DeliveryRepository;
+}
+
+const GET_STATUS_SERVICES = Symbol('GET_STATUS_SERVICES');
+
+interface GetStatusServices {
+  readonly paymentGateway: PaymentGatewayPort;
+  readonly finalizeTransactionUseCase: FinalizeTransactionUseCase;
 }
 
 const CREATE_TRANSACTION_REPOSITORIES = Symbol('CREATE_TRANSACTION_REPOSITORIES');
@@ -87,6 +120,7 @@ interface CreateTransactionRuntime {
     { provide: PAYMENT_GATEWAY, useClass: HttpPaymentGatewayAdapter },
     { provide: UNIT_OF_WORK, useClass: TypeOrmUnitOfWork },
     { provide: CLOCK, useClass: SystemClock },
+    { provide: EVENT_PUBLISHER, useClass: InMemoryEventPublisher },
     {
       provide: FINALIZE_COLLABORATORS,
       useFactory: (
@@ -101,14 +135,53 @@ interface CreateTransactionRuntime {
       inject: [TRANSACTION_REPOSITORY, STOCK_RESERVATION, DELIVERY_REPOSITORY],
     },
     {
+      provide: FINALIZE_RUNTIME,
+      useFactory: (
+        unitOfWork: UnitOfWork,
+        clock: Clock,
+        eventPublisher: EventPublisher,
+      ): FinalizeRuntime => ({ unitOfWork, clock, eventPublisher }),
+      inject: [UNIT_OF_WORK, CLOCK, EVENT_PUBLISHER],
+    },
+    {
       provide: FINALIZE_TRANSACTION_DEPENDENCIES,
       useFactory: (
         collaborators: FinalizeCollaborators,
-        unitOfWork: UnitOfWork,
-      ): FinalizeTransactionDependencies => ({ ...collaborators, unitOfWork }),
-      inject: [FINALIZE_COLLABORATORS, UNIT_OF_WORK],
+        runtime: FinalizeRuntime,
+      ): FinalizeTransactionDependencies => ({ ...collaborators, ...runtime }),
+      inject: [FINALIZE_COLLABORATORS, FINALIZE_RUNTIME],
     },
     FinalizeTransactionUseCase,
+    {
+      provide: GET_STATUS_REPOSITORIES,
+      useFactory: (
+        transactionRepository: TransactionRepository,
+        productRepository: ProductRepository,
+        deliveryRepository: DeliveryRepository,
+      ): GetStatusRepositories => ({
+        transactionRepository,
+        productRepository,
+        deliveryRepository,
+      }),
+      inject: [TRANSACTION_REPOSITORY, PRODUCT_REPOSITORY, DELIVERY_REPOSITORY],
+    },
+    {
+      provide: GET_STATUS_SERVICES,
+      useFactory: (
+        paymentGateway: PaymentGatewayPort,
+        finalizeTransactionUseCase: FinalizeTransactionUseCase,
+      ): GetStatusServices => ({ paymentGateway, finalizeTransactionUseCase }),
+      inject: [PAYMENT_GATEWAY, FinalizeTransactionUseCase],
+    },
+    {
+      provide: GET_TRANSACTION_STATUS_DEPENDENCIES,
+      useFactory: (
+        repositories: GetStatusRepositories,
+        services: GetStatusServices,
+      ): GetTransactionStatusDependencies => ({ ...repositories, ...services }),
+      inject: [GET_STATUS_REPOSITORIES, GET_STATUS_SERVICES],
+    },
+    GetTransactionStatusUseCase,
     {
       provide: CREATE_TRANSACTION_REPOSITORIES,
       useFactory: (
