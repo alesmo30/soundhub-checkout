@@ -202,7 +202,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
 
 ### Configuration and publisher
 
-1. [ ] **Drivers in config.** The four variables in `environment-variables.ts` and `app-config.ts`, and `.env.example`. The specs cover:
+1. [x] **Drivers in config.** The four variables in `environment-variables.ts` and `app-config.ts`, and `.env.example`. The specs cover:
    - the defaults are `memory` / `log` / `null`;
    - `sqs` without a queue URL fails validation, naming the variable;
    - an invalid driver value fails;

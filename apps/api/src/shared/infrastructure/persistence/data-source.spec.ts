@@ -30,6 +30,9 @@ function buildAppConfig(dbOverrides: Partial<AppConfig['db']> = {}): AppConfig {
       password: 'pass',
       from: 'from@example.com',
     },
+    messaging: { driver: 'memory', queueUrl: null },
+    email: { driver: 'log' },
+    web: { publicUrl: null },
   };
 }
 

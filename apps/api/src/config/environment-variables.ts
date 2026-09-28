@@ -1,13 +1,27 @@
 import { plainToInstance, Type } from 'class-transformer';
-import { IsIn, IsInt, IsOptional, IsString, Max, Min, validateSync } from 'class-validator';
+import {
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUrl,
+  Max,
+  Min,
+  ValidateIf,
+  validateSync,
+} from 'class-validator';
 
 export type NodeEnv = 'development' | 'test' | 'production';
 export type LogLevel = 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace';
 export type DbSsl = 'true' | 'false';
+export type EventPublisherDriver = 'memory' | 'sqs';
+export type EmailDriver = 'log' | 'smtp';
 
 export const NODE_ENVS: readonly NodeEnv[] = ['development', 'test', 'production'];
 export const LOG_LEVELS: readonly LogLevel[] = ['fatal', 'error', 'warn', 'info', 'debug', 'trace'];
 export const DB_SSL_VALUES: readonly DbSsl[] = ['true', 'false'];
+export const EVENT_PUBLISHER_DRIVERS: readonly EventPublisherDriver[] = ['memory', 'sqs'];
+export const EMAIL_DRIVERS: readonly EmailDriver[] = ['log', 'smtp'];
 
 export class EnvironmentVariables {
   @IsIn(NODE_ENVS)
@@ -76,6 +90,22 @@ export class EnvironmentVariables {
 
   @IsString()
   EMAIL_FROM!: string;
+
+  @IsOptional()
+  @IsIn(EVENT_PUBLISHER_DRIVERS)
+  EVENT_PUBLISHER_DRIVER: EventPublisherDriver = 'memory';
+
+  @ValidateIf((env: EnvironmentVariables) => env.EVENT_PUBLISHER_DRIVER === 'sqs')
+  @IsUrl()
+  TRANSACTION_FINALIZED_QUEUE_URL?: string;
+
+  @IsOptional()
+  @IsIn(EMAIL_DRIVERS)
+  EMAIL_DRIVER: EmailDriver = 'log';
+
+  @IsOptional()
+  @IsUrl({ require_tld: false })
+  PUBLIC_WEB_URL?: string;
 }
 
 function assertNoErrors(errors: { property: string }[]): void {

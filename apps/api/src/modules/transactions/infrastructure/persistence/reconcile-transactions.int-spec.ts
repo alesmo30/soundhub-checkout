@@ -330,6 +330,9 @@ function fakeAppConfig(): AppConfig {
       eventsSecret: 'test-events-secret',
     },
     smtp: { host: '', port: 465, user: '', password: '', from: '' },
+    messaging: { driver: 'memory', queueUrl: null },
+    email: { driver: 'log' },
+    web: { publicUrl: null },
   };
 }
 
