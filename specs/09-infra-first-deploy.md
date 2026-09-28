@@ -280,7 +280,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step.
    Manual test: `pnpm --filter @checkout/infra test` is green locally.
    Commit: `ci: run infra tests`.
 
-3. [ ] **Network.** In `CheckoutDataStack`: VPC with 2 AZs and 3 subnet tiers, the NAT instance t4g.nano through `NatProvider.instanceV2`, and the exported `LambdaSecurityGroup`. `data-stack.test.ts` asserts:
+3. [x] **Network.** In `CheckoutDataStack`: VPC with 2 AZs and 3 subnet tiers, the NAT instance t4g.nano through `NatProvider.instanceV2`, and the exported `LambdaSecurityGroup`. `data-stack.test.ts` asserts:
    - 0 `AWS::EC2::NatGateway` and 1 `AWS::EC2::Instance` of type `t4g.nano`;
    - 6 subnets in 2 AZs;
    - the project tag on the VPC.
