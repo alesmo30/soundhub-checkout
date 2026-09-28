@@ -57,7 +57,8 @@ describe('parsePaymentEvent', () => {
   });
 
   it('returns null when signature is missing', () => {
-    const { signature: _signature, ...withoutSignature } = approvedFixture;
+    const { signature, ...withoutSignature } = approvedFixture;
+    void signature;
 
     expect(parsePaymentEvent(withoutSignature)).toBeNull();
   });

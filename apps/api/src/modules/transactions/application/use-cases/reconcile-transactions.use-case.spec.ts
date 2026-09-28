@@ -44,7 +44,7 @@ class FakeUnitOfWork implements UnitOfWork {
     return work(this.tx).map((value) => {
       this.insideRun = false;
       return value;
-    }) as ResultAsync<T, E>;
+    });
   }
 }
 
@@ -512,16 +512,14 @@ describe('ReconcileTransactionsUseCase — re-publish task', () => {
     const summary = (await useCase.execute())._unsafeUnwrap();
 
     expect(summary.republished).toBe(1);
-    expect(eventPublisher.calls).toEqual([
-      {
-        event: {
-          type: 'transaction.finalized',
-          transactionId: transaction.id,
-          status: 'EXPIRED',
-          occurredAt: expect.any(Date),
-        },
-      },
-    ]);
+    expect(eventPublisher.calls).toHaveLength(1);
+    const publishedEvent = eventPublisher.calls[0]?.event;
+    expect(publishedEvent?.occurredAt).toBeInstanceOf(Date);
+    expect(publishedEvent).toMatchObject({
+      type: 'transaction.finalized',
+      transactionId: transaction.id,
+      status: 'EXPIRED',
+    });
     expect(repository.markEmailSentCalls).toEqual([transaction.id]);
   });
 

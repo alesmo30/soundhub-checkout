@@ -9,6 +9,13 @@ import { TransactionOrmEntity } from './transaction.orm-entity';
 
 const RESERVATION_EXPIRES_AT = new Date('2026-09-27T20:05:00.000Z');
 
+// jest.fn()'s untyped `.mock.calls` is `any[][]`; this reads the first
+// argument of the first call with the caller's expected shape instead of
+// leaking `any` into the assertion below.
+function firstCallArg<T>(mockFn: { mock: { calls: unknown[][] } }): T {
+  return mockFn.mock.calls[0]?.[0] as T;
+}
+
 function buildNewTransaction(overrides: Partial<NewTransaction> = {}): NewTransaction {
   return {
     reference: 'TX-20260927-ABC123',
@@ -415,7 +422,8 @@ describe('TypeOrmTransactionRepository', () => {
 
       const result = await repository.markEmailSent(new TypeOrmTxContext(txManager), 'tx-1');
 
-      expect(builder.set).toHaveBeenCalledWith({ emailSentAt: expect.any(Function) });
+      const setArg = firstCallArg<{ emailSentAt: unknown }>(builder.set);
+      expect(typeof setArg.emailSentAt).toBe('function');
       expect(builder.where).toHaveBeenCalledWith('id = :id AND email_sent_at IS NULL', {
         id: 'tx-1',
       });

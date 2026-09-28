@@ -21,8 +21,16 @@ function get(data: unknown, path: string): unknown {
   }, data);
 }
 
+// A signed field is always a string or a number in the gateway's documented
+// event shape; anything else (a stray object/array at that path) still gets
+// a deterministic, non-throwing representation rather than reaching
+// String()'s default `[object Object]` stringification.
 function toChecksumString(value: unknown): string {
-  return value === undefined || value === null ? '' : String(value);
+  if (value === undefined || value === null) return '';
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  return JSON.stringify(value);
 }
 
 // Only the fields named in `properties` (the event's own `signature.properties`)

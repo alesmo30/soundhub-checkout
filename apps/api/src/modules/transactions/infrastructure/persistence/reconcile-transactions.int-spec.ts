@@ -121,6 +121,16 @@ async function softDeleteProduct(manager: EntityManager, productId: string): Pro
   await manager.query('UPDATE products SET deleted_at = now() WHERE id = $1', [productId]);
 }
 
+async function fetchReference(manager: EntityManager, transactionId: string): Promise<string> {
+  const rows: Array<{ reference: string }> = await manager.query(
+    'SELECT reference FROM transactions WHERE id = $1',
+    [transactionId],
+  );
+  const reference = rows[0]?.reference;
+  if (!reference) throw new Error(`Transaction ${transactionId} not found`);
+  return reference;
+}
+
 async function fetchTransactionRow(
   manager: EntityManager,
   transactionId: string,
@@ -412,11 +422,7 @@ describe('ReconcileTransactionsUseCase against Postgres', () => {
     );
 
     try {
-      const reference = (
-        await dataSource.manager.query('SELECT reference FROM transactions WHERE id = $1', [
-          transactionId,
-        ])
-      )[0].reference as string;
+      const reference = await fetchReference(dataSource.manager, transactionId);
 
       await clearProviderTransactionId(dataSource.manager, transactionId);
       await backdateReservationExpiresAt(dataSource.manager, transactionId, FAR_PAST);
@@ -448,11 +454,7 @@ describe('ReconcileTransactionsUseCase against Postgres', () => {
     );
 
     try {
-      const reference = (
-        await dataSource.manager.query('SELECT reference FROM transactions WHERE id = $1', [
-          transactionId,
-        ])
-      )[0].reference as string;
+      const reference = await fetchReference(dataSource.manager, transactionId);
 
       const recoveredProviderId = `recovered-${randomUUID()}`;
       await clearProviderTransactionId(dataSource.manager, transactionId);
