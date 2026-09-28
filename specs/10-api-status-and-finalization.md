@@ -222,7 +222,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `test` green.
    Commit: `feat(api): finalize approved transactions and publish transaction.finalized`.
 
-3. [ ] **Finalization stock numbers against Postgres.** `finalize-transaction.int-spec.ts` runs the real use case, SPEC 08's repositories, `TypeOrmUnitOfWork` and a counting fake publisher. The setup creates a product with stock `10 / 0` and a random SKU, plus a customer with a random email. It then reserves 2 units and inserts a PENDING transaction and an AWAITING_PAYMENT delivery in one unit of work. The spec proves:
+3. [x] **Finalization stock numbers against Postgres.** `finalize-transaction.int-spec.ts` runs the real use case, SPEC 08's repositories, `TypeOrmUnitOfWork` and a counting fake publisher. The setup creates a product with stock `10 / 0` and a random SKU, plus a customer with a random email. It then reserves 2 units and inserts a PENDING transaction and an AWAITING_PAYMENT delivery in one unit of work. The spec proves:
    - `APPROVED` → stock `8 / 0`, transaction `APPROVED` with `finalized_at` set, delivery `READY_TO_SHIP`, 1 event;
    - `DECLINED` (fresh setup) → stock `10 / 0`, delivery `CANCELLED`, 1 event;
    - a second finalize of the same transaction → `ALREADY_FINAL`, with stock unchanged and no second event.
