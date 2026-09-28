@@ -49,6 +49,12 @@ export { APP_CONFIG };
           SMTP_USER: configService.get('SMTP_USER', { infer: true }),
           SMTP_PASSWORD: configService.get('SMTP_PASSWORD', { infer: true }),
           EMAIL_FROM: configService.get('EMAIL_FROM', { infer: true }),
+          EVENT_PUBLISHER_DRIVER: configService.get('EVENT_PUBLISHER_DRIVER', { infer: true }),
+          TRANSACTION_FINALIZED_QUEUE_URL: configService.get('TRANSACTION_FINALIZED_QUEUE_URL', {
+            infer: true,
+          }),
+          EMAIL_DRIVER: configService.get('EMAIL_DRIVER', { infer: true }),
+          PUBLIC_WEB_URL: configService.get('PUBLIC_WEB_URL', { infer: true }),
         }),
       inject: [ConfigService],
     },

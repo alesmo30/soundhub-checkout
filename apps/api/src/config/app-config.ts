@@ -2,7 +2,9 @@ import { config as loadDotenvFile } from 'dotenv';
 
 import type {
   DbEnvironmentVariables,
+  EmailDriver,
   EnvironmentVariables,
+  EventPublisherDriver,
   LogLevel,
   NodeEnv,
 } from './environment-variables';
@@ -37,6 +39,13 @@ export interface AppConfig {
     eventsSecret: string;
   };
   smtp: { host: string; port: number; user: string; password: string; from: string };
+  messaging: { driver: EventPublisherDriver; queueUrl: string | null };
+  email: { driver: EmailDriver };
+  web: { publicUrl: string | null };
+}
+
+function trimTrailingSlash(url: string): string {
+  return url.endsWith('/') ? url.slice(0, -1) : url;
 }
 
 export function buildAppConfig(env: EnvironmentVariables): AppConfig {
@@ -64,6 +73,12 @@ export function buildAppConfig(env: EnvironmentVariables): AppConfig {
       password: env.SMTP_PASSWORD,
       from: env.EMAIL_FROM,
     },
+    messaging: {
+      driver: env.EVENT_PUBLISHER_DRIVER,
+      queueUrl: env.TRANSACTION_FINALIZED_QUEUE_URL ?? null,
+    },
+    email: { driver: env.EMAIL_DRIVER },
+    web: { publicUrl: env.PUBLIC_WEB_URL ? trimTrailingSlash(env.PUBLIC_WEB_URL) : null },
   };
 }
 

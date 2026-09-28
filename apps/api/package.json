@@ -16,10 +16,13 @@
     "migration:generate": "tsx node_modules/typeorm/cli.js migration:generate -d src/shared/infrastructure/persistence/data-source.ts",
     "seed": "tsx src/shared/infrastructure/persistence/seeds/seed.cli.ts",
     "seed:reset": "tsx src/shared/infrastructure/persistence/seeds/seed-reset.cli.ts",
-    "reconcile:once": "nest start --entryFile workers/reconcile-once.cli"
+    "reconcile:once": "nest start --entryFile workers/reconcile-once.cli",
+    "email:preview": "tsx src/workers/email-preview.ts",
+    "email:send-once": "nest start --entryFile workers/email-send-once.cli --"
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.1141.0",
+    "@aws-sdk/client-sqs": "^3.1141.0",
     "@checkout/shared": "workspace:*",
     "@codegenie/serverless-express": "^4.16.0",
     "@nestjs/common": "^12.1.0",
@@ -36,6 +39,7 @@
     "helmet": "^8.3.0",
     "nestjs-pino": "^5.2.1",
     "neverthrow": "^8.2.0",
+    "nodemailer": "^10.0.11",
     "pg": "^8.23.0",
     "pino": "^10.3.1",
     "reflect-metadata": "^0.2.2",
@@ -51,6 +55,7 @@
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.20.4",
+    "@types/nodemailer": "^8.0.2",
     "@types/pg": "^8.23.1",
     "@types/supertest": "^7.2.1",
     "csv-parse": "^7.0.3",

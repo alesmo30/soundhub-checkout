@@ -32,6 +32,47 @@ describe('validateEnvironmentVariables', () => {
     expect(() => buildValidEnvironmentVariables({ DB_SSL: 'yes' })).toThrow(/DB_SSL/);
   });
 
+  it('defaults EVENT_PUBLISHER_DRIVER to memory, EMAIL_DRIVER to log, PUBLIC_WEB_URL to unset', () => {
+    const env = buildValidEnvironmentVariables();
+
+    expect(env.EVENT_PUBLISHER_DRIVER).toBe('memory');
+    expect(env.EMAIL_DRIVER).toBe('log');
+    expect(env.PUBLIC_WEB_URL).toBeUndefined();
+  });
+
+  it('rejects EVENT_PUBLISHER_DRIVER=sqs without TRANSACTION_FINALIZED_QUEUE_URL', () => {
+    expect(() => buildValidEnvironmentVariables({ EVENT_PUBLISHER_DRIVER: 'sqs' })).toThrow(
+      /TRANSACTION_FINALIZED_QUEUE_URL/,
+    );
+  });
+
+  it('accepts EVENT_PUBLISHER_DRIVER=sqs with a queue URL', () => {
+    const env = buildValidEnvironmentVariables({
+      EVENT_PUBLISHER_DRIVER: 'sqs',
+      TRANSACTION_FINALIZED_QUEUE_URL: 'https://sqs.us-east-1.amazonaws.com/123456789012/queue',
+    });
+
+    expect(env.EVENT_PUBLISHER_DRIVER).toBe('sqs');
+  });
+
+  it('rejects an invalid EVENT_PUBLISHER_DRIVER value', () => {
+    expect(() => buildValidEnvironmentVariables({ EVENT_PUBLISHER_DRIVER: 'kafka' })).toThrow(
+      /EVENT_PUBLISHER_DRIVER/,
+    );
+  });
+
+  it('rejects an invalid EMAIL_DRIVER value', () => {
+    expect(() => buildValidEnvironmentVariables({ EMAIL_DRIVER: 'carrier-pigeon' })).toThrow(
+      /EMAIL_DRIVER/,
+    );
+  });
+
+  it('accepts a localhost PUBLIC_WEB_URL', () => {
+    const env = buildValidEnvironmentVariables({ PUBLIC_WEB_URL: 'http://localhost:5173' });
+
+    expect(env.PUBLIC_WEB_URL).toBe('http://localhost:5173');
+  });
+
   it('fails fast, naming every missing variable', () => {
     const incomplete = Object.fromEntries(
       Object.entries(VALID_ENV_RECORD).filter(([key]) => key !== 'DB_HOST' && key !== 'SMTP_HOST'),

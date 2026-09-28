@@ -49,6 +49,9 @@ function buildConfig(): AppConfig {
       eventsSecret: 'events_fake_00000000000000000000',
     },
     smtp: { host: 'smtp', port: 587, user: 'user', password: 'pass', from: 'from@example.test' },
+    messaging: { driver: 'memory', queueUrl: null },
+    email: { driver: 'log' },
+    web: { publicUrl: null },
   };
 }
 
