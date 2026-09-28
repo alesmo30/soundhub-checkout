@@ -36,6 +36,8 @@ const config: Config = {
     '<rootDir>/src/main.ts',
     '<rootDir>/src/lambda.ts',
     '<rootDir>/src/workers/migrator.handler.ts',
+    '<rootDir>/src/workers/reconcile-once.cli.ts',
+    '<rootDir>/src/workers/reconciler.handler.ts',
     '<rootDir>/src/shared/infrastructure/persistence/migrations/',
     '<rootDir>/src/shared/infrastructure/persistence/seeds/',
   ],
