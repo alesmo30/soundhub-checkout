@@ -1,6 +1,7 @@
 import type { Clock } from '../../../../shared/application/ports/clock.port';
 import type { TxContext, UnitOfWork } from '../../../../shared/application/ports/unit-of-work.port';
 import { errAsync, okAsync, ResultAsync } from '../../../../shared/domain/result';
+import type { TransactionFinalizedEvent } from '../../domain/transaction-finalized.event';
 import type { Transaction } from '../../domain/transaction';
 import type {
   GatewayCharge,
@@ -80,20 +81,45 @@ function buildTransaction(overrides: Partial<Transaction> = {}): Transaction {
 
 class FakeTransactionRepository implements TransactionRepository {
   claimPendingForSyncCalls: Array<{ olderThan: Date; limit: number }> = [];
+  claimExpiredReservationsCalls: Array<{ now: Date; limit: number }> = [];
+  recordGatewayResponseCalls: Array<{
+    id: string;
+    providerTransactionId: string;
+    statusMessage: string | null;
+  }> = [];
+  markEmailSentCalls: string[] = [];
 
-  constructor(private readonly toClaim: Transaction[] = []) {}
+  constructor(
+    private readonly toClaim: Transaction[] = [],
+    private readonly toClaimExpired: Transaction[] = [],
+    private readonly toFindUnsentEmails: Transaction[] = [],
+  ) {}
 
   claimPendingForSync(_tx: TxContext, query: { olderThan: Date; limit: number }) {
     this.claimPendingForSyncCalls.push(query);
     return okAsync(this.toClaim);
   }
 
-  claimExpiredReservations() {
-    return okAsync<Transaction[], never>([]);
+  claimExpiredReservations(_tx: TxContext, query: { now: Date; limit: number }) {
+    this.claimExpiredReservationsCalls.push(query);
+    return okAsync(this.toClaimExpired);
   }
 
   findUnsentEmails() {
-    return okAsync<Transaction[], never>([]);
+    return okAsync(this.toFindUnsentEmails);
+  }
+
+  recordGatewayResponse(
+    _tx: TxContext,
+    response: { id: string; providerTransactionId: string; statusMessage: string | null },
+  ) {
+    this.recordGatewayResponseCalls.push(response);
+    return okAsync<void, never>(undefined);
+  }
+
+  markEmailSent(_tx: TxContext, id: string) {
+    this.markEmailSentCalls.push(id);
+    return okAsync<void, never>(undefined);
   }
 
   findByProviderTransactionId(): never {
@@ -112,15 +138,7 @@ class FakeTransactionRepository implements TransactionRepository {
     throw new Error('not used by this spec');
   }
 
-  recordGatewayResponse(): never {
-    throw new Error('not used by this spec');
-  }
-
   finalize(): never {
-    throw new Error('not used by this spec');
-  }
-
-  markEmailSent(): never {
     throw new Error('not used by this spec');
   }
 }
@@ -136,15 +154,23 @@ function gatewayCharge(overrides: Partial<GatewayCharge> = {}): GatewayCharge {
   };
 }
 
+type GatewayCallResult =
+  | { readonly ok: true; readonly charge: GatewayCharge }
+  | { readonly ok: false };
+
+type ReferenceLookupResult =
+  | { readonly ok: true; readonly charge: GatewayCharge | null }
+  | { readonly ok: false };
+
 class FakePaymentGateway implements PaymentGatewayPort {
   getChargeCalls: string[] = [];
+  findChargeByReferenceCalls: string[] = [];
   private readonly insideUnitOfWorkAtCall: boolean[] = [];
 
   constructor(
-    private readonly results: Array<
-      { readonly ok: true; readonly charge: GatewayCharge } | { readonly ok: false }
-    > = [],
+    private readonly results: GatewayCallResult[] = [],
     private readonly unitOfWork?: FakeUnitOfWork,
+    private readonly referenceResults: ReferenceLookupResult[] = [],
   ) {}
 
   getCharge(providerTransactionId: string): ResultAsync<GatewayCharge, PaymentGatewayError> {
@@ -154,6 +180,17 @@ class FakePaymentGateway implements PaymentGatewayPort {
     return result.ok
       ? okAsync(result.charge)
       : errAsync<GatewayCharge, PaymentGatewayError>({ kind: 'UNAVAILABLE', message: 'boom' });
+  }
+
+  findChargeByReference(reference: string): ResultAsync<GatewayCharge | null, PaymentGatewayError> {
+    this.findChargeByReferenceCalls.push(reference);
+    const result = this.referenceResults[this.findChargeByReferenceCalls.length - 1] ?? {
+      ok: true,
+      charge: null,
+    };
+    return result.ok
+      ? okAsync(result.charge)
+      : errAsync<GatewayCharge | null, PaymentGatewayError>({ kind: 'UNAVAILABLE', message: 'boom' });
   }
 
   wasEverCalledInsideUnitOfWork(): boolean {
@@ -167,9 +204,23 @@ class FakePaymentGateway implements PaymentGatewayPort {
   createCharge(): never {
     throw new Error('not used by this spec');
   }
+}
 
-  findChargeByReference(): never {
-    throw new Error('not used by this spec');
+interface PublishCall {
+  readonly event: TransactionFinalizedEvent;
+}
+
+class FakeEventPublisher {
+  readonly calls: PublishCall[] = [];
+
+  constructor(private readonly results: Array<{ readonly ok: boolean }> = []) {}
+
+  publish(event: TransactionFinalizedEvent) {
+    this.calls.push({ event });
+    const result = this.results[this.calls.length - 1] ?? { ok: true };
+    return result.ok
+      ? okAsync<void, { message: string }>(undefined)
+      : errAsync<void, { message: string }>({ message: 'publish failed' });
   }
 }
 
@@ -190,20 +241,30 @@ class UnreachableFinalizer {
 
 function buildUseCase(params: {
   toClaim?: Transaction[];
-  gatewayResults?: Array<{ readonly ok: true; readonly charge: GatewayCharge } | { readonly ok: false }>;
+  toClaimExpired?: Transaction[];
+  toFindUnsentEmails?: Transaction[];
+  gatewayResults?: GatewayCallResult[];
+  referenceResults?: ReferenceLookupResult[];
   finalizeTransactionUseCase?: { execute: FinalizeTransactionUseCase['execute'] };
+  eventPublisher?: FakeEventPublisher;
   clock?: FakeClock;
   unitOfWork?: FakeUnitOfWork;
 }): {
   useCase: ReconcileTransactionsUseCase;
   repository: FakeTransactionRepository;
   gateway: FakePaymentGateway;
+  eventPublisher: FakeEventPublisher;
   unitOfWork: FakeUnitOfWork;
 } {
   const unitOfWork = params.unitOfWork ?? new FakeUnitOfWork();
-  const gateway = new FakePaymentGateway(params.gatewayResults, unitOfWork);
-  const repository = new FakeTransactionRepository(params.toClaim ?? []);
+  const gateway = new FakePaymentGateway(params.gatewayResults, unitOfWork, params.referenceResults);
+  const repository = new FakeTransactionRepository(
+    params.toClaim ?? [],
+    params.toClaimExpired ?? [],
+    params.toFindUnsentEmails ?? [],
+  );
   const finalizeTransactionUseCase = params.finalizeTransactionUseCase ?? new FakeFinalizeTransactionUseCase();
+  const eventPublisher = params.eventPublisher ?? new FakeEventPublisher();
 
   const dependencies: ReconcileTransactionsDependencies = {
     transactionRepository: repository,
@@ -211,10 +272,16 @@ function buildUseCase(params: {
     finalizeTransactionUseCase: finalizeTransactionUseCase as unknown as FinalizeTransactionUseCase,
     unitOfWork,
     clock: params.clock ?? new FakeClock(),
-    eventPublisher: { publish: () => okAsync(undefined) },
+    eventPublisher,
   };
 
-  return { useCase: new ReconcileTransactionsUseCase(dependencies), repository, gateway, unitOfWork };
+  return {
+    useCase: new ReconcileTransactionsUseCase(dependencies),
+    repository,
+    gateway,
+    eventPublisher,
+    unitOfWork,
+  };
 }
 
 describe('ReconcileTransactionsUseCase — sync task', () => {
@@ -313,5 +380,163 @@ describe('ReconcileTransactionsUseCase — sync task', () => {
 
     expect(gateway.getChargeCalls).toHaveLength(3);
     expect(summary.deferred).toBe(17);
+  });
+});
+
+describe('ReconcileTransactionsUseCase — safe expiry task', () => {
+  it('finalizes EXPIRED when no charge is found by reference', async () => {
+    const transaction = buildTransaction({ providerTransactionId: null });
+    const finalizer = new FakeFinalizeTransactionUseCase();
+    const { useCase } = buildUseCase({
+      toClaimExpired: [transaction],
+      referenceResults: [{ ok: true, charge: null }],
+      finalizeTransactionUseCase: finalizer,
+    });
+
+    const summary = (await useCase.execute())._unsafeUnwrap();
+
+    expect(summary.expired).toBe(1);
+    expect(finalizer.calls).toEqual([
+      {
+        id: transaction.id,
+        status: 'EXPIRED',
+        statusMessage: 'Reservation expired before reaching the payment gateway',
+      },
+    ]);
+  });
+
+  it('records the provider id and finalizes when a final charge is found by reference', async () => {
+    const transaction = buildTransaction({ providerTransactionId: null });
+    const finalizer = new FakeFinalizeTransactionUseCase();
+    const { useCase, repository } = buildUseCase({
+      toClaimExpired: [transaction],
+      referenceResults: [
+        { ok: true, charge: gatewayCharge({ providerTransactionId: 'gw-recovered', status: 'APPROVED' }) },
+      ],
+      finalizeTransactionUseCase: finalizer,
+    });
+
+    const summary = (await useCase.execute())._unsafeUnwrap();
+
+    expect(summary.recovered).toBe(1);
+    expect(summary.expired).toBe(0);
+    expect(repository.recordGatewayResponseCalls).toEqual([
+      { id: transaction.id, providerTransactionId: 'gw-recovered', statusMessage: null },
+    ]);
+    expect(finalizer.calls).toEqual([
+      { id: transaction.id, status: 'APPROVED', statusMessage: null },
+    ]);
+  });
+
+  it('records the provider id but does not finalize when the found charge is still PENDING', async () => {
+    const transaction = buildTransaction({ providerTransactionId: null });
+    const finalizer = new UnreachableFinalizer();
+    const { useCase, repository } = buildUseCase({
+      toClaimExpired: [transaction],
+      referenceResults: [
+        { ok: true, charge: gatewayCharge({ providerTransactionId: 'gw-pending', status: 'PENDING' }) },
+      ],
+      finalizeTransactionUseCase: finalizer,
+    });
+
+    const summary = (await useCase.execute())._unsafeUnwrap();
+
+    expect(summary.recovered).toBe(1);
+    expect(repository.recordGatewayResponseCalls).toHaveLength(1);
+  });
+
+  it('touches nothing and counts failed on a gateway Err', async () => {
+    const transaction = buildTransaction({ providerTransactionId: null });
+    const finalizer = new UnreachableFinalizer();
+    const { useCase, repository } = buildUseCase({
+      toClaimExpired: [transaction],
+      referenceResults: [{ ok: false }],
+      finalizeTransactionUseCase: finalizer,
+    });
+
+    const summary = (await useCase.execute())._unsafeUnwrap();
+
+    expect(summary.failed).toBe(1);
+    expect(summary.expired).toBe(0);
+    expect(summary.recovered).toBe(0);
+    expect(repository.recordGatewayResponseCalls).toEqual([]);
+  });
+
+  it('shares the time budget with the sync task', async () => {
+    const clock = new FakeClock();
+    const syncTransaction = buildTransaction({ id: 'tx-sync' });
+    const expiredTransactions = Array.from({ length: 5 }, (_, index) =>
+      buildTransaction({ id: `tx-expired-${index + 1}`, providerTransactionId: null }),
+    );
+    const unitOfWork = new FakeUnitOfWork();
+    const gateway = new FakePaymentGateway(
+      [{ ok: true, charge: gatewayCharge({ status: 'PENDING' }) }],
+      unitOfWork,
+      [],
+    );
+    const originalGetCharge = gateway.getCharge.bind(gateway);
+    gateway.getCharge = (id: string) => {
+      const result = originalGetCharge(id);
+      clock.advanceMs(31_000);
+      return result;
+    };
+    const repository = new FakeTransactionRepository([syncTransaction], expiredTransactions);
+    const finalizer = new UnreachableFinalizer();
+    const eventPublisher = new FakeEventPublisher();
+    const dependencies: ReconcileTransactionsDependencies = {
+      transactionRepository: repository,
+      paymentGateway: gateway,
+      finalizeTransactionUseCase: finalizer as unknown as FinalizeTransactionUseCase,
+      unitOfWork,
+      clock,
+      eventPublisher,
+    };
+    const useCase = new ReconcileTransactionsUseCase(dependencies);
+
+    const summary = (await useCase.execute())._unsafeUnwrap();
+
+    expect(gateway.findChargeByReferenceCalls).toHaveLength(0);
+    expect(summary.deferred).toBe(5);
+  });
+});
+
+describe('ReconcileTransactionsUseCase — re-publish task', () => {
+  it('publishes transaction.finalized for each unsent-email row, EXPIRED included, and marks the email sent', async () => {
+    const transaction = buildTransaction({ status: 'EXPIRED' });
+    const eventPublisher = new FakeEventPublisher();
+    const { useCase, repository } = buildUseCase({
+      toFindUnsentEmails: [transaction],
+      eventPublisher,
+    });
+
+    const summary = (await useCase.execute())._unsafeUnwrap();
+
+    expect(summary.republished).toBe(1);
+    expect(eventPublisher.calls).toEqual([
+      {
+        event: {
+          type: 'transaction.finalized',
+          transactionId: transaction.id,
+          status: 'EXPIRED',
+          occurredAt: expect.any(Date),
+        },
+      },
+    ]);
+    expect(repository.markEmailSentCalls).toEqual([transaction.id]);
+  });
+
+  it('logs a warn and continues when a publish fails, without marking that row sent', async () => {
+    const failing = buildTransaction({ id: 'tx-fail' });
+    const succeeding = buildTransaction({ id: 'tx-ok' });
+    const eventPublisher = new FakeEventPublisher([{ ok: false }, { ok: true }]);
+    const { useCase, repository } = buildUseCase({
+      toFindUnsentEmails: [failing, succeeding],
+      eventPublisher,
+    });
+
+    const summary = (await useCase.execute())._unsafeUnwrap();
+
+    expect(summary.republished).toBe(1);
+    expect(repository.markEmailSentCalls).toEqual(['tx-ok']);
   });
 });
