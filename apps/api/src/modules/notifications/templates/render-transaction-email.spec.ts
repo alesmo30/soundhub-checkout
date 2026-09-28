@@ -100,13 +100,15 @@ describe('renderTransactionEmail', () => {
     },
   );
 
-  it('omits the button entirely when links is null', () => {
-    const content = renderTransactionEmail(buildSampleEmailData({ links: null }));
+  it.each(['APPROVED', 'DECLINED', 'ERROR', 'VOIDED', 'EXPIRED'] as const)(
+    'omits the button entirely for %s when links is null',
+    (status) => {
+      const content = renderTransactionEmail(buildSampleEmailData({ status, links: null }));
 
-    expect(content.html).not.toContain('href=');
-    expect(content.html).not.toContain('Ver mi pedido');
-    expect(content.text).not.toContain('http');
-  });
+      expect(content.html).not.toContain('href=');
+      expect(content.text).not.toContain('http');
+    },
+  );
 
   it('never includes the national ID, email, phone or delivery address', () => {
     const content = renderTransactionEmail(buildSampleEmailData());

@@ -32,7 +32,7 @@ import { NodemailerGmailAdapter } from './infrastructure/nodemailer-gmail.adapte
 // single-token dependency object.
 const NOTIFICATIONS_REPOSITORIES = Symbol('NOTIFICATIONS_REPOSITORIES');
 
-interface NotificationsRepositories {
+export interface NotificationsRepositories {
   readonly transactionRepository: TransactionRepository;
   readonly customerRepository: CustomerRepository;
   readonly productRepository: ProductRepository;
@@ -40,19 +40,43 @@ interface NotificationsRepositories {
 
 const NOTIFICATIONS_RUNTIME = Symbol('NOTIFICATIONS_RUNTIME');
 
-interface NotificationsRuntime {
+export interface NotificationsRuntime {
   readonly deliveryRepository: DeliveryRepository;
   readonly emailSender: EmailSender;
   readonly unitOfWork: UnitOfWork;
 }
 
-// A plain function, not a factory closure, so the driver selection is unit
-// tested directly (see notifications.module.spec.ts) without spinning up
-// the whole module and its real TypeORM-backed imports.
+// Plain functions, not factory closures, so each is unit tested directly
+// (see notifications.module.spec.ts) without spinning up the whole module
+// and its real TypeORM-backed imports.
 export function selectEmailSender(appConfig: AppConfig): EmailSender {
   return appConfig.email.driver === 'smtp'
     ? new NodemailerGmailAdapter(appConfig)
     : new LoggingEmailSender();
+}
+
+export function buildNotificationsRepositories(
+  transactionRepository: TransactionRepository,
+  customerRepository: CustomerRepository,
+  productRepository: ProductRepository,
+): NotificationsRepositories {
+  return { transactionRepository, customerRepository, productRepository };
+}
+
+export function buildNotificationsRuntime(
+  deliveryRepository: DeliveryRepository,
+  emailSender: EmailSender,
+  unitOfWork: UnitOfWork,
+): NotificationsRuntime {
+  return { deliveryRepository, emailSender, unitOfWork };
+}
+
+export function buildSendTransactionEmailDependencies(
+  repositories: NotificationsRepositories,
+  runtime: NotificationsRuntime,
+  appConfig: AppConfig,
+): SendTransactionEmailDependencies {
+  return { ...repositories, ...runtime, publicWebUrl: appConfig.web.publicUrl };
 }
 
 @Module({
@@ -62,37 +86,17 @@ export function selectEmailSender(appConfig: AppConfig): EmailSender {
     { provide: EMAIL_SENDER, useFactory: selectEmailSender, inject: [APP_CONFIG] },
     {
       provide: NOTIFICATIONS_REPOSITORIES,
-      useFactory: (
-        transactionRepository: TransactionRepository,
-        customerRepository: CustomerRepository,
-        productRepository: ProductRepository,
-      ): NotificationsRepositories => ({
-        transactionRepository,
-        customerRepository,
-        productRepository,
-      }),
+      useFactory: buildNotificationsRepositories,
       inject: [TRANSACTION_REPOSITORY, CUSTOMER_REPOSITORY, PRODUCT_REPOSITORY],
     },
     {
       provide: NOTIFICATIONS_RUNTIME,
-      useFactory: (
-        deliveryRepository: DeliveryRepository,
-        emailSender: EmailSender,
-        unitOfWork: UnitOfWork,
-      ): NotificationsRuntime => ({ deliveryRepository, emailSender, unitOfWork }),
+      useFactory: buildNotificationsRuntime,
       inject: [DELIVERY_REPOSITORY, EMAIL_SENDER, UNIT_OF_WORK],
     },
     {
       provide: SEND_TRANSACTION_EMAIL_DEPENDENCIES,
-      useFactory: (
-        repositories: NotificationsRepositories,
-        runtime: NotificationsRuntime,
-        appConfig: AppConfig,
-      ): SendTransactionEmailDependencies => ({
-        ...repositories,
-        ...runtime,
-        publicWebUrl: appConfig.web.publicUrl,
-      }),
+      useFactory: buildSendTransactionEmailDependencies,
       inject: [NOTIFICATIONS_REPOSITORIES, NOTIFICATIONS_RUNTIME, APP_CONFIG],
     },
     SendTransactionEmailUseCase,

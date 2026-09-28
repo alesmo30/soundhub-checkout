@@ -42,4 +42,17 @@ describe('SqsEventPublisher', () => {
       expect(result.error).toEqual({ message: 'SQS is down' });
     }
   });
+
+  it('falls back to a fixed message when the SDK rejects with a non-Error value', async () => {
+    const send = jest.fn().mockRejectedValue('timeout');
+    const client = { send } as unknown as SQSClient;
+    const publisher = new SqsEventPublisher(client, QUEUE_URL);
+
+    const result = await publisher.publish(buildEvent());
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error).toEqual({ message: 'Unknown SQS error' });
+    }
+  });
 });
