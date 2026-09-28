@@ -276,7 +276,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step.
    Manual test: `pnpm --filter @checkout/infra exec cdk synth` prints 3 empty templates, and `pnpm lint` / `typecheck` are green.
    Commit: `chore(infra): scaffold CDK app and deploy env loader`.
 
-2. [ ] **CI job.** Add the `infra` job to `.github/workflows/ci.yml`, running `pnpm --filter @checkout/infra test`.
+2. [x] **CI job.** Add the `infra` job to `.github/workflows/ci.yml`, running `pnpm --filter @checkout/infra test`.
    Manual test: `pnpm --filter @checkout/infra test` is green locally.
    Commit: `ci: run infra tests`.
 
