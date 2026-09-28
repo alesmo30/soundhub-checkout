@@ -1,11 +1,13 @@
 import { plainToInstance, Type } from 'class-transformer';
-import { IsIn, IsInt, IsString, Max, Min, validateSync } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString, Max, Min, validateSync } from 'class-validator';
 
 export type NodeEnv = 'development' | 'test' | 'production';
 export type LogLevel = 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace';
+export type DbSsl = 'true' | 'false';
 
 export const NODE_ENVS: readonly NodeEnv[] = ['development', 'test', 'production'];
 export const LOG_LEVELS: readonly LogLevel[] = ['fatal', 'error', 'warn', 'info', 'debug', 'trace'];
+export const DB_SSL_VALUES: readonly DbSsl[] = ['true', 'false'];
 
 export class EnvironmentVariables {
   @IsIn(NODE_ENVS)
@@ -37,6 +39,10 @@ export class EnvironmentVariables {
 
   @IsString()
   DB_NAME!: string;
+
+  @IsOptional()
+  @IsIn(DB_SSL_VALUES)
+  DB_SSL: DbSsl = 'false';
 
   @IsString()
   PAYMENT_GATEWAY_URL!: string;
@@ -111,6 +117,10 @@ export class DbEnvironmentVariables {
 
   @IsString()
   DB_NAME!: string;
+
+  @IsOptional()
+  @IsIn(DB_SSL_VALUES)
+  DB_SSL: DbSsl = 'false';
 }
 
 export function validateDbEnvironmentVariables(

@@ -5,7 +5,9 @@
 # Dependencies and build output
 node_modules
 dist
+dist-lambda
 cdk.out
+cdk.context.json
 *.tsbuildinfo
 
 # Coverage and test artifacts

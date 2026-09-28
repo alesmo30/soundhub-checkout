@@ -7,9 +7,12 @@ export default defineConfig(
   {
     ignores: [
       '**/dist/**',
+      '**/dist-lambda/**',
       '**/coverage/**',
       '**/node_modules/**',
       '**/cdk.out/**',
+      'infra/test/fixtures/**',
+      'infra/lib/functions/**',
       '**/*.d.ts',
       'pnpm-lock.yaml',
     ],

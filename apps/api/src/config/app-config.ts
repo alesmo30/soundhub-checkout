@@ -21,7 +21,14 @@ export const APP_CONFIG = Symbol('APP_CONFIG');
 
 export interface AppConfig {
   app: { nodeEnv: NodeEnv; port: number; logLevel: LogLevel };
-  db: { host: string; port: number; username: string; password: string; name: string };
+  db: {
+    host: string;
+    port: number;
+    username: string;
+    password: string;
+    name: string;
+    ssl: boolean;
+  };
   paymentGateway: {
     url: string;
     publicKey: string;
@@ -41,6 +48,7 @@ export function buildAppConfig(env: EnvironmentVariables): AppConfig {
       username: env.DB_USERNAME,
       password: env.DB_PASSWORD,
       name: env.DB_NAME,
+      ssl: env.DB_SSL === 'true',
     },
     paymentGateway: {
       url: env.PAYMENT_GATEWAY_URL,
@@ -80,6 +88,7 @@ export function buildDbConfig(env: DbEnvironmentVariables): DbConfig {
       username: env.DB_USERNAME,
       password: env.DB_PASSWORD,
       name: env.DB_NAME,
+      ssl: env.DB_SSL === 'true',
     },
   };
 }

@@ -33,7 +33,14 @@ const noSleep = (): Promise<void> => Promise.resolve();
 function buildConfig(): AppConfig {
   return {
     app: { nodeEnv: 'test', port: 3000, logLevel: 'error' },
-    db: { host: 'localhost', port: 5432, username: 'user', password: 'pass', name: 'db' },
+    db: {
+      host: 'localhost',
+      port: 5432,
+      username: 'user',
+      password: 'pass',
+      name: 'db',
+      ssl: false,
+    },
     paymentGateway: {
       url: GATEWAY_URL,
       publicKey: 'pub_fake_00000000000000000000',
