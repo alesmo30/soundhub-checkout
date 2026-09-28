@@ -320,7 +320,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step.
    Manual test: `pnpm dev` still boots against docker Postgres without SSL, and `test:int` is green.
    Commit: `feat(api): support SSL to RDS behind DB_SSL`.
 
-7. [ ] **Secrets loader.** `shared/infrastructure/aws/load-secrets.ts` with a spec over a fake `SecretsManagerClient`. The spec covers:
+7. [x] **Secrets loader.** `shared/infrastructure/aws/load-secrets.ts` with a spec over a fake `SecretsManagerClient`. The spec covers:
    - both secrets mapped to the `.env` names;
    - a missing ARN, secret key or field throws naming the key without its value;
    - a second call in the same process does not fetch again.

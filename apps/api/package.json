@@ -17,6 +17,7 @@
     "seed:reset": "tsx src/shared/infrastructure/persistence/seeds/seed-reset.cli.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.1141.0",
     "@checkout/shared": "workspace:*",
     "@nestjs/common": "^12.1.0",
     "@nestjs/config": "^12.0.1",
