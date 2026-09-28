@@ -1,4 +1,23 @@
 {
   "name": "@checkout/infra",
-  "private": true
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "jest -c jest.config.ts",
+    "cdk": "cdk"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.271.0",
+    "constructs": "^10.8.1"
+  },
+  "devDependencies": {
+    "aws-cdk": "^2.1143.0",
+    "typescript": "^5.9.3",
+    "tsx": "^4.23.15",
+    "jest": "^30.5.2",
+    "@swc/jest": "^0.2.39",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.20.4"
+  }
 }

@@ -268,7 +268,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step.
 
 ### Part 1 — Data stack
 
-1. [ ] **CDK skeleton.** `infra/{package.json, tsconfig.json, cdk.json, jest.config.ts}`, `bin/app.ts` with three empty stacks, `lib/config/constants.ts` and `lib/config/deploy-env.ts`, plus `deploy-env.test.ts`. The test covers:
+1. [x] **CDK skeleton.** `infra/{package.json, tsconfig.json, cdk.json, jest.config.ts}`, `bin/app.ts` with three empty stacks, `lib/config/constants.ts` and `lib/config/deploy-env.ts`, plus `deploy-env.test.ts`. The test covers:
    - every value is read;
    - a missing or empty key throws naming it;
    - `SMTP_PORT` is parsed as a number.
