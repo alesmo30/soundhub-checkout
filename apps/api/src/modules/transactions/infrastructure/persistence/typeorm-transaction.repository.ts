@@ -10,6 +10,7 @@ import type {
   TransactionRepository,
   TransactionUniqueViolation,
 } from '../../application/ports/transaction.repository.port';
+import { EMAIL_REPUBLISH_LEASE_MS, RECONCILER_LEASE_MS } from '../../domain/reconciler.constants';
 import type { FinalStatus, NewTransaction, Transaction } from '../../domain/transaction';
 import { toTransactionUniqueViolation } from './helpers/to-transaction-unique-violation';
 import {
@@ -22,11 +23,55 @@ import {
 } from './transaction.mapper';
 import { TransactionOrmEntity } from './transaction.orm-entity';
 
-const NOT_IMPLEMENTED_MESSAGE = 'Not implemented — api 06';
-
 // See typeorm-stock-reservation.repository.ts's `UpdateResult` for why a
 // non-SELECT `manager.query` resolves to this tuple rather than bare rows.
 type FinalizeQueryResult = [rows: FinalizeReturningRow[], affectedRowCount: number];
+
+// See typeorm-stock-reservation.repository.ts's `UpdateResult` for the same
+// tuple shape reasoning as FinalizeQueryResult above.
+type ClaimQueryResult = [rows: TransactionReturningRow[], affectedRowCount: number];
+
+// Leased claim: SELECT ... FOR UPDATE SKIP LOCKED picks the rows, the outer
+// UPDATE bumps updated_at (the lease) and commits immediately — no lock is
+// held across the caller's gateway call (references/layering.md — no
+// network call while row locks are held). Each caller supplies its own
+// filter/order predicate and the placeholder its limit is bound to; the
+// shared shape is the CTE-less `UPDATE ... WHERE id IN (SELECT ...)
+// RETURNING *` skeleton. `clock_timestamp()`, not `now()`: this must be the
+// actual wall-clock instant the lease starts, not the enclosing
+// transaction's frozen snapshot time.
+function buildClaimSql(whereClause: string, limitPlaceholder: string): string {
+  return `UPDATE transactions SET updated_at = clock_timestamp()
+ WHERE id IN (SELECT id FROM transactions
+               WHERE ${whereClause}
+               ORDER BY updated_at LIMIT ${limitPlaceholder}
+               FOR UPDATE SKIP LOCKED)
+RETURNING *`;
+}
+
+// Params: [olderThan, limit]. PENDING with a known provider id, untouched
+// since before `olderThan` — see references/coding-conventions.md#c11.
+const CLAIM_PENDING_FOR_SYNC_SQL = buildClaimSql(
+  "status = 'PENDING' AND provider_transaction_id IS NOT NULL AND updated_at < $1",
+  '$2',
+);
+
+// Params: [now, leaseThreshold, limit]. PENDING, no provider id yet (the
+// gateway response was lost), whose reservation already expired relative to
+// `now`, and whose own lease (`now - RECONCILER_LEASE_MS`) has elapsed.
+const CLAIM_EXPIRED_RESERVATIONS_SQL = buildClaimSql(
+  'status = \'PENDING\' AND provider_transaction_id IS NULL AND reservation_expires_at < $1 AND updated_at < $2',
+  '$3',
+);
+
+// Params: [finalizedBefore, leaseThreshold, limit]. Any final status
+// (EXPIRED included), no email sent yet, finalized before `finalizedBefore`,
+// and whose own lease (`now - EMAIL_REPUBLISH_LEASE_MS`, computed from the
+// repository's own clock since this claim takes no `now`) has elapsed.
+const FIND_UNSENT_EMAILS_SQL = buildClaimSql(
+  "status <> 'PENDING' AND email_sent_at IS NULL AND finalized_at < $1 AND updated_at < $2",
+  '$3',
+);
 
 // See docs/design/01-data-model.md#4-stock-operations for the verbatim
 // statement; only the `:id`/`:final`/`:msg` placeholders became `$1`/`$2`.
@@ -163,15 +208,52 @@ export class TypeOrmTransactionRepository implements TransactionRepository {
     return ResultAsync.fromSafePromise(query);
   }
 
-  claimPendingForSync(): ResultAsync<Transaction[], never> {
-    throw new Error(NOT_IMPLEMENTED_MESSAGE);
+  claimPendingForSync(
+    tx: TxContext,
+    query: { olderThan: Date; limit: number },
+  ): ResultAsync<Transaction[], never> {
+    const manager = tx instanceof TypeOrmTxContext ? tx.manager : this.manager;
+    const promise = manager
+      .query(CLAIM_PENDING_FOR_SYNC_SQL, [query.olderThan, query.limit])
+      .then((result: ClaimQueryResult) => {
+        const [rows] = result;
+        return rows.map(toTransactionFromReturningRow);
+      });
+
+    return ResultAsync.fromSafePromise(promise);
   }
 
-  claimExpiredReservations(): ResultAsync<Transaction[], never> {
-    throw new Error(NOT_IMPLEMENTED_MESSAGE);
+  claimExpiredReservations(
+    tx: TxContext,
+    query: { now: Date; limit: number },
+  ): ResultAsync<Transaction[], never> {
+    const manager = tx instanceof TypeOrmTxContext ? tx.manager : this.manager;
+    const leaseThreshold = new Date(query.now.getTime() - RECONCILER_LEASE_MS);
+    const promise = manager
+      .query(CLAIM_EXPIRED_RESERVATIONS_SQL, [query.now, leaseThreshold, query.limit])
+      .then((result: ClaimQueryResult) => {
+        const [rows] = result;
+        return rows.map(toTransactionFromReturningRow);
+      });
+
+    return ResultAsync.fromSafePromise(promise);
   }
 
-  findUnsentEmails(): ResultAsync<Transaction[], never> {
-    throw new Error(NOT_IMPLEMENTED_MESSAGE);
+  // Runs as its own autocommit statement through the constructor's manager
+  // (no `tx`, per the port), so it is never nested inside another caller's
+  // unit of work.
+  findUnsentEmails(query: {
+    finalizedBefore: Date;
+    limit: number;
+  }): ResultAsync<Transaction[], never> {
+    const leaseThreshold = new Date(Date.now() - EMAIL_REPUBLISH_LEASE_MS);
+    const promise = this.manager
+      .query(FIND_UNSENT_EMAILS_SQL, [query.finalizedBefore, leaseThreshold, query.limit])
+      .then((result: ClaimQueryResult) => {
+        const [rows] = result;
+        return rows.map(toTransactionFromReturningRow);
+      });
+
+    return ResultAsync.fromSafePromise(promise);
   }
 }

@@ -7,8 +7,6 @@ import { TypeOrmTxContext } from '../../../../shared/infrastructure/persistence/
 import type { NewTransaction } from '../../domain/transaction';
 import { TypeOrmTransactionRepository } from './typeorm-transaction.repository';
 
-const NOT_IMPLEMENTED_MESSAGE = 'Not implemented — api 06';
-
 // A transaction FKs into customers and products, neither of which this
 // module may import directly (a module talks to another only through its
 // index.ts — see references/layering.md). Built here as self-contained raw
@@ -287,17 +285,4 @@ describe('TypeOrmTransactionRepository', () => {
     });
   });
 
-  describe('the api 06 stubs', () => {
-    it('claimPendingForSync throws', () => {
-      expect(() => repository.claimPendingForSync()).toThrow(NOT_IMPLEMENTED_MESSAGE);
-    });
-
-    it('claimExpiredReservations throws', () => {
-      expect(() => repository.claimExpiredReservations()).toThrow(NOT_IMPLEMENTED_MESSAGE);
-    });
-
-    it('findUnsentEmails throws', () => {
-      expect(() => repository.findUnsentEmails()).toThrow(NOT_IMPLEMENTED_MESSAGE);
-    });
-  });
 });
