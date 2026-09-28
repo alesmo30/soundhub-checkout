@@ -52,7 +52,7 @@ No persisted data structures. No new dependencies besides `jest-axe` (+ `@types/
    Manual test: `vite build` — checkout dialog appears as its own chunk in the build output.
    Commit: `perf(web): code-split checkout dialog`.
 
-6. [ ] **Bundle check.** Run `vite build`, record initial JS gzip size; if over 200 KB, trim (further code-splitting or dependency review).
+6. [x] **Bundle check.** Run `vite build`, record initial JS gzip size; if over 200 KB, trim (further code-splitting or dependency review).
    Manual test: `pnpm --filter @checkout/web build` output gzip size < 200 KB for the initial chunk.
    Commit: `chore(web): record bundle size check`.
 
