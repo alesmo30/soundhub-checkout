@@ -27,7 +27,11 @@ function asProblem(body: unknown): ProblemDetails {
   return body as ProblemDetails;
 }
 
-function checksumFor(fixture: { data: unknown; signature: { properties: string[] }; timestamp: number }): string {
+function checksumFor(fixture: {
+  data: unknown;
+  signature: { properties: string[] };
+  timestamp: number;
+}): string {
   return eventChecksum({
     data: fixture.data,
     properties: fixture.signature.properties,

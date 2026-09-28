@@ -60,7 +60,7 @@ const CLAIM_PENDING_FOR_SYNC_SQL = buildClaimSql(
 // gateway response was lost), whose reservation already expired relative to
 // `now`, and whose own lease (`now - RECONCILER_LEASE_MS`) has elapsed.
 const CLAIM_EXPIRED_RESERVATIONS_SQL = buildClaimSql(
-  'status = \'PENDING\' AND provider_transaction_id IS NULL AND reservation_expires_at < $1 AND updated_at < $2',
+  "status = 'PENDING' AND provider_transaction_id IS NULL AND reservation_expires_at < $1 AND updated_at < $2",
   '$3',
 );
 
@@ -184,7 +184,9 @@ export class TypeOrmTransactionRepository implements TransactionRepository {
     return ResultAsync.fromSafePromise(query);
   }
 
-  findByProviderTransactionId(providerTransactionId: string): ResultAsync<Transaction | null, never> {
+  findByProviderTransactionId(
+    providerTransactionId: string,
+  ): ResultAsync<Transaction | null, never> {
     const query = this.manager
       .findOne(TransactionOrmEntity, { where: { providerTransactionId } })
       .then((entity) => (entity ? toTransaction(entity) : null));

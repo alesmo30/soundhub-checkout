@@ -212,7 +212,9 @@ class DelayedRecordingGateway {
     throw new Error('not used by this spec');
   }
 
-  async getCharge(providerTransactionId: string): Promise<Result<GatewayCharge, PaymentGatewayError>> {
+  async getCharge(
+    providerTransactionId: string,
+  ): Promise<Result<GatewayCharge, PaymentGatewayError>> {
     this.calledIds.push(providerTransactionId);
     await sleep(GATEWAY_DELAY_MS);
     return ok({

@@ -176,7 +176,10 @@ async function backdateReservationExpiresAt(
   id: string,
   at: Date,
 ): Promise<void> {
-  await manager.query('UPDATE transactions SET reservation_expires_at = $2 WHERE id = $1', [id, at]);
+  await manager.query('UPDATE transactions SET reservation_expires_at = $2 WHERE id = $1', [
+    id,
+    at,
+  ]);
 }
 
 async function backdateUpdatedAt(manager: EntityManager, id: string, at: Date): Promise<void> {
@@ -284,7 +287,9 @@ class ConfigurableFakeGateway implements PaymentGatewayPort {
 
   findChargeByReference(reference: string): ResultAsync<GatewayCharge | null, PaymentGatewayError> {
     this.findByReferenceCalls.push(reference);
-    return okAsync(this.byReference.has(reference) ? (this.byReference.get(reference) ?? null) : null);
+    return okAsync(
+      this.byReference.has(reference) ? (this.byReference.get(reference) ?? null) : null,
+    );
   }
 
   stubGetCharge(providerTransactionId: string, charge: GatewayCharge): void {
@@ -440,7 +445,10 @@ describe('ReconcileTransactionsUseCase against Postgres', () => {
       expect(stock.available).toBe(10);
       expect(stock.reserved).toBe(0);
 
-      const deliveryStatus = await fetchDeliveryStatusByTransactionId(dataSource.manager, transactionId);
+      const deliveryStatus = await fetchDeliveryStatusByTransactionId(
+        dataSource.manager,
+        transactionId,
+      );
       expect(deliveryStatus).toBe('CANCELLED');
     } finally {
       await softDeleteProduct(dataSource.manager, productId);

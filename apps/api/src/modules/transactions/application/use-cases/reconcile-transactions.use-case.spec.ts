@@ -155,12 +155,10 @@ function gatewayCharge(overrides: Partial<GatewayCharge> = {}): GatewayCharge {
 }
 
 type GatewayCallResult =
-  | { readonly ok: true; readonly charge: GatewayCharge }
-  | { readonly ok: false };
+  { readonly ok: true; readonly charge: GatewayCharge } | { readonly ok: false };
 
 type ReferenceLookupResult =
-  | { readonly ok: true; readonly charge: GatewayCharge | null }
-  | { readonly ok: false };
+  { readonly ok: true; readonly charge: GatewayCharge | null } | { readonly ok: false };
 
 class FakePaymentGateway implements PaymentGatewayPort {
   getChargeCalls: string[] = [];
@@ -176,7 +174,10 @@ class FakePaymentGateway implements PaymentGatewayPort {
   getCharge(providerTransactionId: string): ResultAsync<GatewayCharge, PaymentGatewayError> {
     this.getChargeCalls.push(providerTransactionId);
     this.insideUnitOfWorkAtCall.push(this.unitOfWork?.insideRun ?? false);
-    const result = this.results[this.getChargeCalls.length - 1] ?? { ok: true, charge: gatewayCharge() };
+    const result = this.results[this.getChargeCalls.length - 1] ?? {
+      ok: true,
+      charge: gatewayCharge(),
+    };
     return result.ok
       ? okAsync(result.charge)
       : errAsync<GatewayCharge, PaymentGatewayError>({ kind: 'UNAVAILABLE', message: 'boom' });
@@ -190,7 +191,10 @@ class FakePaymentGateway implements PaymentGatewayPort {
     };
     return result.ok
       ? okAsync(result.charge)
-      : errAsync<GatewayCharge | null, PaymentGatewayError>({ kind: 'UNAVAILABLE', message: 'boom' });
+      : errAsync<GatewayCharge | null, PaymentGatewayError>({
+          kind: 'UNAVAILABLE',
+          message: 'boom',
+        });
   }
 
   wasEverCalledInsideUnitOfWork(): boolean {
@@ -257,13 +261,18 @@ function buildUseCase(params: {
   unitOfWork: FakeUnitOfWork;
 } {
   const unitOfWork = params.unitOfWork ?? new FakeUnitOfWork();
-  const gateway = new FakePaymentGateway(params.gatewayResults, unitOfWork, params.referenceResults);
+  const gateway = new FakePaymentGateway(
+    params.gatewayResults,
+    unitOfWork,
+    params.referenceResults,
+  );
   const repository = new FakeTransactionRepository(
     params.toClaim ?? [],
     params.toClaimExpired ?? [],
     params.toFindUnsentEmails ?? [],
   );
-  const finalizeTransactionUseCase = params.finalizeTransactionUseCase ?? new FakeFinalizeTransactionUseCase();
+  const finalizeTransactionUseCase =
+    params.finalizeTransactionUseCase ?? new FakeFinalizeTransactionUseCase();
   const eventPublisher = params.eventPublisher ?? new FakeEventPublisher();
 
   const dependencies: ReconcileTransactionsDependencies = {
@@ -411,7 +420,10 @@ describe('ReconcileTransactionsUseCase — safe expiry task', () => {
     const { useCase, repository } = buildUseCase({
       toClaimExpired: [transaction],
       referenceResults: [
-        { ok: true, charge: gatewayCharge({ providerTransactionId: 'gw-recovered', status: 'APPROVED' }) },
+        {
+          ok: true,
+          charge: gatewayCharge({ providerTransactionId: 'gw-recovered', status: 'APPROVED' }),
+        },
       ],
       finalizeTransactionUseCase: finalizer,
     });
@@ -434,7 +446,10 @@ describe('ReconcileTransactionsUseCase — safe expiry task', () => {
     const { useCase, repository } = buildUseCase({
       toClaimExpired: [transaction],
       referenceResults: [
-        { ok: true, charge: gatewayCharge({ providerTransactionId: 'gw-pending', status: 'PENDING' }) },
+        {
+          ok: true,
+          charge: gatewayCharge({ providerTransactionId: 'gw-pending', status: 'PENDING' }),
+        },
       ],
       finalizeTransactionUseCase: finalizer,
     });

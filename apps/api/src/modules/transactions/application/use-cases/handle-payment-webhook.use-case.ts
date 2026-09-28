@@ -14,10 +14,7 @@ export interface PaymentWebhookEvent {
 }
 
 export type HandlePaymentWebhookResult =
-  | 'FINALIZED'
-  | 'ALREADY_FINAL'
-  | 'IGNORED'
-  | 'UNKNOWN_TRANSACTION';
+  'FINALIZED' | 'ALREADY_FINAL' | 'IGNORED' | 'UNKNOWN_TRANSACTION';
 
 // Bundles the use case's 2 collaborators behind one DI token (references/coding-conventions.md#c1,
 // same pattern as FinalizeTransactionUseCase's FINALIZE_TRANSACTION_DEPENDENCIES).

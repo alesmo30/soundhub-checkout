@@ -249,9 +249,7 @@ describe('TypeOrmTransactionRepository', () => {
         statusMessage: null,
       });
 
-      const found = (
-        await repository.findByProviderTransactionId('gw-lookup-1')
-      )._unsafeUnwrap();
+      const found = (await repository.findByProviderTransactionId('gw-lookup-1'))._unsafeUnwrap();
 
       expect(found?.id).toBe(inserted.id);
     });
@@ -284,5 +282,4 @@ describe('TypeOrmTransactionRepository', () => {
       expect(afterSecond?.emailSentAt).toEqual(firstTimestamp);
     });
   });
-
 });

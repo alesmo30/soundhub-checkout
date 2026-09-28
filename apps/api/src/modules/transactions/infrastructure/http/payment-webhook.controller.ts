@@ -1,4 +1,13 @@
-import { Body, Controller, Headers, HttpCode, HttpStatus, Inject, Logger, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Inject,
+  Logger,
+  Post,
+} from '@nestjs/common';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
 
 import { APP_CONFIG, type AppConfig } from '../../../../config/app-config';

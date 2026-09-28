@@ -8,7 +8,10 @@ import type {
   FinalizeTransactionResult,
 } from './finalize-transaction.use-case';
 import type { FinalizeTransactionUseCase } from './finalize-transaction.use-case';
-import type { HandlePaymentWebhookDependencies, PaymentWebhookEvent } from './handle-payment-webhook.use-case';
+import type {
+  HandlePaymentWebhookDependencies,
+  PaymentWebhookEvent,
+} from './handle-payment-webhook.use-case';
 import { HandlePaymentWebhookUseCase } from './handle-payment-webhook.use-case';
 
 function buildTransaction(overrides: Partial<Transaction> = {}): Transaction {
@@ -116,7 +119,8 @@ function buildUseCase(deps: {
 }): HandlePaymentWebhookUseCase {
   const dependencies: HandlePaymentWebhookDependencies = {
     transactionRepository: deps.transactionRepository,
-    finalizeTransactionUseCase: deps.finalizeTransactionUseCase as unknown as FinalizeTransactionUseCase,
+    finalizeTransactionUseCase:
+      deps.finalizeTransactionUseCase as unknown as FinalizeTransactionUseCase,
   };
   return new HandlePaymentWebhookUseCase(dependencies);
 }
@@ -165,9 +169,7 @@ describe('HandlePaymentWebhookUseCase', () => {
       finalizeTransactionUseCase: finalizer,
     });
 
-    const result = await useCase.execute(
-      buildEvent({ status: TransactionStatus.PENDING }),
-    );
+    const result = await useCase.execute(buildEvent({ status: TransactionStatus.PENDING }));
 
     expect(result._unsafeUnwrap()).toBe('IGNORED');
   });

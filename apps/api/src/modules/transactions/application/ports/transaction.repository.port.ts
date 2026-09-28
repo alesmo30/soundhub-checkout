@@ -16,7 +16,9 @@ export interface TransactionRepository {
   // Looked up on the signed `data.transaction.id` from a payment webhook
   // event; never on a caller-supplied reference (see transaction-reference's
   // absence from the trusted signature — spec 12a's webhook decisions).
-  findByProviderTransactionId(providerTransactionId: string): ResultAsync<Transaction | null, never>;
+  findByProviderTransactionId(
+    providerTransactionId: string,
+  ): ResultAsync<Transaction | null, never>;
   insert(
     tx: TxContext,
     transaction: NewTransaction,
