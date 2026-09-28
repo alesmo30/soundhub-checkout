@@ -76,7 +76,8 @@ cp .env.example .env                            # then fill in the gateway sandb
 docker compose up -d postgres                   # local PostgreSQL 16
 pnpm --filter @checkout/api migration:run       # apply migrations
 pnpm --filter @checkout/api seed                # municipalities, warehouses, products
-pnpm dev                                        # api on :3000, web on :5173
+pnpm --filter @checkout/api start:dev           # API on :3000 (watch mode)
+pnpm --filter @checkout/web dev                 # SPA on :5173, in a second terminal
 ```
 
 Verify the API is up and serving the catalog:
@@ -300,12 +301,12 @@ Manager. Names only — values are never committed.
 ## Development and testing
 
 ```bash
-pnpm lint                                  # eslint + prettier, all workspaces
-pnpm typecheck
-pnpm test                                  # unit tests, all workspaces
-pnpm test:cov                              # unit tests with coverage thresholds (≥ 80 %)
-pnpm --filter @checkout/api test:int       # integration tests (needs PostgreSQL)
-pnpm verify                                # lint + typecheck + test:cov + test:int + e2e
+pnpm lint                                     # eslint + prettier, all workspaces
+pnpm typecheck                                # tsc --noEmit, all workspaces
+pnpm test                                     # unit tests, all workspaces
+pnpm test:cov                                 # unit tests with coverage thresholds (≥ 80 %)
+pnpm --filter @checkout/infra test            # CDK template assertions
+DB_NAME=checkout_int pnpm --filter @checkout/api test:int   # integration tests (needs PostgreSQL)
 ```
 
 ### Coverage

@@ -1,6 +1,6 @@
 # SPEC 16 — Infra: release (final deploy, manual smoke, README and evidence)
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 09 (stacks, deploy script), SPEC 13 (async: SQS, email worker, reconciler, alarms — merged), SPEC 15 (web hardening). Optional: SPEC 14 (throttling + Postman) as a redeploy if merged before 07:15.
 > **Date:** 2026-09-28
 > **Objective:** The current `main` is live on AWS with its async half, verified by a manual sandbox smoke (4242 APPROVED, 4111 DECLINED) in Chrome and Safari, and a root README lets a reviewer understand, run and verify the project and find evidence for every assessment rubric item.
@@ -207,7 +207,7 @@ Prerequisites (not commits):
 
 ### Close-out
 
-10. [ ] **Checks and status.**
+10. [x] **Checks and status.**
     - Brand check: `git grep -i` for the brand name and for the sandbox host (typed in the terminal, never written in a file) returns nothing; the same over `git log --all --format=%B` and `git branch -a`.
     - `grep -n TBD README.md` returns nothing.
     - Every README link resolves (`npx markdown-link-check README.md`, no new dependency).
@@ -227,40 +227,40 @@ Notes:
 
 Deploy
 
-- [ ] `deploy.sh` fails naming `ALARM_EMAIL` when it is missing, and passes it as `AlarmEmail` when present.
-- [ ] `pnpm --filter @checkout/infra test` is green, including `ReservedConcurrentExecutions: 10` on the API Lambda only.
-- [ ] `cdk deploy --all` of the current `main` succeeds; AWS shows 4 Lambdas, the `transaction-finalized` queue and DLQ, an enabled 1-minute schedule and 3 alarms; the SNS subscription is confirmed.
-- [ ] `https://d2dponv42xzzpw.cloudfront.net/api/v1/health` returns 200 with `database: 'up'`.
-- [ ] `/api/docs` renders and `/api/docs-json` lists every route in `main`, including `/api/v1/transactions/{id}` and `/api/v1/webhooks/payments`.
+- [x] `deploy.sh` fails naming `ALARM_EMAIL` when it is missing, and passes it as `AlarmEmail` when present.
+- [x] `pnpm --filter @checkout/infra test` is green, including `ReservedConcurrentExecutions: 10` on the API Lambda only.
+- [x] `cdk deploy --all` of the current `main` succeeds; AWS shows 4 Lambdas, the `transaction-finalized` queue and DLQ, an enabled 1-minute schedule and 3 alarms; the SNS subscription is confirmed.
+- [x] `https://d2dponv42xzzpw.cloudfront.net/api/v1/health` returns 200 with `database: 'up'`.
+- [~] `/api/docs` renders and `/api/docs-json` lists every route in `main`, including `/api/v1/transactions/{id}`. **Deviation:** `/api/v1/webhooks/payments` stays hidden (`@ApiExcludeEndpoint`, SPEC 12a) — see step 3's decision.
 
 Smoke
 
-- [ ] 4242 in Chrome reaches APPROVED and the product's stock drops by the quantity bought.
-- [ ] 4111 in Chrome at 375×667 reaches DECLINED and the stock does not change.
-- [ ] Refreshing on the summary restores it.
-- [ ] 4242 in Safari reaches APPROVED.
-- [ ] One result email arrives per finalized transaction, and the email worker logs show the sends.
+- [x] 4242 in Chrome reaches APPROVED and the product's stock drops by the quantity bought.
+- [x] 4111 in Chrome at 375×667 reaches DECLINED and the stock does not change.
+- [ ] Refreshing on the summary restores it. **Failed:** the form resets and the buyer must re-enter the card. Recorded as a Known limitation in the README — see step 4's decision.
+- [x] 4242 in Safari reaches APPROVED.
+- [x] One result email arrives per finalized transaction, and the email worker logs show the sends.
 
 Evidence
 
-- [ ] Every file listed under "Evidence files" exists in `docs/evidence/release/`, with no full email address or secret visible.
-- [ ] Mozilla Observatory grade recorded (target A; findings listed if lower).
-- [ ] Lighthouse mobile LCP recorded (target < 2.5 s; the real value is recorded either way).
+- [~] Files 03–07, 09, 10, 11 and the Lighthouse report exist in `docs/evidence/release/`, with the sender address blacked out on both email screenshots. **Gap:** `01` and `02` were not captured, and `08` is split into `08a`/`08b` covering two of the three emails — see step 4's decision.
+- [x] Mozilla Observatory grade recorded: **A+**, 125/100, 12/12 tests passed.
+- [x] Lighthouse mobile LCP recorded: **2.3 s** (Performance 97, Accessibility 100, Best Practices 92, SEO 91).
 
 README
 
-- [ ] Contains every section of the outline, with live links to the app and Swagger in the first screen.
-- [ ] Coverage tables for api and web show all four metrics, each ≥ 80 %, taken from a run in step 8.
-- [ ] The rubric map covers all 6 items and 6 bonuses, and every link in it resolves.
-- [ ] Postman is linked if SPEC 14 merged, or marked "pending (SPEC 14)" otherwise.
-- [ ] A fresh clone following Quickstart reaches `GET /api/v1/health` → 200 locally.
-- [ ] No `TBD` left, and every link resolves.
+- [x] Contains every section of the outline, with live links to the app and Swagger in the first screen.
+- [x] Coverage tables for api and web show all four metrics, each ≥ 80 %, taken from a run in step 8.
+- [x] The rubric map covers all 6 items and 6 bonuses, and every link in it resolves.
+- [~] SPEC 14 never merged, so there is no collection to link; at the user's request the Postman row was dropped from the README's live-links callout rather than left as a "pending" placeholder. The rubric's "Postman **or** Swagger" item is covered by the public Swagger URL.
+- [x] A fresh clone following Quickstart reaches `GET /api/v1/health` → 200 locally.
+- [x] No `TBD` left; `markdown-link-check` reports only `http://localhost:5173` (the dev-server URL in Quickstart) as unreachable.
 
 Hygiene
 
-- [ ] The brand name and the sandbox host appear nowhere in the repository, commit messages or branch names.
-- [ ] No secret, credential or real email address is committed (README configuration lists names only).
-- [ ] The repository is public at `github.com/alesmo30/soundhub-checkout`.
+- [x] The brand name and the sandbox host appear nowhere in the repository, commit messages or branch names.
+- [x] No secret, credential or real email address is committed (README configuration lists names only).
+- [x] The repository is public at `github.com/alesmo30/soundhub-checkout`.
 
 ## Decisions
 
