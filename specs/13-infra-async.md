@@ -103,7 +103,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `cdk synth` shows an `AWS::Scheduler::Schedule` resource.
    Commit: `feat(infra): add reconciler Lambda on a 1-minute EventBridge Scheduler`.
 
-5. [ ] **Alarms and SNS notification.** A `CfnParameter AlarmEmail` (string, no default) inside `CheckoutBackendStack`; an `AsyncAlarmsTopic` SNS topic with an email subscription bound to that parameter; three `Alarm` constructs — `DlqNotEmptyAlarm` (`ApproximateNumberOfMessagesVisible` on the DLQ, threshold > 0), `EmailWorkerErrorsAlarm` and `ReconcilerErrorsAlarm` (`Errors` metric on each Lambda, threshold > 0) — each with `addAlarmAction(new SnsAction(topic))`. The specs cover:
+5. [x] **Alarms and SNS notification.** A `CfnParameter AlarmEmail` (string, no default) inside `CheckoutBackendStack`; an `AsyncAlarmsTopic` SNS topic with an email subscription bound to that parameter; three `Alarm` constructs — `DlqNotEmptyAlarm` (`ApproximateNumberOfMessagesVisible` on the DLQ, threshold > 0), `EmailWorkerErrorsAlarm` and `ReconcilerErrorsAlarm` (`Errors` metric on each Lambda, threshold > 0) — each with `addAlarmAction(new SnsAction(topic))`. The specs cover:
    - the three alarms exist with the correct namespace, metric name, dimensions and threshold;
    - the SNS topic has exactly one email subscription, using the `AlarmEmail` parameter (not a literal address).
 

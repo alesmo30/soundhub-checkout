@@ -346,3 +346,96 @@ describe('CheckoutBackendStack — reconciler Lambda and schedule', () => {
     }
   });
 });
+
+describe('CheckoutBackendStack — alarms and SNS notification', () => {
+  it('declares an AlarmEmail string parameter with no default', () => {
+    const template = synthBackendStack();
+
+    template.hasParameter('AlarmEmail', {
+      Type: 'String',
+      Default: Match.absent(),
+    });
+  });
+
+  it('creates exactly one SNS topic with a single email subscription bound to the AlarmEmail parameter', () => {
+    const template = synthBackendStack();
+
+    const topics = template.findResources('AWS::SNS::Topic');
+    expect(Object.keys(topics)).toHaveLength(1);
+    const topicLogicalId = Object.keys(topics)[0] as string;
+
+    const subscriptions = template.findResources('AWS::SNS::Subscription', {
+      Properties: { TopicArn: { Ref: topicLogicalId } },
+    });
+    expect(Object.keys(subscriptions)).toHaveLength(1);
+
+    const subscription = Object.values(subscriptions)[0] as {
+      Properties: { Protocol: string; Endpoint: unknown };
+    };
+    expect(subscription.Properties.Protocol).toBe('email');
+    expect(subscription.Properties.Endpoint).toEqual({ Ref: 'AlarmEmail' });
+  });
+
+  it('alarms on the DLQ having visible messages, notifying the SNS topic', () => {
+    const template = synthBackendStack();
+
+    const dlqs = template.findResources('AWS::SQS::Queue', {
+      Properties: { QueueName: Match.absent() },
+    });
+    const dlqLogicalId = Object.keys(dlqs)[0] as string;
+
+    const topics = template.findResources('AWS::SNS::Topic');
+    const topicLogicalId = Object.keys(topics)[0] as string;
+
+    template.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      Namespace: 'AWS/SQS',
+      MetricName: 'ApproximateNumberOfMessagesVisible',
+      Dimensions: [{ Name: 'QueueName', Value: { 'Fn::GetAtt': [dlqLogicalId, 'QueueName'] } }],
+      Threshold: 0,
+      ComparisonOperator: 'GreaterThanThreshold',
+      AlarmActions: [{ Ref: topicLogicalId }],
+    });
+  });
+
+  it('alarms on email worker Lambda errors, notifying the SNS topic', () => {
+    const template = synthBackendStack();
+
+    const emailWorkerLambdas = template.findResources('AWS::Lambda::Function', {
+      Properties: { Handler: 'email-worker.handler.handler' },
+    });
+    const emailWorkerLogicalId = Object.keys(emailWorkerLambdas)[0] as string;
+
+    const topics = template.findResources('AWS::SNS::Topic');
+    const topicLogicalId = Object.keys(topics)[0] as string;
+
+    template.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      Namespace: 'AWS/Lambda',
+      MetricName: 'Errors',
+      Dimensions: [{ Name: 'FunctionName', Value: { Ref: emailWorkerLogicalId } }],
+      Threshold: 0,
+      ComparisonOperator: 'GreaterThanThreshold',
+      AlarmActions: [{ Ref: topicLogicalId }],
+    });
+  });
+
+  it('alarms on reconciler Lambda errors, notifying the SNS topic', () => {
+    const template = synthBackendStack();
+
+    const reconcilerLambdas = template.findResources('AWS::Lambda::Function', {
+      Properties: { Handler: 'reconciler.handler.handler' },
+    });
+    const reconcilerLogicalId = Object.keys(reconcilerLambdas)[0] as string;
+
+    const topics = template.findResources('AWS::SNS::Topic');
+    const topicLogicalId = Object.keys(topics)[0] as string;
+
+    template.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      Namespace: 'AWS/Lambda',
+      MetricName: 'Errors',
+      Dimensions: [{ Name: 'FunctionName', Value: { Ref: reconcilerLogicalId } }],
+      Threshold: 0,
+      ComparisonOperator: 'GreaterThanThreshold',
+      AlarmActions: [{ Ref: topicLogicalId }],
+    });
+  });
+});
