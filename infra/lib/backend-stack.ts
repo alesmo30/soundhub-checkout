@@ -3,6 +3,7 @@ import * as apigatewayv2 from 'aws-cdk-lib/aws-apigatewayv2';
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
@@ -27,6 +28,8 @@ const API_PORT = '3000';
 const DB_SSL_ENABLED = 'true';
 const API_HANDLER = 'lambda.handler';
 const MIGRATOR_HANDLER = 'migrator.handler';
+const EMAIL_WORKER_HANDLER = 'email-worker.handler.handler';
+const EMAIL_DRIVER_SMTP = 'smtp';
 
 export interface DataStackOutputs {
   vpc: ec2.IVpc;
@@ -123,6 +126,40 @@ export class CheckoutBackendStack extends cdk.Stack {
     });
     transactionFinalizedQueue.grantSendMessages(apiLambda);
     apiLambda.addEnvironment('TRANSACTION_FINALIZED_QUEUE_URL', transactionFinalizedQueue.queueUrl);
+
+    const emailWorkerLambda = new lambda.Function(this, 'EmailWorkerLambda', {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      architecture: lambda.Architecture.ARM_64,
+      memorySize: ASYNC.EMAIL_WORKER.MEMORY_MB,
+      timeout: ASYNC.EMAIL_WORKER.TIMEOUT,
+      handler: EMAIL_WORKER_HANDLER,
+      code,
+      vpc,
+      vpcSubnets,
+      securityGroups: [lambdaSecurityGroup],
+      logGroup: new logs.LogGroup(this, 'EmailWorkerLambdaLogGroup', {
+        retention: logs.RetentionDays.TWO_WEEKS,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+      }),
+      environment: {
+        EMAIL_DRIVER: EMAIL_DRIVER_SMTP,
+        DB_NAME,
+        DB_SSL: DB_SSL_ENABLED,
+        DB_SECRET_ARN: dbSecret.secretArn,
+        APP_SECRETS_ARN: appSecrets.secretArn,
+        SMTP_HOST: deployEnv.smtpHost,
+        SMTP_PORT: String(deployEnv.smtpPort),
+        EMAIL_FROM: deployEnv.emailFrom,
+      },
+    });
+    dbSecret.grantRead(emailWorkerLambda);
+    appSecrets.grantRead(emailWorkerLambda);
+    emailWorkerLambda.addEventSource(
+      new SqsEventSource(transactionFinalizedQueue, {
+        batchSize: ASYNC.SQS_BATCH_SIZE,
+        reportBatchItemFailures: true,
+      }),
+    );
 
     // Runs the migrator during every `cdk deploy` and re-runs it whenever the
     // migrator's code or config changes, so the schema/seed are applied

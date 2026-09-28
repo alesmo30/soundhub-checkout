@@ -96,6 +96,105 @@ describe('CheckoutBackendStack — async queue', () => {
       Properties: { Environment: { Variables: Record<string, unknown> } };
     };
 
-    expect(apiLambda.Properties.Environment.Variables).toHaveProperty('TRANSACTION_FINALIZED_QUEUE_URL');
+    expect(apiLambda.Properties.Environment.Variables).toHaveProperty(
+      'TRANSACTION_FINALIZED_QUEUE_URL',
+    );
+  });
+});
+
+const EMAIL_WORKER_SECRET_ENV_KEYS = [
+  'DB_HOST',
+  'DB_PORT',
+  'DB_USERNAME',
+  'DB_PASSWORD',
+  'PAYMENT_GATEWAY_PRIVATE_KEY',
+  'PAYMENT_GATEWAY_INTEGRITY_SECRET',
+  'PAYMENT_GATEWAY_EVENTS_SECRET',
+  'SMTP_USER',
+  'SMTP_PASSWORD',
+];
+
+describe('CheckoutBackendStack — email worker Lambda', () => {
+  it('creates the email worker Lambda as arm64/nodejs22.x/512MB/2min in the VPC', () => {
+    const template = synthBackendStack();
+
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Handler: 'email-worker.handler.handler',
+      Architectures: ['arm64'],
+      Runtime: 'nodejs22.x',
+      MemorySize: ASYNC.EMAIL_WORKER.MEMORY_MB,
+      Timeout: 120,
+      VpcConfig: Match.objectLike({
+        SecurityGroupIds: Match.anyValue(),
+        SubnetIds: Match.anyValue(),
+      }),
+    });
+  });
+
+  it('keeps the email worker Lambda logs for 14 days in its own LogGroup', () => {
+    const template = synthBackendStack();
+
+    template.resourcePropertiesCountIs('AWS::Logs::LogGroup', { RetentionInDays: 14 }, 3);
+  });
+
+  it('consumes the transaction-finalized queue with batch size 5 and partial batch responses', () => {
+    const template = synthBackendStack();
+
+    template.hasResourceProperties('AWS::Lambda::EventSourceMapping', {
+      BatchSize: ASYNC.SQS_BATCH_SIZE,
+      FunctionResponseTypes: ['ReportBatchItemFailures'],
+    });
+  });
+
+  it('never puts a secret value in the email worker Lambda environment', () => {
+    const template = synthBackendStack();
+
+    const emailWorkerLambdas = template.findResources('AWS::Lambda::Function', {
+      Properties: { Handler: 'email-worker.handler.handler' },
+    });
+    const emailWorkerLambda = Object.values(emailWorkerLambdas)[0] as {
+      Properties: { Environment: { Variables: Record<string, unknown> } };
+    };
+    const envKeys = Object.keys(emailWorkerLambda.Properties.Environment.Variables);
+
+    expect(envKeys).toEqual(expect.arrayContaining(['DB_SECRET_ARN', 'APP_SECRETS_ARN']));
+    for (const secretKey of EMAIL_WORKER_SECRET_ENV_KEYS) {
+      expect(envKeys).not.toContain(secretKey);
+    }
+  });
+
+  it("grants the email worker Lambda read access to both secrets, scoped (no '*')", () => {
+    const template = synthBackendStack();
+
+    interface PolicyResource {
+      Properties: {
+        PolicyDocument: { Statement: Array<{ Action: string | string[]; Resource: unknown }> };
+        Roles: Array<{ Ref: string }>;
+      };
+    }
+
+    const policies = template.findResources('AWS::IAM::Policy') as Record<string, PolicyResource>;
+    const emailWorkerPolicies = Object.values(policies).filter((policy) =>
+      policy.Properties.Roles.some((role) => role.Ref.startsWith('EmailWorkerLambdaServiceRole')),
+    );
+
+    expect(emailWorkerPolicies.length).toBeGreaterThan(0);
+
+    const resourceArns: unknown[] = [];
+    for (const policy of emailWorkerPolicies) {
+      for (const statement of policy.Properties.PolicyDocument.Statement) {
+        const actions = Array.isArray(statement.Action) ? statement.Action : [statement.Action];
+        if (!actions.includes('secretsmanager:GetSecretValue')) {
+          continue;
+        }
+        expect(statement.Resource).not.toBe('*');
+        const resourceList: unknown[] = Array.isArray(statement.Resource)
+          ? (statement.Resource as unknown[])
+          : [statement.Resource];
+        resourceArns.push(...resourceList);
+      }
+    }
+
+    expect(resourceArns).toHaveLength(2);
   });
 });

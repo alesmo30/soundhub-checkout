@@ -86,7 +86,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `pnpm --filter @checkout/infra test` green; `cdk synth` includes the queue.
    Commit: `feat(infra): add transaction-finalized SQS queue and DLQ`.
 
-3. [ ] **Email Worker Lambda and SQS event source.** New Lambda (Node 22, arm64, `ASYNC.EMAIL_WORKER.MEMORY_MB`/`TIMEOUT`, private subnets, `lambdaSecurityGroup`, handler `email-worker.handler.handler`, code from the shared `lambdaBundlePath`), its own `LogGroup` (`RetentionDays.TWO_WEEKS`), env vars (`EMAIL_DRIVER=smtp`, `DB_SECRET_ARN`, `APP_SECRETS_ARN`, plus the same non-secret DB/SMTP config already passed to `apiLambda`), `dbSecret.grantRead` and `appSecrets.grantRead`, and an `SqsEventSource(queue, { batchSize: ASYNC.SQS_BATCH_SIZE, reportBatchItemFailures: true })`. The specs cover:
+3. [x] **Email Worker Lambda and SQS event source.** New Lambda (Node 22, arm64, `ASYNC.EMAIL_WORKER.MEMORY_MB`/`TIMEOUT`, private subnets, `lambdaSecurityGroup`, handler `email-worker.handler.handler`, code from the shared `lambdaBundlePath`), its own `LogGroup` (`RetentionDays.TWO_WEEKS`), env vars (`EMAIL_DRIVER=smtp`, `DB_SECRET_ARN`, `APP_SECRETS_ARN`, plus the same non-secret DB/SMTP config already passed to `apiLambda`), `dbSecret.grantRead` and `appSecrets.grantRead`, and an `SqsEventSource(queue, { batchSize: ASYNC.SQS_BATCH_SIZE, reportBatchItemFailures: true })`. The specs cover:
    - runtime, architecture, memory, timeout, subnet and security group;
    - the event source mapping has batch size 5 and partial batch response enabled;
    - the environment holds no raw secret value (same negative-assertion pattern as `backend-stack.test.ts`'s existing check);
