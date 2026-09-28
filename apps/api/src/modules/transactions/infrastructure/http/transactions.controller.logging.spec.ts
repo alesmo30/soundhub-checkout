@@ -118,6 +118,10 @@ class FakeTransactionRepository implements TransactionRepository {
     return okAsync(existing);
   }
 
+  findByProviderTransactionId(): never {
+    throw new Error('not used by this spec');
+  }
+
   findById(): never {
     throw new Error('not used by this spec');
   }

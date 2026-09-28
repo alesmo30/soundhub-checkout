@@ -139,6 +139,10 @@ export class TypeOrmTransactionRepository implements TransactionRepository {
     return ResultAsync.fromSafePromise(query);
   }
 
+  findByProviderTransactionId(): ResultAsync<Transaction | null, never> {
+    throw new Error('Not implemented — spec 12a');
+  }
+
   // The reconciler's own shape (locking strategy, batching, retry policy)
   // is not decided by this spec — it belongs to api 06 (see
   // specs/08-api-create-transaction.md, "Adapters").

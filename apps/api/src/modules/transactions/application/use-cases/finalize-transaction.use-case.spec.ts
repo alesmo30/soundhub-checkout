@@ -65,6 +65,10 @@ class RecordingPorts implements TransactionRepository, StockReservationPort, Del
     throw new Error('not used by this spec');
   }
 
+  findByProviderTransactionId(): never {
+    throw new Error('not used by this spec');
+  }
+
   findByTransactionId(): never {
     throw new Error('not used by this spec');
   }

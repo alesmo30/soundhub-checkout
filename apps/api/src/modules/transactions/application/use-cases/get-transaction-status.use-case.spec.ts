@@ -101,6 +101,10 @@ class FakeTransactionRepository implements TransactionRepository {
     throw new Error('not used by this spec');
   }
 
+  findByProviderTransactionId(): never {
+    throw new Error('not used by this spec');
+  }
+
   insert(): never {
     throw new Error('not used by this spec');
   }
