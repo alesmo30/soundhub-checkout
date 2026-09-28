@@ -7,9 +7,14 @@ import type { TransactionReturningRow } from './transaction.mapper';
 import { TypeOrmTransactionRepository } from './typeorm-transaction.repository';
 import { TransactionOrmEntity } from './transaction.orm-entity';
 
-const NOT_IMPLEMENTED_MESSAGE = 'Not implemented — api 06';
-
 const RESERVATION_EXPIRES_AT = new Date('2026-09-27T20:05:00.000Z');
+
+// jest.fn()'s untyped `.mock.calls` is `any[][]`; this reads the first
+// argument of the first call with the caller's expected shape instead of
+// leaking `any` into the assertion below.
+function firstCallArg<T>(mockFn: { mock: { calls: unknown[][] } }): T {
+  return mockFn.mock.calls[0]?.[0] as T;
+}
 
 function buildNewTransaction(overrides: Partial<NewTransaction> = {}): NewTransaction {
   return {
@@ -214,6 +219,21 @@ describe('TypeOrmTransactionRepository', () => {
     });
   });
 
+  describe('findByProviderTransactionId', () => {
+    it('reads through the constructor manager, keyed by the provider id', async () => {
+      const { manager, findOne } = buildManagerMock();
+      findOne.mockResolvedValue(null);
+      const repository = new TypeOrmTransactionRepository(manager);
+
+      const result = await repository.findByProviderTransactionId('gw-1');
+
+      expect(findOne).toHaveBeenCalledWith(TransactionOrmEntity, {
+        where: { providerTransactionId: 'gw-1' },
+      });
+      expect(result._unsafeUnwrap()).toBeNull();
+    });
+  });
+
   describe('insert', () => {
     it('inserts through the tx manager and maps the RETURNING row back to a Transaction', async () => {
       const { manager: constructorManager } = buildManagerMock();
@@ -391,33 +411,91 @@ describe('TypeOrmTransactionRepository', () => {
     });
   });
 
-  describe('the api 06 stubs', () => {
-    it('markEmailSent throws', () => {
-      const { manager } = buildManagerMock();
-      const repository = new TypeOrmTransactionRepository(manager);
+  describe('markEmailSent', () => {
+    it('sets email_sent_at conditionally through the tx manager', async () => {
+      const { manager: constructorManager } = buildManagerMock();
+      const { manager: txManager, createQueryBuilder } = buildManagerMock();
+      const execute = jest.fn().mockResolvedValue(undefined);
+      const builder = buildUpdateQueryBuilderMock(execute);
+      createQueryBuilder.mockReturnValue(builder);
+      const repository = new TypeOrmTransactionRepository(constructorManager);
 
-      expect(() => repository.markEmailSent()).toThrow(NOT_IMPLEMENTED_MESSAGE);
+      const result = await repository.markEmailSent(new TypeOrmTxContext(txManager), 'tx-1');
+
+      const setArg = firstCallArg<{ emailSentAt: unknown }>(builder.set);
+      expect(typeof setArg.emailSentAt).toBe('function');
+      expect(builder.where).toHaveBeenCalledWith('id = :id AND email_sent_at IS NULL', {
+        id: 'tx-1',
+      });
+      expect(result._unsafeUnwrap()).toBeUndefined();
     });
 
-    it('claimPendingForSync throws', () => {
-      const { manager } = buildManagerMock();
+    it('falls back to the constructor manager when tx is not a TypeOrmTxContext', async () => {
+      const { manager, createQueryBuilder } = buildManagerMock();
+      const execute = jest.fn().mockResolvedValue(undefined);
+      createQueryBuilder.mockReturnValue(buildUpdateQueryBuilderMock(execute));
       const repository = new TypeOrmTransactionRepository(manager);
 
-      expect(() => repository.claimPendingForSync()).toThrow(NOT_IMPLEMENTED_MESSAGE);
+      await repository.markEmailSent({ __brand: 'TxContext' }, 'tx-1');
+
+      expect(createQueryBuilder).toHaveBeenCalled();
     });
+  });
 
-    it('claimExpiredReservations throws', () => {
-      const { manager } = buildManagerMock();
-      const repository = new TypeOrmTransactionRepository(manager);
+  describe('claimPendingForSync', () => {
+    it('runs the claim SQL through the tx manager with olderThan and limit, mapping RETURNING rows', async () => {
+      const { manager: constructorManager } = buildManagerMock();
+      const { manager: txManager, query } = buildManagerMock();
+      const row = buildReturningRow();
+      query.mockResolvedValue([[row], 1]);
+      const repository = new TypeOrmTransactionRepository(constructorManager);
+      const olderThan = new Date('2026-09-27T20:00:00.000Z');
 
-      expect(() => repository.claimExpiredReservations()).toThrow(NOT_IMPLEMENTED_MESSAGE);
+      const result = await repository.claimPendingForSync(new TypeOrmTxContext(txManager), {
+        olderThan,
+        limit: 20,
+      });
+
+      expect(query).toHaveBeenCalledWith(expect.stringContaining('FOR UPDATE SKIP LOCKED'), [
+        olderThan,
+        20,
+      ]);
+      expect(result._unsafeUnwrap()).toEqual([expect.objectContaining({ id: row.id })]);
     });
+  });
 
-    it('findUnsentEmails throws', () => {
-      const { manager } = buildManagerMock();
+  describe('claimExpiredReservations', () => {
+    it('runs the claim SQL with now, the lease threshold and limit', async () => {
+      const { manager, query } = buildManagerMock();
+      query.mockResolvedValue([[], 0]);
       const repository = new TypeOrmTransactionRepository(manager);
+      const now = new Date('2026-09-27T20:10:00.000Z');
 
-      expect(() => repository.findUnsentEmails()).toThrow(NOT_IMPLEMENTED_MESSAGE);
+      await repository.claimExpiredReservations(new TypeOrmTxContext(manager), { now, limit: 20 });
+
+      expect(query).toHaveBeenCalledWith(expect.stringContaining('FOR UPDATE SKIP LOCKED'), [
+        now,
+        new Date(now.getTime() - 60_000),
+        20,
+      ]);
+    });
+  });
+
+  describe('findUnsentEmails', () => {
+    it('runs the claim SQL through the constructor manager, with no tx', async () => {
+      const { manager, query } = buildManagerMock();
+      const row = buildReturningRow({ status: 'EXPIRED', email_sent_at: null });
+      query.mockResolvedValue([[row], 1]);
+      const repository = new TypeOrmTransactionRepository(manager);
+      const finalizedBefore = new Date('2026-09-27T19:00:00.000Z');
+
+      const result = await repository.findUnsentEmails({ finalizedBefore, limit: 20 });
+
+      expect(query).toHaveBeenCalledWith(
+        expect.stringContaining('FOR UPDATE SKIP LOCKED'),
+        expect.arrayContaining([finalizedBefore, 20]),
+      );
+      expect(result._unsafeUnwrap()).toEqual([expect.objectContaining({ id: row.id })]);
     });
   });
 });

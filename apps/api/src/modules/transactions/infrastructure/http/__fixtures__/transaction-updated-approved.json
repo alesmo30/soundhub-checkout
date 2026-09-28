@@ -1,0 +1,21 @@
+{
+  "event": "transaction.updated",
+  "data": {
+    "transaction": {
+      "id": "15379-1530291411-92993",
+      "amount_in_cents": 4490000,
+      "reference": "TX-20260927-ABC123",
+      "customer_email": "buyer@example.com",
+      "currency": "COP",
+      "payment_method_type": "CARD",
+      "status": "APPROVED",
+      "status_message": null
+    }
+  },
+  "environment": "test",
+  "signature": {
+    "properties": ["transaction.id", "transaction.status", "transaction.amount_in_cents"]
+  },
+  "timestamp": 1530291411,
+  "sent_at": "2018-06-29T17:30:15.000Z"
+}

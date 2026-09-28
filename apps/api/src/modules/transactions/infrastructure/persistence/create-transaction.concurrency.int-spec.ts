@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
+import { Global, Module } from '@nestjs/common';
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -8,7 +9,8 @@ import { CardBrand, ErrorCode, TransactionStatus } from '@checkout/shared/enums'
 import { DataSource } from 'typeorm';
 import type { EntityManager } from 'typeorm';
 
-import { loadDbConfig } from '../../../../config/app-config';
+import type { AppConfig } from '../../../../config/app-config';
+import { APP_CONFIG, loadDbConfig } from '../../../../config/app-config';
 import type { Result, ResultAsync } from '../../../../shared/domain/result';
 import { errAsync, ok, okAsync } from '../../../../shared/domain/result';
 import { buildDataSourceOptions } from '../../../../shared/infrastructure/persistence/data-source';
@@ -71,6 +73,29 @@ const CONCURRENT_ATTEMPTS = 20;
 // as headroom for that wider per-attempt fan-out, not because the race
 // itself needs more than ~20.
 const POOL_MAX = 40;
+
+// TransactionsModule now also registers PaymentWebhookController (spec 12a),
+// which injects APP_CONFIG directly. Supplied here through a local
+// @Global() module instead of the real ConfigModule, which would require
+// the full .env test:int's CI job never sets (see environment-variables.ts).
+function fakeAppConfig(): AppConfig {
+  return {
+    app: { nodeEnv: 'test', port: 3000, logLevel: 'debug' },
+    db: { host: '', port: 5432, username: '', password: '', name: '', ssl: false },
+    paymentGateway: {
+      url: '',
+      publicKey: '',
+      privateKey: '',
+      integritySecret: '',
+      eventsSecret: 'test-events-secret',
+    },
+    smtp: { host: '', port: 465, user: '', password: '', from: '' },
+  };
+}
+
+@Global()
+@Module({ providers: [{ provide: APP_CONFIG, useValue: fakeAppConfig() }], exports: [APP_CONFIG] })
+class FakeConfigModule {}
 
 function randomDocumentNumber(): string {
   return String(1_000_000 + Math.floor(Math.random() * 8_999_999));
@@ -307,6 +332,7 @@ describe('CreateTransactionUseCase concurrency (real UnitOfWork + real repositor
           ...buildDataSourceOptions(loadDbConfig()),
           extra: { max: POOL_MAX },
         }),
+        FakeConfigModule,
         TransactionsModule,
       ],
     })

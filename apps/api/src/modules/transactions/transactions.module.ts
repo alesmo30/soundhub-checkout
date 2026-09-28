@@ -40,7 +40,18 @@ import {
   GET_TRANSACTION_STATUS_DEPENDENCIES,
   GetTransactionStatusUseCase,
 } from './application/use-cases/get-transaction-status.use-case';
+import type { HandlePaymentWebhookDependencies } from './application/use-cases/handle-payment-webhook.use-case';
+import {
+  HANDLE_PAYMENT_WEBHOOK_DEPENDENCIES,
+  HandlePaymentWebhookUseCase,
+} from './application/use-cases/handle-payment-webhook.use-case';
+import type { ReconcileTransactionsDependencies } from './application/use-cases/reconcile-transactions.use-case';
+import {
+  RECONCILE_TRANSACTIONS_DEPENDENCIES,
+  ReconcileTransactionsUseCase,
+} from './application/use-cases/reconcile-transactions.use-case';
 import { TransactionsController } from './infrastructure/http/transactions.controller';
+import { PaymentWebhookController } from './infrastructure/http/payment-webhook.controller';
 import { IdempotencyKeyPipe } from './infrastructure/http/idempotency-key.pipe';
 import { HttpPaymentGatewayAdapter } from './infrastructure/payment-gateway/http-payment-gateway.adapter';
 import { TransactionOrmEntity } from './infrastructure/persistence/transaction.orm-entity';
@@ -106,6 +117,22 @@ interface CreateTransactionRuntime {
   readonly finalizeTransactionUseCase: FinalizeTransactionUseCase;
 }
 
+const RECONCILE_COLLABORATORS = Symbol('RECONCILE_COLLABORATORS');
+
+interface ReconcileCollaborators {
+  readonly transactionRepository: TransactionRepository;
+  readonly paymentGateway: PaymentGatewayPort;
+  readonly finalizeTransactionUseCase: FinalizeTransactionUseCase;
+}
+
+const RECONCILE_RUNTIME = Symbol('RECONCILE_RUNTIME');
+
+interface ReconcileRuntime {
+  readonly unitOfWork: UnitOfWork;
+  readonly clock: Clock;
+  readonly eventPublisher: EventPublisher;
+}
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([TransactionOrmEntity]),
@@ -114,7 +141,7 @@ interface CreateTransactionRuntime {
     CustomersModule,
     DeliveriesModule,
   ],
-  controllers: [TransactionsController],
+  controllers: [TransactionsController, PaymentWebhookController],
   providers: [
     { provide: TRANSACTION_REPOSITORY, useClass: TypeOrmTransactionRepository },
     { provide: PAYMENT_GATEWAY, useClass: HttpPaymentGatewayAdapter },
@@ -182,6 +209,49 @@ interface CreateTransactionRuntime {
       inject: [GET_STATUS_REPOSITORIES, GET_STATUS_SERVICES],
     },
     GetTransactionStatusUseCase,
+    {
+      provide: HANDLE_PAYMENT_WEBHOOK_DEPENDENCIES,
+      useFactory: (
+        transactionRepository: TransactionRepository,
+        finalizeTransactionUseCase: FinalizeTransactionUseCase,
+      ): HandlePaymentWebhookDependencies => ({
+        transactionRepository,
+        finalizeTransactionUseCase,
+      }),
+      inject: [TRANSACTION_REPOSITORY, FinalizeTransactionUseCase],
+    },
+    HandlePaymentWebhookUseCase,
+    {
+      provide: RECONCILE_COLLABORATORS,
+      useFactory: (
+        transactionRepository: TransactionRepository,
+        paymentGateway: PaymentGatewayPort,
+        finalizeTransactionUseCase: FinalizeTransactionUseCase,
+      ): ReconcileCollaborators => ({
+        transactionRepository,
+        paymentGateway,
+        finalizeTransactionUseCase,
+      }),
+      inject: [TRANSACTION_REPOSITORY, PAYMENT_GATEWAY, FinalizeTransactionUseCase],
+    },
+    {
+      provide: RECONCILE_RUNTIME,
+      useFactory: (
+        unitOfWork: UnitOfWork,
+        clock: Clock,
+        eventPublisher: EventPublisher,
+      ): ReconcileRuntime => ({ unitOfWork, clock, eventPublisher }),
+      inject: [UNIT_OF_WORK, CLOCK, EVENT_PUBLISHER],
+    },
+    {
+      provide: RECONCILE_TRANSACTIONS_DEPENDENCIES,
+      useFactory: (
+        collaborators: ReconcileCollaborators,
+        runtime: ReconcileRuntime,
+      ): ReconcileTransactionsDependencies => ({ ...collaborators, ...runtime }),
+      inject: [RECONCILE_COLLABORATORS, RECONCILE_RUNTIME],
+    },
+    ReconcileTransactionsUseCase,
     {
       provide: CREATE_TRANSACTION_REPOSITORIES,
       useFactory: (

@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
+import { Global, Module } from '@nestjs/common';
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -8,7 +9,8 @@ import { CardBrand, TransactionStatus } from '@checkout/shared/enums';
 import { DataSource } from 'typeorm';
 import type { EntityManager } from 'typeorm';
 
-import { loadDbConfig } from '../../../../config/app-config';
+import type { AppConfig } from '../../../../config/app-config';
+import { APP_CONFIG, loadDbConfig } from '../../../../config/app-config';
 import type { Clock } from '../../../../shared/application/ports/clock.port';
 import { CLOCK } from '../../../../shared/application/ports/clock.port';
 import type { DomainEvent } from '../../../../shared/domain/domain-event';
@@ -268,6 +270,28 @@ class CountingEventPublisher implements EventPublisher {
   }
 }
 
+// Same APP_CONFIG rationale as finalize-transaction.int-spec.ts: supplied
+// through a local @Global() module rather than the real ConfigModule, which
+// would require the full .env test:int's CI job never sets.
+function fakeAppConfig(): AppConfig {
+  return {
+    app: { nodeEnv: 'test', port: 3000, logLevel: 'debug' },
+    db: { host: '', port: 5432, username: '', password: '', name: '', ssl: false },
+    paymentGateway: {
+      url: '',
+      publicKey: '',
+      privateKey: '',
+      integritySecret: '',
+      eventsSecret: 'test-events-secret',
+    },
+    smtp: { host: '', port: 465, user: '', password: '', from: '' },
+  };
+}
+
+@Global()
+@Module({ providers: [{ provide: APP_CONFIG, useValue: fakeAppConfig() }], exports: [APP_CONFIG] })
+class FakeConfigModule {}
+
 describe('FinalizeTransactionUseCase concurrency (real UnitOfWork + real repositories, fake gateway)', () => {
   let moduleRef: TestingModule;
   let dataSource: DataSource;
@@ -287,6 +311,7 @@ describe('FinalizeTransactionUseCase concurrency (real UnitOfWork + real reposit
           ...buildDataSourceOptions(loadDbConfig()),
           extra: { max: POOL_MAX },
         }),
+        FakeConfigModule,
         TransactionsModule,
       ],
     })
