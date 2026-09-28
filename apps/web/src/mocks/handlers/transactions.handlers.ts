@@ -53,7 +53,7 @@ function progressingResponse(
 export const transactionsHandlers = [
   http.post('*/api/v1/transactions', async ({ request }) => {
     const body = (await request.json()) as CreateTransactionRequest;
-    const created = body.payment.cardToken.endsWith('4111')
+    const created = body.payment.cardToken.endsWith('1111')
       ? transactionCreatedDeclinedProgressingFixture
       : transactionCreatedProgressingFixture;
 

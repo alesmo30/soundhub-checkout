@@ -44,7 +44,7 @@ describe('POST /transactions', () => {
   });
 
   it('returns 201 PENDING for the declined-progressing id on a card 4111 token', async () => {
-    const response = await postTransaction('tok_test_4111');
+    const response = await postTransaction('tok_test_1111');
     const body = (await response.json()) as ApiResponse<TransactionCreated>;
 
     expect(response.status).toBe(201);
