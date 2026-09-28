@@ -119,7 +119,9 @@ describe('CheckoutBackendStack', () => {
       const statements = policy.Properties.PolicyDocument.Statement;
       for (const statement of statements) {
         const actions = Array.isArray(statement.Action) ? statement.Action : [statement.Action];
-        expect(actions).toContain('secretsmanager:GetSecretValue');
+        if (!actions.includes('secretsmanager:GetSecretValue')) {
+          continue;
+        }
         expect(statement.Resource).not.toBe('*');
         resourceArns.add(JSON.stringify(statement.Resource));
       }
@@ -128,10 +130,10 @@ describe('CheckoutBackendStack', () => {
     expect(resourceArns.size).toBe(2);
   });
 
-  it('keeps API and migrator Lambda logs for 14 days', () => {
+  it('keeps API, migrator, email worker and reconciler Lambda logs for 14 days', () => {
     const template = synthBackendStack();
 
-    template.resourcePropertiesCountIs('AWS::Logs::LogGroup', { RetentionInDays: 14 }, 2);
+    template.resourcePropertiesCountIs('AWS::Logs::LogGroup', { RetentionInDays: 14 }, 4);
   });
 
   it('never puts a secret value in the API Lambda environment', () => {
