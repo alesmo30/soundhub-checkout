@@ -268,7 +268,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
 
 ### Worker
 
-7. [ ] **Batch processing.** `workers/email-worker.ts` (`processBatch`). The specs, with a fake use case, cover:
+7. [x] **Batch processing.** `workers/email-worker.ts` (`processBatch`). The specs, with a fake use case, cover:
    - a batch of 5 where the 3rd returns `Err` → `batchItemFailures` holds exactly that `messageId`;
    - records are processed sequentially (call-order assertion with delayed fakes);
    - a malformed body → error log, not reported, and the rest processed;
