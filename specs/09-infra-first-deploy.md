@@ -360,7 +360,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step.
     Manual test: `test` green.
     Commit: `feat(infra): add SPA rewrite CloudFront function`.
 
-12. [ ] **Frontend stack.** Private bucket with OAC, the distribution with the 3 behaviors, the 2 headers policies and the `BucketDeployment`. `frontend-stack.test.ts` asserts:
+12. [x] **Frontend stack.** Private bucket with OAC, the distribution with the 3 behaviors, the 2 headers policies and the `BucketDeployment`. `frontend-stack.test.ts` asserts:
     - the bucket blocks public access;
     - `/api/*` uses `CachingDisabled` and `AllViewerExceptHostHeader`, with no function association;
     - the function is associated only with the S3 behaviors;
