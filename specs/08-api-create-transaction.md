@@ -407,7 +407,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
     Manual test: `/api/docs` shows `POST /transactions` with the header and body schema.
     Commit: `feat(api): expose POST /transactions`.
 
-13. [ ] **End-to-end concurrency proof.** `create-transaction.concurrency.int-spec.ts` runs the real use case, the repositories and `TypeOrmUnitOfWork` against Postgres, with a fake gateway. It proves:
+13. [x] **End-to-end concurrency proof.** `create-transaction.concurrency.int-spec.ts` runs the real use case, the repositories and `TypeOrmUnitOfWork` against Postgres, with a fake gateway. It proves:
     - 20 parallel requests with different keys for a 1-unit product → 1 PENDING and 19 `OUT_OF_STOCK`, and stock `0 / 1`;
     - 2 parallel requests with the **same** key → 1 transaction row, 1 gateway call, and the same id in both responses;
     - a rejected charge → `ERROR`, stock back to `1 / 0`, delivery `CANCELLED`.
