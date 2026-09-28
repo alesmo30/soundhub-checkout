@@ -123,7 +123,7 @@ describe('CheckoutBackendStack — email worker Lambda', () => {
     const template = synthBackendStack();
 
     template.hasResourceProperties('AWS::Lambda::Function', {
-      Handler: 'email-worker.handler.handler',
+      Handler: 'email-worker.handler',
       Architectures: ['arm64'],
       Runtime: 'nodejs22.x',
       MemorySize: ASYNC.EMAIL_WORKER.MEMORY_MB,
@@ -154,7 +154,7 @@ describe('CheckoutBackendStack — email worker Lambda', () => {
     const template = synthBackendStack();
 
     const emailWorkerLambdas = template.findResources('AWS::Lambda::Function', {
-      Properties: { Handler: 'email-worker.handler.handler' },
+      Properties: { Handler: 'email-worker.handler' },
     });
     const emailWorkerLambda = Object.values(emailWorkerLambdas)[0] as {
       Properties: { Environment: { Variables: Record<string, unknown> } };
@@ -208,7 +208,7 @@ describe('CheckoutBackendStack — reconciler Lambda and schedule', () => {
     const template = synthBackendStack();
 
     template.hasResourceProperties('AWS::Lambda::Function', {
-      Handler: 'reconciler.handler.handler',
+      Handler: 'reconciler.handler',
       Architectures: ['arm64'],
       Runtime: 'nodejs22.x',
       MemorySize: ASYNC.RECONCILER.MEMORY_MB,
@@ -224,7 +224,7 @@ describe('CheckoutBackendStack — reconciler Lambda and schedule', () => {
     const template = synthBackendStack();
 
     const reconcilerLambdas = template.findResources('AWS::Lambda::Function', {
-      Properties: { Handler: 'reconciler.handler.handler' },
+      Properties: { Handler: 'reconciler.handler' },
     });
     const reconcilerLambda = Object.values(reconcilerLambdas)[0] as {
       Properties: { LoggingConfig?: { LogGroup?: { Ref: string } } };
@@ -277,7 +277,7 @@ describe('CheckoutBackendStack — reconciler Lambda and schedule', () => {
     const template = synthBackendStack();
 
     const reconcilerLambdas = template.findResources('AWS::Lambda::Function', {
-      Properties: { Handler: 'reconciler.handler.handler' },
+      Properties: { Handler: 'reconciler.handler' },
     });
     const reconcilerLogicalId = Object.keys(reconcilerLambdas)[0] as string;
 
@@ -401,7 +401,7 @@ describe('CheckoutBackendStack — alarms and SNS notification', () => {
     const template = synthBackendStack();
 
     const emailWorkerLambdas = template.findResources('AWS::Lambda::Function', {
-      Properties: { Handler: 'email-worker.handler.handler' },
+      Properties: { Handler: 'email-worker.handler' },
     });
     const emailWorkerLogicalId = Object.keys(emailWorkerLambdas)[0] as string;
 
@@ -422,7 +422,7 @@ describe('CheckoutBackendStack — alarms and SNS notification', () => {
     const template = synthBackendStack();
 
     const reconcilerLambdas = template.findResources('AWS::Lambda::Function', {
-      Properties: { Handler: 'reconciler.handler.handler' },
+      Properties: { Handler: 'reconciler.handler' },
     });
     const reconcilerLogicalId = Object.keys(reconcilerLambdas)[0] as string;
 

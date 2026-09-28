@@ -34,9 +34,10 @@ const API_PORT = '3000';
 const DB_SSL_ENABLED = 'true';
 const API_HANDLER = 'lambda.handler';
 const MIGRATOR_HANDLER = 'migrator.handler';
-const EMAIL_WORKER_HANDLER = 'email-worker.handler.handler';
+const EMAIL_WORKER_HANDLER = 'email-worker.handler';
 const EMAIL_DRIVER_SMTP = 'smtp';
-const RECONCILER_HANDLER = 'reconciler.handler.handler';
+const EVENT_PUBLISHER_DRIVER_SQS = 'sqs';
+const RECONCILER_HANDLER = 'reconciler.handler';
 const SCHEDULER_ASSUME_ROLE_SERVICE = 'scheduler.amazonaws.com';
 const SCHEDULER_FLEXIBLE_TIME_WINDOW_MODE = 'OFF';
 const ALARM_EMAIL_PARAM_DESCRIPTION =
@@ -105,6 +106,7 @@ export class CheckoutBackendStack extends cdk.Stack {
         SMTP_HOST: deployEnv.smtpHost,
         SMTP_PORT: String(deployEnv.smtpPort),
         EMAIL_FROM: deployEnv.emailFrom,
+        EVENT_PUBLISHER_DRIVER: EVENT_PUBLISHER_DRIVER_SQS,
       },
     });
 
@@ -165,11 +167,16 @@ export class CheckoutBackendStack extends cdk.Stack {
         removalPolicy: cdk.RemovalPolicy.DESTROY,
       }),
       environment: {
+        NODE_ENV: NODE_ENV_PRODUCTION,
+        PORT: API_PORT,
+        LOG_LEVEL: LOG_LEVEL_INFO,
         EMAIL_DRIVER: EMAIL_DRIVER_SMTP,
         DB_NAME,
         DB_SSL: DB_SSL_ENABLED,
         DB_SECRET_ARN: dbSecret.secretArn,
         APP_SECRETS_ARN: appSecrets.secretArn,
+        PAYMENT_GATEWAY_URL: deployEnv.paymentGatewayUrl,
+        PAYMENT_GATEWAY_PUBLIC_KEY: deployEnv.paymentGatewayPublicKey,
         SMTP_HOST: deployEnv.smtpHost,
         SMTP_PORT: String(deployEnv.smtpPort),
         EMAIL_FROM: deployEnv.emailFrom,
@@ -199,12 +206,18 @@ export class CheckoutBackendStack extends cdk.Stack {
         removalPolicy: cdk.RemovalPolicy.DESTROY,
       }),
       environment: {
+        NODE_ENV: NODE_ENV_PRODUCTION,
+        PORT: API_PORT,
+        LOG_LEVEL: LOG_LEVEL_INFO,
         DB_NAME,
         DB_SSL: DB_SSL_ENABLED,
         DB_SECRET_ARN: dbSecret.secretArn,
         APP_SECRETS_ARN: appSecrets.secretArn,
         PAYMENT_GATEWAY_URL: deployEnv.paymentGatewayUrl,
         PAYMENT_GATEWAY_PUBLIC_KEY: deployEnv.paymentGatewayPublicKey,
+        SMTP_HOST: deployEnv.smtpHost,
+        SMTP_PORT: String(deployEnv.smtpPort),
+        EMAIL_FROM: deployEnv.emailFrom,
         TRANSACTION_FINALIZED_QUEUE_URL: transactionFinalizedQueue.queueUrl,
       },
     });
