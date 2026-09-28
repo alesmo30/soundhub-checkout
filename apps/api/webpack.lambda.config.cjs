@@ -100,4 +100,9 @@ module.exports = [
       name: 'migrator',
       sourcePath: 'src/workers/migrator.handler.ts',
     }),
+  (options, webpack) =>
+    buildEntryConfig(options, webpack, {
+      name: 'reconciler',
+      sourcePath: 'src/workers/reconciler.handler.ts',
+    }),
 ];
