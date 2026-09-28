@@ -1,6 +1,6 @@
 # SPEC 12a — API: payment webhook and reconciler
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 10 (blocking: complete `FinalizeTransactionUseCase` with event publishing), SPEC 08 (blocking: transaction repository, `findChargeByReference` / `getCharge` adapter), SPEC 09 (blocking only for the reconciler Lambda handler step: `load-secrets.ts`, `build:lambda`). SPEC 12b (email notifications) follows this one.
 > **Date:** 2026-09-27
 > **Objective:** No transaction stays PENDING forever and reserved stock always comes back — a checksum-verified webhook and a leased, time-boxed reconciler (sync, safe expiry by reference, email re-publish) converge on the same idempotent finalization, and two reconciler runs never process the same row.
@@ -233,20 +233,20 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
 
 ### Contract change
 
-1. [ ] **Transaction port finds by provider id.** On a branch `chore/transactions-port-find-by-provider-id` cut from `main`: add `findByProviderTransactionId` and the lease comments. Give `TypeOrmTransactionRepository` a `findByProviderTransactionId` that throws `Not implemented — spec 12a` so the build stays green. After the user merges that PR, `/spec-impl` creates the spec branch from the updated `main`. This box is ticked in step 2's commit.
+1. [x] **Transaction port finds by provider id.** On a branch `chore/transactions-port-find-by-provider-id` cut from `main`: add `findByProviderTransactionId` and the lease comments. Give `TypeOrmTransactionRepository` a `findByProviderTransactionId` that throws `Not implemented — spec 12a` so the build stays green. After the user merges that PR, `/spec-impl` creates the spec branch from the updated `main`. This box is ticked in step 2's commit.
    Manual test: `pnpm typecheck` green; the PR diff shows the port and the one-line stub.
    Commit: `feat(api): let TransactionRepository find by provider transaction id`.
 
 ### Repository
 
-2. [ ] **Provider-id lookup and conditional email mark.** `findByProviderTransactionId` and `markEmailSent` (`UPDATE … WHERE id = $1 AND email_sent_at IS NULL`). The int-spec proves:
+2. [x] **Provider-id lookup and conditional email mark.** `findByProviderTransactionId` and `markEmailSent` (`UPDATE … WHERE id = $1 AND email_sent_at IS NULL`). The int-spec proves:
    - a lookup by a stored provider id returns the row, and an unknown id returns `null`;
    - `markEmailSent` sets `email_sent_at` once, and a second call leaves the first timestamp untouched.
 
    Manual test: `pnpm --filter @checkout/api test:int` green.
    Commit: `feat(api): find transactions by provider id and mark emails sent once`.
 
-3. [ ] **Leased claims.** `claimPendingForSync`, `claimExpiredReservations` and `findUnsentEmails` as the raw SQL above. `reconciler-claims.int-spec.ts` seeds rows and backdates `updated_at` with a test-only `UPDATE`. It proves, for each claim:
+3. [x] **Leased claims.** `claimPendingForSync`, `claimExpiredReservations` and `findUnsentEmails` as the raw SQL above. `reconciler-claims.int-spec.ts` seeds rows and backdates `updated_at` with a test-only `UPDATE`. It proves, for each claim:
    - it returns only the rows matching its filter (status, provider id, expiry, finalized age, `email_sent_at`);
    - it bumps `updated_at` on the claimed rows;
    - a second claim right after returns none of them (the lease holds);
@@ -258,7 +258,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
 
 ### Webhook
 
-4. [ ] **Event checksum and parser.** `reconciler.constants.ts`, `event-checksum.ts`, `invalidSignature`, `payment-webhook.parser.ts` and the `__fixtures__/*.json` files (hand-written from the gateway's documented event shape, fake ids, checksums computed with a test secret). The unit specs cover:
+4. [x] **Event checksum and parser.** `reconciler.constants.ts`, `event-checksum.ts`, `invalidSignature`, `payment-webhook.parser.ts` and the `__fixtures__/*.json` files (hand-written from the gateway's documented event shape, fake ids, checksums computed with a test secret). The unit specs cover:
    - a fixture's checksum matches its precomputed value;
    - a wrong secret, a tampered `status` and a tampered `timestamp` each fail;
    - a changed field that is **not** in `signature.properties` does not change the checksum (documents why only signed fields are trusted);
@@ -268,7 +268,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `pnpm --filter @checkout/api test` green.
    Commit: `feat(api): verify payment event checksums`.
 
-5. [ ] **Webhook use case.** `HandlePaymentWebhookUseCase` over fake ports. The unit specs cover every row of the webhook table:
+5. [x] **Webhook use case.** `HandlePaymentWebhookUseCase` over fake ports. The unit specs cover every row of the webhook table:
    - an event type other than `transaction.updated` → `IGNORED`, with no repository call;
    - an unknown provider id → `UNKNOWN_TRANSACTION`;
    - PENDING or an unmapped status → `IGNORED`, with no finalize;
@@ -279,7 +279,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `test` green.
    Commit: `feat(api): handle payment webhook events through the finalizer`.
 
-6. [ ] **POST /webhooks/payments.** `payment-webhook.controller.ts` (`@Body() body: unknown`, `@Headers(EVENT_CHECKSUM_HEADER)`), with the events secret from `AppConfig`, plus the `TransactionsModule` wiring. `payment-webhook.controller.spec.ts` (`configureApp` + supertest + fakes) checks:
+6. [x] **POST /webhooks/payments.** `payment-webhook.controller.ts` (`@Body() body: unknown`, `@Headers(EVENT_CHECKSUM_HEADER)`), with the events secret from `AppConfig`, plus the `TransactionsModule` wiring. `payment-webhook.controller.spec.ts` (`configureApp` + supertest + fakes) checks:
    - a valid fixture → 200 `{ data: { received: true } }`;
    - a missing header, a wrong checksum and a garbage body → 401 `INVALID_SIGNATURE` Problem Details;
    - a body with extra unknown fields is accepted (no 400);
@@ -291,7 +291,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
 
 ### Reconciler
 
-7. [ ] **Reconciler: sync task and budget.** `ReconcileTransactionsUseCase` with `syncPending` real and the other two phases returning zero. It uses a fake clock and fake ports. The unit specs cover:
+7. [x] **Reconciler: sync task and budget.** `ReconcileTransactionsUseCase` with `syncPending` real and the other two phases returning zero. It uses a fake clock and fake ports. The unit specs cover:
    - a final status → finalize, `synced + 1`;
    - PENDING → no finalize;
    - `Err` → `failed + 1`, no finalize;
@@ -301,7 +301,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `test` green.
    Commit: `feat(api): add reconciler sync task with a time budget`.
 
-8. [ ] **Reconciler: safe expiry and re-publish.** `expireReservations` and `republishUnsentEmails`. The unit specs cover:
+8. [x] **Reconciler: safe expiry and re-publish.** `expireReservations` and `republishUnsentEmails`. The unit specs cover:
    - `findChargeByReference` → `null` → finalize `EXPIRED` with `EXPIRED_STATUS_MESSAGE`, `expired + 1`;
    - found and APPROVED → `recordGatewayResponse`, then finalize APPROVED, `recovered + 1`;
    - found and PENDING → `recordGatewayResponse` only, no finalize;
@@ -313,7 +313,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `test` green.
    Commit: `feat(api): expire reservations safely and re-publish unsent emails`.
 
-9. [ ] **Reconciler integration and concurrency proof.** Both int-specs run the real use case, repositories, `TypeOrmUnitOfWork` and `FinalizeTransactionUseCase` against Postgres, with a fake gateway and a counting publisher.
+9. [x] **Reconciler integration and concurrency proof.** Both int-specs run the real use case, repositories, `TypeOrmUnitOfWork` and `FinalizeTransactionUseCase` against Postgres, with a fake gateway and a counting publisher.
    - `reconcile-transactions.int-spec.ts` proves:
      - a PENDING row without a provider id whose reservation expired, where the gateway has no charge → `EXPIRED`, stock `10 / 0`, delivery `CANCELLED`;
      - the same setup, where the gateway has an APPROVED charge by reference → provider id stored, `APPROVED`, stock `8 / 0`;
@@ -327,17 +327,17 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `for i in $(seq 10); do pnpm --filter @checkout/api test:int -- reconcile-transactions.concurrency || break; done`, all green.
    Commit: `test(api): prove the reconciler expires safely and never double-processes`.
 
-10. [ ] **Local one-shot run.** `workers/reconcile-once.cli.ts`: `NestFactory.createApplicationContext(AppModule)`, run the use case, print the summary, close. Add the `reconcile:once` script, compiled through `nest start --entryFile workers/reconcile-once.cli` so decorator metadata is emitted (`tsx` would not). Add it to the coverage exclusions.
+10. [x] **Local one-shot run.** `workers/reconcile-once.cli.ts`: `NestFactory.createApplicationContext(AppModule)`, run the use case, print the summary, close. Add the `reconcile:once` script, compiled through `nest start --entryFile workers/reconcile-once.cli` so decorator metadata is emitted (`tsx` would not). Add it to the coverage exclusions.
     Manual test: with `pnpm dev` stopped, create a transaction whose charge times out (or insert one with `reservation_expires_at` in the past and no provider id), then run `pnpm --filter @checkout/api reconcile:once`. Expect `{ expired: 1, … }`, the row `EXPIRED`, stock back, and one "event published" line.
     Commit: `feat(api): add a local one-shot reconciler command`.
 
-11. [ ] **Reconciler Lambda handler.** Requires SPEC 09 on `main`. `workers/reconciler.handler.ts`: `loadSecretsIntoEnv()`, then an application context cached in a module-level promise, then the use case, then log and return the summary. Add it to the `build:lambda` entries and to the coverage exclusions.
+11. [x] **Reconciler Lambda handler.** Requires SPEC 09 on `main`. `workers/reconciler.handler.ts`: `loadSecretsIntoEnv()`, then an application context cached in a module-level promise, then the use case, then log and return the summary. Add it to the `build:lambda` entries and to the coverage exclusions.
     Manual test: `build:lambda`, then `node -e "require('./dist-lambda/workers/reconciler.handler.js').handler({}).then(console.log)"` against docker Postgres prints the summary.
     Commit: `feat(api): add the reconciler Lambda handler`.
 
 ### Close-out
 
-12. [ ] **Coverage and CI.**
+12. [x] **Coverage and CI.**
     - `test:cov`: `handle-payment-webhook.use-case.ts`, `reconcile-transactions.use-case.ts`, `event-checksum.ts` and `payment-webhook.parser.ts` ≥ 85 % on all four metrics. `apps/api` stays ≥ 80 %.
     - Re-run step 10's manual check against the sandbox, including a lost-response case recovered as `APPROVED`.
     - When the user asks, push and open the PR with `gh-cli`, wait for CI, and fix whatever fails.
