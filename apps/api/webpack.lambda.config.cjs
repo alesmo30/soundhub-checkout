@@ -105,4 +105,9 @@ module.exports = [
       name: 'reconciler',
       sourcePath: 'src/workers/reconciler.handler.ts',
     }),
+  (options, webpack) =>
+    buildEntryConfig(options, webpack, {
+      name: 'email-worker',
+      sourcePath: 'src/workers/email-worker.handler.ts',
+    }),
 ];

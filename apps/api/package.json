@@ -17,7 +17,8 @@
     "seed": "tsx src/shared/infrastructure/persistence/seeds/seed.cli.ts",
     "seed:reset": "tsx src/shared/infrastructure/persistence/seeds/seed-reset.cli.ts",
     "reconcile:once": "nest start --entryFile workers/reconcile-once.cli",
-    "email:preview": "tsx src/workers/email-preview.ts"
+    "email:preview": "tsx src/workers/email-preview.ts",
+    "email:send-once": "nest start --entryFile workers/email-send-once.cli --"
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.1141.0",

@@ -278,7 +278,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `test` green.
    Commit: `feat(api): process result-email batches with partial failures`.
 
-8. [ ] **Email worker Lambda handler and local send.** Requires SPEC 09 on `main`.
+8. [x] **Email worker Lambda handler and local send.** Requires SPEC 09 on `main`.
    - `workers/email-worker.handler.ts`: `loadSecretsIntoEnv()`, an application context cached in a module-level promise, then `processBatch`. Add it to `build:lambda` and the coverage exclusions.
    - `workers/email-send-once.cli.ts` with the `email:send-once` script (`nest start --entryFile`).
 
