@@ -61,8 +61,12 @@ export function StatusActions({ view }: StatusActionsProps) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-3">
-      <Button type="button" onClick={handleTryAnotherCard}>
+    <div className="flex w-full max-w-xs flex-col items-center gap-3">
+      <Button
+        type="button"
+        onClick={handleTryAnotherCard}
+        className="h-auto min-h-14 w-full py-3 text-center whitespace-normal"
+      >
         Intentar con otra tarjeta
       </Button>
       <Button type="button" variant="link" onClick={handleBackToProduct}>

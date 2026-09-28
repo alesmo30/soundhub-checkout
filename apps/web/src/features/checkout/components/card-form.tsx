@@ -238,7 +238,7 @@ export function CardForm() {
 
         <GatewayError reason={tokenization.gatewayError} />
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <Button type="button" variant="secondary" onClick={handleVolver}>
             Volver
           </Button>

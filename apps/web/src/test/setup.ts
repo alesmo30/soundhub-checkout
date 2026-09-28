@@ -1,7 +1,11 @@
 import '@testing-library/jest-dom';
 
+import { toHaveNoViolations } from 'jest-axe';
+
 import { resetTransactionsHandlersState } from '@/mocks/handlers/transactions.handlers';
 import { server } from '@/mocks/server';
+
+expect.extend(toHaveNoViolations);
 
 // jsdom does not implement matchMedia; vaul (Drawer) and prefers-reduced-motion
 // checks need it.

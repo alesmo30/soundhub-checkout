@@ -133,14 +133,19 @@ export function SummarySheet({ productId, quantity }: SummarySheetProps) {
         />
       )}
 
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         {!isUncertain && (
           <Button type="button" variant="secondary" onClick={handleEditar}>
             Editar
           </Button>
         )}
         {!isUncertain && !isOutOfStock && (
-          <Button type="button" onClick={handlePagar} disabled={isPayDisabled} className="flex-1">
+          <Button
+            type="button"
+            onClick={handlePagar}
+            disabled={isPayDisabled}
+            className="h-auto min-h-14 flex-1 whitespace-normal py-3 text-center"
+          >
             {payLabel}
           </Button>
         )}
