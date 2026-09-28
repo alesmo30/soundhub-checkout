@@ -235,7 +235,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
 
 ### Senders and use case
 
-4. [ ] **Email senders.** Add `nodemailer` and `@types/nodemailer`. `NodemailerGmailAdapter` and `LoggingEmailSender`, and `NotificationsModule` binding `EMAIL_SENDER` by driver. The specs cover:
+4. [x] **Email senders.** Add `nodemailer` and `@types/nodemailer`. `NodemailerGmailAdapter` and `LoggingEmailSender`, and `NotificationsModule` binding `EMAIL_SENDER` by driver. The specs cover:
    - the Nodemailer transport options (465, `secure`, the timeouts, `auth` from config), with `createTransport` mocked;
    - `sendMail` receives `from`, `to`, `subject`, `html` and `text`;
    - a rejection → `Err` with a message that holds no credentials;
