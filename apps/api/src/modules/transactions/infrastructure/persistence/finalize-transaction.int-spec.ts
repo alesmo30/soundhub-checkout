@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
+import { Global, Module } from '@nestjs/common';
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -8,7 +9,8 @@ import { CardBrand, TransactionStatus } from '@checkout/shared/enums';
 import { DataSource } from 'typeorm';
 import type { EntityManager } from 'typeorm';
 
-import { loadDbConfig } from '../../../../config/app-config';
+import type { AppConfig } from '../../../../config/app-config';
+import { APP_CONFIG, loadDbConfig } from '../../../../config/app-config';
 import type { DomainEvent } from '../../../../shared/domain/domain-event';
 import type {
   EventPublishError,
@@ -281,6 +283,31 @@ class CountingEventPublisher implements EventPublisher {
   }
 }
 
+// TransactionsModule now also registers PaymentWebhookController (spec 12a),
+// which injects APP_CONFIG directly. The real ConfigModule validates the
+// full .env (paymentGateway, smtp included), which test:int's CI job never
+// sets (see environment-variables.ts — that job only sets the db group), so
+// this spec supplies APP_CONFIG itself through a local @Global() module
+// instead of importing the real ConfigModule.
+function fakeAppConfig(): AppConfig {
+  return {
+    app: { nodeEnv: 'test', port: 3000, logLevel: 'debug' },
+    db: { host: '', port: 5432, username: '', password: '', name: '', ssl: false },
+    paymentGateway: {
+      url: '',
+      publicKey: '',
+      privateKey: '',
+      integritySecret: '',
+      eventsSecret: 'test-events-secret',
+    },
+    smtp: { host: '', port: 465, user: '', password: '', from: '' },
+  };
+}
+
+@Global()
+@Module({ providers: [{ provide: APP_CONFIG, useValue: fakeAppConfig() }], exports: [APP_CONFIG] })
+class FakeConfigModule {}
+
 describe('FinalizeTransactionUseCase against Postgres (real UnitOfWork + real repositories)', () => {
   let moduleRef: TestingModule;
   let dataSource: DataSource;
@@ -300,6 +327,7 @@ describe('FinalizeTransactionUseCase against Postgres (real UnitOfWork + real re
           ...buildDataSourceOptions(loadDbConfig()),
           extra: { max: POOL_MAX },
         }),
+        FakeConfigModule,
         TransactionsModule,
       ],
     })
