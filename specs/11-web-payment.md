@@ -339,7 +339,7 @@ Each step is one commit after review. Frontend steps save Chrome screenshots at 
 
 ### Part 2 — final status
 
-7. [ ] **Transaction API and polling hook.** `transaction.api.ts` and `use-transaction-polling.ts`. The fake-timer specs cover:
+7. [x] **Transaction API and polling hook.** `transaction.api.ts` and `use-transaction-polling.ts`. The fake-timer specs cover:
    - PENDING → APPROVED on the progressing id, with a request every 2 s;
    - PENDING → DECLINED;
    - a `Retry-After: 5` response waits 5 s;
