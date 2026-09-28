@@ -1,6 +1,6 @@
 # SPEC 13 — Infra: async queue and scheduler
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 09 (blocking: VPC, `lambdaSecurityGroup`, `app-secrets`, `CheckoutBackendStack` with `apiLambda`), SPEC 12a (blocking: `reconciler.handler.ts`), SPEC 12b (blocking: `email-worker.handler.ts`)
 > **Date:** 2026-09-28
 > **Objective:** The backend's asynchronous half runs in AWS — SQS delivers finalized transactions to an email worker Lambda, and a reconciler Lambda runs every minute via EventBridge Scheduler, both with DLQ/error alarms wired to an email-subscribed SNS topic.
@@ -110,7 +110,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `pnpm --filter @checkout/infra test` green; `cdk synth --parameters AlarmEmail=test@example.com` succeeds.
    Commit: `feat(infra): add DLQ and Lambda error alarms with SNS email notification`.
 
-6. [ ] **Close-out.**
+6. [x] **Close-out.**
    - Full `infra/test` suite, `pnpm --filter @checkout/infra lint` and `pnpm --filter @checkout/infra typecheck` green.
    - Note in the PR description that a real end-to-end check (sandbox payment → email delivered; abandoned PENDING → expired) needs SPEC 09, SPEC 12a and SPEC 12b merged and deployed first — it is checkpoint work, not part of this spec's automated verification.
    - When the user asks, push and open the PR with `gh-cli`, wait for CI, and fix whatever fails.
@@ -128,34 +128,34 @@ Notes:
 
 Queue
 
-- [ ] `transaction-finalized` SQS queue exists with a DLQ, redrive `maxReceiveCount = 5`.
-- [ ] The queue's visibility timeout is 720 s (6 × the Email Worker's 2-minute timeout).
-- [ ] `apiLambda`'s environment includes `TRANSACTION_FINALIZED_QUEUE_URL`, and its IAM policy grants `sqs:SendMessage` scoped to the queue ARN only.
+- [x] `transaction-finalized` SQS queue exists with a DLQ, redrive `maxReceiveCount = 5`.
+- [x] The queue's visibility timeout is 720 s (6 × the Email Worker's 2-minute timeout).
+- [x] `apiLambda`'s environment includes `TRANSACTION_FINALIZED_QUEUE_URL`, and its IAM policy grants `sqs:SendMessage` scoped to the queue ARN only.
 
 Email Worker Lambda
 
-- [ ] Node 22, arm64, 512 MB, 2-minute timeout, in `lambdaSecurityGroup`'s private subnets.
-- [ ] SQS event source with batch size 5 and `ReportBatchItemFailures` enabled.
-- [ ] Read access to `db-credentials` and `app-secrets`, both scoped grants (no `*` resource).
-- [ ] No raw secret value appears in its environment variables.
-- [ ] Its own `LogGroup` with 14-day retention.
+- [x] Node 22, arm64, 512 MB, 2-minute timeout, in `lambdaSecurityGroup`'s private subnets.
+- [x] SQS event source with batch size 5 and `ReportBatchItemFailures` enabled.
+- [x] Read access to `db-credentials` and `app-secrets`, both scoped grants (no `*` resource).
+- [x] No raw secret value appears in its environment variables.
+- [x] Its own `LogGroup` with 14-day retention.
 
 Reconciler Lambda
 
-- [ ] Node 22, arm64, 512 MB, 1-minute timeout, same subnet and security group as the Email Worker.
-- [ ] An `AWS::Scheduler::Schedule` at `rate(1 minute)` targets it, with `MaximumRetryAttempts: 2` and `MaximumEventAgeInSeconds: 120`.
-- [ ] Its own `LogGroup` with 14-day retention.
+- [x] Node 22, arm64, 512 MB, 1-minute timeout, same subnet and security group as the Email Worker.
+- [x] An `AWS::Scheduler::Schedule` at `rate(1 minute)` targets it, with `MaximumRetryAttempts: 2` and `MaximumEventAgeInSeconds: 120`.
+- [x] Its own `LogGroup` with 14-day retention.
 
 Alarms
 
-- [ ] An alarm fires when the DLQ has visible messages > 0.
-- [ ] An alarm fires on Email Worker Lambda errors, and another on Reconciler Lambda errors.
-- [ ] All three alarms notify an SNS topic subscribed to the email address supplied through the `AlarmEmail` `CfnParameter` (not a hardcoded address).
+- [x] An alarm fires when the DLQ has visible messages > 0.
+- [x] An alarm fires on Email Worker Lambda errors, and another on Reconciler Lambda errors.
+- [x] All three alarms notify an SNS topic subscribed to the email address supplied through the `AlarmEmail` `CfnParameter` (not a hardcoded address).
 
 Quality
 
-- [ ] `pnpm --filter @checkout/infra test`, `lint` and `typecheck` exit 0.
-- [ ] `cdk synth --parameters AlarmEmail=<any address>` succeeds against the test fixture bundle.
+- [x] `pnpm --filter @checkout/infra test`, `lint` and `typecheck` exit 0.
+- [x] `cdk synth --parameters AlarmEmail=<any address>` succeeds against the test fixture bundle.
 
 ## Decisions
 
