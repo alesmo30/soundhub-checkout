@@ -212,7 +212,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `pnpm --filter @checkout/api test` green, and `pnpm dev` boots with no DI error.
    Commit: `feat(api): add in-memory event publisher`.
 
-2. [ ] **Approved branch and event publishing.** This step starts by reading SPEC 08's `finalize-transaction.use-case.ts` on `main` and adapting to its actual names. It then adds the APPROVED branch, injects `EVENT_PUBLISHER` and `CLOCK`, publishes after the commit, and removes the APPROVED throw. The unit specs, over fake ports and a fake `UnitOfWork`, cover:
+2. [x] **Approved branch and event publishing.** This step starts by reading SPEC 08's `finalize-transaction.use-case.ts` on `main` and adapting to its actual names. It then adds the APPROVED branch, injects `EVENT_PUBLISHER` and `CLOCK`, publishes after the commit, and removes the APPROVED throw. The unit specs, over fake ports and a fake `UnitOfWork`, cover:
    - `APPROVED` → `finalize`, `commit` and `transition(READY_TO_SHIP)` inside one `run`, then 1 publish with `status: 'APPROVED'`, returning `FINALIZED`;
    - each of `DECLINED` / `VOIDED` / `ERROR` / `EXPIRED` → `release` and `transition(CANCELLED)`, then 1 publish with that status;
    - `ALREADY_FINAL` → no stock call, no transition and no publish;

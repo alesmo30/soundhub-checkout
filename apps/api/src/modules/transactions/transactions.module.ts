@@ -12,6 +12,7 @@ import { GetQuoteUseCase } from '../pricing';
 import { PricingModule } from '../pricing/pricing.module';
 import type { Clock } from '../../shared/application/ports/clock.port';
 import { CLOCK } from '../../shared/application/ports/clock.port';
+import type { EventPublisher } from '../../shared/application/ports/event-publisher.port';
 import { EVENT_PUBLISHER } from '../../shared/application/ports/event-publisher.port';
 import type { UnitOfWork } from '../../shared/application/ports/unit-of-work.port';
 import { UNIT_OF_WORK } from '../../shared/application/ports/unit-of-work.port';
@@ -49,6 +50,14 @@ interface FinalizeCollaborators {
   readonly transactionRepository: TransactionRepository;
   readonly stockReservation: StockReservationPort;
   readonly deliveryRepository: DeliveryRepository;
+}
+
+const FINALIZE_RUNTIME = Symbol('FINALIZE_RUNTIME');
+
+interface FinalizeRuntime {
+  readonly unitOfWork: UnitOfWork;
+  readonly clock: Clock;
+  readonly eventPublisher: EventPublisher;
 }
 
 const CREATE_TRANSACTION_REPOSITORIES = Symbol('CREATE_TRANSACTION_REPOSITORIES');
@@ -104,12 +113,21 @@ interface CreateTransactionRuntime {
       inject: [TRANSACTION_REPOSITORY, STOCK_RESERVATION, DELIVERY_REPOSITORY],
     },
     {
+      provide: FINALIZE_RUNTIME,
+      useFactory: (
+        unitOfWork: UnitOfWork,
+        clock: Clock,
+        eventPublisher: EventPublisher,
+      ): FinalizeRuntime => ({ unitOfWork, clock, eventPublisher }),
+      inject: [UNIT_OF_WORK, CLOCK, EVENT_PUBLISHER],
+    },
+    {
       provide: FINALIZE_TRANSACTION_DEPENDENCIES,
       useFactory: (
         collaborators: FinalizeCollaborators,
-        unitOfWork: UnitOfWork,
-      ): FinalizeTransactionDependencies => ({ ...collaborators, unitOfWork }),
-      inject: [FINALIZE_COLLABORATORS, UNIT_OF_WORK],
+        runtime: FinalizeRuntime,
+      ): FinalizeTransactionDependencies => ({ ...collaborators, ...runtime }),
+      inject: [FINALIZE_COLLABORATORS, FINALIZE_RUNTIME],
     },
     FinalizeTransactionUseCase,
     {
