@@ -38,6 +38,7 @@ const config: Config = {
     '<rootDir>/src/workers/migrator.handler.ts',
     '<rootDir>/src/workers/reconcile-once.cli.ts',
     '<rootDir>/src/workers/reconciler.handler.ts',
+    '<rootDir>/src/workers/email-preview.ts',
     '<rootDir>/src/shared/infrastructure/persistence/migrations/',
     '<rootDir>/src/shared/infrastructure/persistence/seeds/',
   ],

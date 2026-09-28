@@ -221,7 +221,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
 
 ### Templates
 
-3. [ ] **Templates and preview.** `templates/**`, `domain/notifications.constants.ts`, the sample fixture, and `email-preview.ts` with its script. The specs cover:
+3. [x] **Templates and preview.** `templates/**`, `domain/notifications.constants.ts`, the sample fixture, and `email-preview.ts` with its script. The specs cover:
    - each status's subject, chip label and lead line;
    - COP formatting (`392046000` → "$ 3.920.460") in both HTML and text;
    - `•••• 4242`;

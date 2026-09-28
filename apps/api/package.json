@@ -16,7 +16,8 @@
     "migration:generate": "tsx node_modules/typeorm/cli.js migration:generate -d src/shared/infrastructure/persistence/data-source.ts",
     "seed": "tsx src/shared/infrastructure/persistence/seeds/seed.cli.ts",
     "seed:reset": "tsx src/shared/infrastructure/persistence/seeds/seed-reset.cli.ts",
-    "reconcile:once": "nest start --entryFile workers/reconcile-once.cli"
+    "reconcile:once": "nest start --entryFile workers/reconcile-once.cli",
+    "email:preview": "tsx src/workers/email-preview.ts"
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.1141.0",
