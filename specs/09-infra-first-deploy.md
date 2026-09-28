@@ -353,7 +353,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step.
     Manual test: `test` green.
     Commit: `feat(infra): add API and migrator Lambdas behind an HTTP API`.
 
-11. [ ] **SPA rewrite function.** `lib/functions/spa-rewrite.js` with `spa-rewrite.test.ts`, which runs the function body against sample events:
+11. [x] **SPA rewrite function.** `lib/functions/spa-rewrite.js` with `spa-rewrite.test.ts`, which runs the function body against sample events:
     - `/products/abc` and `/` → `/index.html`;
     - `/assets/x.js`, `/images/products/y.webp` and `/favicon.ico` → unchanged.
 
