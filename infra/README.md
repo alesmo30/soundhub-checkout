@@ -203,6 +203,35 @@ Postman collection itself lives with api spec 07; the root README links it.
 - Lambda bundle size: `lambda.js` 4.6 MB, `migrator.js` 4.7 MB, `dist-lambda/` total 27 MB.
 - Lambda concurrency quota increase (request `5748b3c72b314c8fb36167d73d5adc52YXKB9cGl`): **approved**, limit is now 1000. Reserved concurrency itself stays out of this spec's scope (infra 09).
 
+### Release (2026-09-28)
+
+First deploy of the async half (SPEC 13: SQS + DLQ, email worker, reconciler,
+Scheduler, SNS alarms), on top of the `spec-16-infra-release` branch. Stack
+outputs unchanged from the section above (`CloudFrontUrl`, `ApiUrl`).
+
+- 4 Lambdas confirmed: API (reserved concurrency **10**), migrator, email
+  worker, reconciler.
+- `transaction-finalized` queue and its DLQ exist; the reconciler schedule is
+  `ENABLED` (rate: 1 minute).
+- SNS subscription to the alarm email confirmed.
+- `/api/v1/health` → `{ status: 'ok', database: 'up' }`.
+- `/api/docs-json` lists every route in `main` except
+  `/api/v1/webhooks/payments`, deliberately hidden with `@ApiExcludeEndpoint`
+  since SPEC 12a — the route exists and works, it just isn't public API
+  documentation. See spec 16, step 3 decisions.
+- This deploy surfaced and fixed three real bugs left by SPEC 13's own
+  deploy (never run before this spec): the email worker and reconciler
+  Lambda `handler` strings duplicated `.handler` (`Runtime.HandlerNotFound`);
+  both were missing several required plain env vars (`NODE_ENV`, `PORT`,
+  `LOG_LEVEL`, and per-Lambda `SMTP_*`/`PAYMENT_GATEWAY_*`); the API Lambda
+  never set `EVENT_PUBLISHER_DRIVER=sqs`, so it silently used the in-memory
+  no-op publisher instead of actually enqueueing finalized transactions.
+  Verified fixed via CloudWatch logs after redeploy.
+- `app-secrets` in Secrets Manager had never been rotated past its
+  `placeholder` scaffold value since `CheckoutDataStack` was first created —
+  updated by hand with the real payment gateway and SMTP credentials before
+  this deploy (see spec 16, step 3 decisions).
+
 ## 7. Destroy
 
 Destructive. Only run this when you decide to tear the sandbox down —
