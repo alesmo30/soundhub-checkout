@@ -3,6 +3,7 @@ import { ErrorCode } from '@checkout/shared/enums';
 import {
   customerNotFoundForPayment,
   idempotencyKeyReused,
+  invalidSignature,
   missingIdempotencyKey,
   outOfStockOnReserve,
   paymentGatewayUnavailable,
@@ -62,5 +63,14 @@ describe('paymentGatewayUnavailable', () => {
 
     expect(error.code).toBe(ErrorCode.PAYMENT_GATEWAY_UNAVAILABLE);
     expect(error.kind).toBe('UNAVAILABLE');
+  });
+});
+
+describe('invalidSignature', () => {
+  it('builds an UNAUTHORIZED domain error', () => {
+    const error = invalidSignature();
+
+    expect(error.code).toBe(ErrorCode.INVALID_SIGNATURE);
+    expect(error.kind).toBe('UNAUTHORIZED');
   });
 });

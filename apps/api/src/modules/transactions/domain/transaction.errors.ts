@@ -50,3 +50,11 @@ export function transactionNotFound(id: string): DomainError {
     `Transaction ${id} not found`,
   );
 }
+
+export function invalidSignature(): DomainError {
+  return new DomainError(
+    ErrorCode.INVALID_SIGNATURE,
+    'UNAUTHORIZED',
+    'The webhook event checksum is missing or invalid',
+  );
+}
