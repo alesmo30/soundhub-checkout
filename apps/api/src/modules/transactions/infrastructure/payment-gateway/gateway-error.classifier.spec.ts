@@ -48,4 +48,40 @@ describe('classifyGatewayError', () => {
 
     expect(error).toEqual({ kind: 'UNAVAILABLE', message: 'The payment gateway is unavailable' });
   });
+
+  it('skips a field whose nested messages is not itself a record', () => {
+    const error = classifyGatewayError(422, {
+      error: {
+        type: 'INPUT_VALIDATION_ERROR',
+        messages: { payment_method: { messages: 'not-a-record' } },
+      },
+    });
+
+    expect(error).toEqual({ kind: 'REJECTED', message: 'INPUT_VALIDATION_ERROR' });
+  });
+
+  it('skips an inner value that is not an array before falling back to the type', () => {
+    const error = classifyGatewayError(422, {
+      error: {
+        type: 'INPUT_VALIDATION_ERROR',
+        messages: { payment_method: { messages: { token: 'not-an-array' } } },
+      },
+    });
+
+    expect(error).toEqual({ kind: 'REJECTED', message: 'INPUT_VALIDATION_ERROR' });
+  });
+
+  it('keeps looking at later fields when an earlier one has no usable message', () => {
+    const error = classifyGatewayError(422, {
+      error: {
+        type: 'INPUT_VALIDATION_ERROR',
+        messages: {
+          acceptance_token: { messages: { token: [] } },
+          payment_method: { messages: { token: ['The token field is not valid'] } },
+        },
+      },
+    });
+
+    expect(error).toEqual({ kind: 'REJECTED', message: 'The token field is not valid' });
+  });
 });

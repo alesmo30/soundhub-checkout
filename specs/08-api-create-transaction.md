@@ -1,6 +1,6 @@
 # SPEC 08 — API: create transaction (reserve, charge, safe retry)
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 02 (frozen ports, `UnitOfWork`, resilience helpers), SPEC 04 (product, municipality and warehouse repositories), SPEC 06 (blocking: `GetQuoteUseCase` and the customer repository must be merged first), SPEC 00 (gateway findings)
 > **Date:** 2026-09-27
 > **Objective:** `POST /api/v1/transactions` turns a verified quote into a PENDING transaction with reserved stock and an AWAITING_PAYMENT delivery, charges the card token through the payment gateway after the commit, and is safe to retry: no double charge, no oversell.
@@ -418,7 +418,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
 
 ### Close-out
 
-14. [ ] **Sandbox check, coverage and CI.**
+14. [x] **Sandbox check, coverage and CI.**
     - Against the local API with sandbox keys: tokenize card 4242 and fetch fresh acceptance tokens with curl, then `POST /transactions`. Expect 201 PENDING with a stored `provider_transaction_id`.
     - Repeat with a made-up token. Expect 201 `ERROR` and restored stock.
     - Run `test:cov` and check `modules/transactions` ≥ 85 % on all four metrics.

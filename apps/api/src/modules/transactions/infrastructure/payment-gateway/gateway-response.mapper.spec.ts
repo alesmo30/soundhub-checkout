@@ -72,6 +72,33 @@ describe('toGatewayCharge', () => {
       current_step_status: 'APPROVED',
     });
   });
+
+  it('defaults the provider transaction id to an empty string when the field is missing or not a string', () => {
+    expect(toGatewayCharge({ data: { status: 'PENDING' } }).providerTransactionId).toBe('');
+    expect(toGatewayCharge({ data: { id: 42, status: 'PENDING' } }).providerTransactionId).toBe(
+      '',
+    );
+  });
+
+  it('falls back to an empty charge when the body is not an object at all', () => {
+    expect(toGatewayCharge('not-a-body')).toStrictEqual({
+      providerTransactionId: '',
+      status: 'PENDING',
+      statusMessage: null,
+      cardBrand: null,
+      cardLast4: null,
+    });
+  });
+
+  it('falls back to an empty charge when data is missing', () => {
+    expect(toGatewayCharge({})).toStrictEqual({
+      providerTransactionId: '',
+      status: 'PENDING',
+      statusMessage: null,
+      cardBrand: null,
+      cardLast4: null,
+    });
+  });
 });
 
 describe('toGatewayChargeFromReferenceLookup', () => {
@@ -89,5 +116,13 @@ describe('toGatewayChargeFromReferenceLookup', () => {
 
   it('returns null when the by-reference lookup has zero matches', () => {
     expect(toGatewayChargeFromReferenceLookup(byReferenceEmpty)).toBeNull();
+  });
+
+  it('returns null when the body is not an object at all', () => {
+    expect(toGatewayChargeFromReferenceLookup('not-a-body')).toBeNull();
+  });
+
+  it('returns null when data is present but is not an array', () => {
+    expect(toGatewayChargeFromReferenceLookup({ data: 'not-an-array' })).toBeNull();
   });
 });
