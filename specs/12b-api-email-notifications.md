@@ -246,7 +246,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `test` green.
    Commit: `feat(api): add Gmail SMTP and logging email senders`.
 
-5. [ ] **Send transaction email use case.** `SendTransactionEmailUseCase` over fake ports and a fake `UnitOfWork`. The specs cover:
+5. [x] **Send transaction email use case.** `SendTransactionEmailUseCase` over fake ports and a fake `UnitOfWork`. The specs cover:
    - not found → `SKIPPED`, PENDING → `SKIPPED`, `emailSentAt` set → `ALREADY_SENT`, all without sending;
    - APPROVED → one send to `customer.email`, then `markEmailSent` inside `run` → `SENT`;
    - the template is chosen by the **stored** status;

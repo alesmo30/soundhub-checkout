@@ -1,12 +1,7 @@
-import { Global, Module } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
-
-import { APP_CONFIG, type AppConfig } from '../../config/app-config';
-import type { EmailSender } from './application/ports/email-sender.port';
-import { EMAIL_SENDER } from './application/ports/email-sender.port';
+import type { AppConfig } from '../../config/app-config';
 import { LoggingEmailSender } from './infrastructure/logging-email-sender';
 import { NodemailerGmailAdapter } from './infrastructure/nodemailer-gmail.adapter';
-import { NotificationsModule } from './notifications.module';
+import { selectEmailSender } from './notifications.module';
 
 function buildAppConfig(emailDriver: 'log' | 'smtp'): AppConfig {
   return {
@@ -21,34 +16,16 @@ function buildAppConfig(emailDriver: 'log' | 'smtp'): AppConfig {
   } as AppConfig;
 }
 
-// Mirrors ConfigModule's @Global() APP_CONFIG binding from the real app
-// composition, which NotificationsModule relies on rather than importing itself.
-function buildFakeConfigModule(appConfig: AppConfig) {
-  @Global()
-  @Module({ providers: [{ provide: APP_CONFIG, useValue: appConfig }], exports: [APP_CONFIG] })
-  class FakeConfigModule {}
-
-  return FakeConfigModule;
-}
-
-describe('NotificationsModule', () => {
-  it('resolves LoggingEmailSender for the log driver', async () => {
-    const moduleRef = await Test.createTestingModule({
-      imports: [buildFakeConfigModule(buildAppConfig('log')), NotificationsModule],
-    }).compile();
-
-    const emailSender = moduleRef.get<EmailSender>(EMAIL_SENDER);
-
-    expect(emailSender).toBeInstanceOf(LoggingEmailSender);
+// NotificationsModule wires SendTransactionEmailUseCase across real,
+// TypeORM-backed sibling modules, so it needs a live DataSource to compile
+// end to end — that is exercised by the int-spec (step 6), not here. This
+// spec covers the pure EMAIL_SENDER driver selection in isolation.
+describe('selectEmailSender', () => {
+  it('resolves LoggingEmailSender for the log driver', () => {
+    expect(selectEmailSender(buildAppConfig('log'))).toBeInstanceOf(LoggingEmailSender);
   });
 
-  it('resolves NodemailerGmailAdapter for the smtp driver', async () => {
-    const moduleRef = await Test.createTestingModule({
-      imports: [buildFakeConfigModule(buildAppConfig('smtp')), NotificationsModule],
-    }).compile();
-
-    const emailSender = moduleRef.get<EmailSender>(EMAIL_SENDER);
-
-    expect(emailSender).toBeInstanceOf(NodemailerGmailAdapter);
+  it('resolves NodemailerGmailAdapter for the smtp driver', () => {
+    expect(selectEmailSender(buildAppConfig('smtp'))).toBeInstanceOf(NodemailerGmailAdapter);
   });
 });

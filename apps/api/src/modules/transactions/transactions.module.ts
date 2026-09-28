@@ -304,5 +304,8 @@ interface ReconcileRuntime {
     CreateTransactionUseCase,
     IdempotencyKeyPipe,
   ],
+  // NotificationsModule needs the repository to load a transaction before
+  // sending its result email (see specs/12b-api-email-notifications.md).
+  exports: [TRANSACTION_REPOSITORY],
 })
 export class TransactionsModule {}
