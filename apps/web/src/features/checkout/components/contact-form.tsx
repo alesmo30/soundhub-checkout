@@ -27,11 +27,15 @@ import { forgetDetails, rememberDetails, selectRememberedDetails } from '@/featu
 import {
   clearCheckoutSession,
   saveContact,
+  selectCard,
+  selectContactFieldError,
   selectSessionContact,
+  setContactFieldError,
   setQuoteMunicipality,
 } from '../checkout-session.slice';
 import { selectContactDetails } from '../checkout.selectors';
 import { goToStep } from '../checkout.slice';
+import { CONTACT_FIELD_ERROR_MESSAGES } from '../checkout.constants';
 import { useGetDepartmentsQuery, useGetMunicipalitiesQuery } from '../checkout.api';
 import { contactFormSchema, type ContactDetails } from '../lib/contact-details';
 import { RememberedBanner } from './remembered-banner';
@@ -41,6 +45,10 @@ const EMPTY_CONTACT_DETAILS: ContactDetails = {
   address: { departmentCode: '', municipalityCode: '', addressLine: '', addressDetail: '' },
 };
 
+// Static: only one ContactForm is ever mounted at a time (see
+// components/payment-problem.tsx for the same fixed-id pattern).
+const EMAIL_SERVER_ERROR_ID = 'contact-email-server-error';
+
 // The recipient is always the customer (see specs/07-web-checkout.md#decisions),
 // so this form has no separate recipient section: `contactFormSchema` already
 // drops `recipientName`/`phone` from the delivery schema.
@@ -49,6 +57,8 @@ export function ContactForm() {
   const contactDetails = useAppSelector(selectContactDetails);
   const sessionContact = useAppSelector(selectSessionContact);
   const rememberedDetails = useAppSelector(selectRememberedDetails);
+  const contactFieldError = useAppSelector(selectContactFieldError);
+  const hasCard = useAppSelector(selectCard) !== null;
   // The banner (and the checkbox's own default) fire only when the form was
   // pre-filled from `customer.remembered`, not from a session that already
   // holds `contact` this same visit (see specs/07-web-checkout.md, UI rules
@@ -86,15 +96,21 @@ export function ContactForm() {
   // `forgetDetails` also resets the whole `checkoutSession` (see its
   // extraReducers): dispatching it before `saveContact` means an unchecked
   // "Recordarme" clears any previous remembered value without wiping out
-  // the contact details this same submit is about to save.
+  // the contact details this same submit is about to save. It only fires
+  // when there was something remembered to forget — otherwise it would wipe
+  // the tokenized card and idempotency key on every plain submit, including
+  // the one that corrects an email conflict (see
+  // specs/11-web-payment.md#decisions, "Errors": the unused card token must
+  // survive this submit for "Continuar" to reach SUMMARY below).
   function onSubmit(values: ContactDetails) {
     if (rememberMe) {
       dispatch(rememberDetails(values));
-    } else {
+    } else if (rememberedDetails !== null) {
       dispatch(forgetDetails());
     }
     dispatch(saveContact(values));
-    dispatch(goToStep('CARD'));
+    dispatch(setContactFieldError(null));
+    dispatch(goToStep(hasCard ? 'SUMMARY' : 'CARD'));
   }
 
   function handleForget() {
@@ -152,15 +168,37 @@ export function ContactForm() {
           <FormField
             control={form.control}
             name="customer.email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Correo</FormLabel>
-                <FormControl>
-                  <Input type="email" placeholder="Ingresa tu correo" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              const hasServerError = contactFieldError?.field === 'email';
+
+              return (
+                <FormItem>
+                  <FormLabel>Correo</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="Ingresa tu correo"
+                      {...field}
+                      // Editing after a 409 clears the stale server error;
+                      // the freshest value is what gets submitted next.
+                      onChange={(event) => {
+                        field.onChange(event);
+                        if (hasServerError) {
+                          dispatch(setContactFieldError(null));
+                        }
+                      }}
+                      {...(hasServerError ? { 'aria-describedby': EMAIL_SERVER_ERROR_ID } : {})}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  {hasServerError && (
+                    <p id={EMAIL_SERVER_ERROR_ID} role="alert" className="text-sm text-destructive">
+                      {CONTACT_FIELD_ERROR_MESSAGES[contactFieldError.code]}
+                    </p>
+                  )}
+                </FormItem>
+              );
+            }}
           />
 
           <FormField

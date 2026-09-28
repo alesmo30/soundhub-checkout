@@ -2,6 +2,7 @@ import {
   checkoutReducer,
   closeCheckout,
   goToStep,
+  resetCheckout,
   selectCheckoutProductId,
   selectCheckoutStep,
   selectIsCheckoutOpen,
@@ -69,6 +70,21 @@ describe('checkout slice', () => {
   it('goToStep moves the persisted step', () => {
     expect(reduce(goToStep('CARD')).step).toBe('CARD');
     expect(reduce(goToStep('CARD'), goToStep('SUMMARY')).step).toBe('SUMMARY');
+  });
+
+  it('resetCheckout returns to the initial state', () => {
+    const state = reduce(
+      startCheckout({ productId: PRODUCT_ID, quantity: 4 }),
+      goToStep('SUMMARY'),
+      resetCheckout(),
+    );
+
+    expect(state).toEqual({
+      productId: null,
+      quantity: 1,
+      isDialogOpen: false,
+      step: 'CONTACT',
+    });
   });
 });
 

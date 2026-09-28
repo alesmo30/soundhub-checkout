@@ -161,6 +161,16 @@ describe('CheckoutDialog', () => {
       await fillAndSubmitCard(user);
       await screen.findByText('VISA •••• 4242', {}, { timeout: 5000 });
 
+      // The summary layer sits on top and, while open, marks the checkout
+      // dialog underneath (and its own "Cerrar") inert (see
+      // specs/11-web-payment.md#decisions, "Summary layout"). Esc closes
+      // only that layer, landing back on CARD; a second Esc then closes the
+      // checkout dialog itself.
+      await user.keyboard('{Escape}');
+      expect(
+        await screen.findByRole('heading', { name: 'Datos de tu tarjeta' }),
+      ).toBeInTheDocument();
+
       await user.click(screen.getByRole('button', { name: 'Cerrar' }));
       expect(store.getState().checkout.isDialogOpen).toBe(false);
       expect(store.getState().checkoutSession.card).toBeNull();

@@ -1,9 +1,25 @@
 import { screen, waitFor } from '@testing-library/react';
+import { CardBrand } from '@checkout/shared/enums';
 import { VALIDATION_MESSAGES } from '@checkout/shared/validation';
 
 import { renderWithProviders, type RenderWithProvidersOptions } from '@/test/render-with-providers';
 
+import type { CheckoutSessionState } from '../checkout-session.slice';
+import { CONTACT_FIELD_ERROR_MESSAGES } from '../checkout.constants';
 import { ContactForm } from './contact-form';
+
+// Matches checkoutSessionSlice's own initialState (see checkout-session.slice.ts):
+// tests below only override the one or two fields their scenario needs.
+const BASE_SESSION: CheckoutSessionState = {
+  contact: null,
+  quoteMunicipalityCode: null,
+  card: null,
+  installments: 1,
+  acceptance: null,
+  idempotencyKey: null,
+  paymentProblem: null,
+  contactFieldError: null,
+};
 
 const REMEMBERED = {
   customer: {
@@ -225,5 +241,92 @@ describe('ContactForm', () => {
     expect(screen.queryByText('Hola, Juana. ¿No eres tú?')).not.toBeInTheDocument();
     expect(store.getState().customer.remembered).toBeNull();
     expect(store.getState().checkoutSession.contact).toBeNull();
+  });
+
+  it.each([['EMAIL_ALREADY_REGISTERED' as const], ['CUSTOMER_DATA_MISMATCH' as const]])(
+    'shows the %s message on the email field, linked with aria-describedby',
+    (code) => {
+      renderContactForm({
+        checkoutSession: { ...BASE_SESSION, contactFieldError: { field: 'email', code } },
+      });
+
+      const message = screen.getByRole('alert');
+      expect(message).toHaveTextContent(CONTACT_FIELD_ERROR_MESSAGES[code]);
+
+      const emailInput = screen.getByLabelText('Correo');
+      const describedBy = emailInput.getAttribute('aria-describedby') ?? '';
+      expect(describedBy.split(' ')).toContain(message.id);
+    },
+  );
+
+  it('clears the email server error once the user edits the field and submits again', async () => {
+    const { user, store } = renderContactForm({
+      checkoutSession: {
+        ...BASE_SESSION,
+        contactFieldError: { field: 'email', code: 'EMAIL_ALREADY_REGISTERED' },
+      },
+    });
+
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText('Nombre completo'), 'Juana Pérez');
+    await user.type(screen.getByLabelText('Cédula'), '1020304050');
+    await user.clear(screen.getByLabelText('Correo'));
+    await user.type(screen.getByLabelText('Correo'), 'nueva@example.com');
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    await user.type(screen.getByLabelText('Celular'), '3001234567');
+    await user.type(screen.getByLabelText('Dirección'), 'Calle 10 # 20-30');
+    await selectOption(user, 'Departamento', 'Antioquia');
+    await selectOption(user, 'Municipio', 'Medellín');
+
+    const submit = screen.getByRole('button', { name: 'Continuar' });
+    await waitFor(() => expect(submit).toBeEnabled());
+    await user.click(submit);
+
+    expect(store.getState().checkoutSession.contactFieldError).toBeNull();
+  });
+
+  it('"Continuar" goes to CARD when no card is in the session', async () => {
+    const { user, store } = renderContactForm();
+
+    await user.type(screen.getByLabelText('Nombre completo'), 'Juana Pérez');
+    await user.type(screen.getByLabelText('Cédula'), '1020304050');
+    await user.type(screen.getByLabelText('Correo'), 'juana@example.com');
+    await user.type(screen.getByLabelText('Celular'), '3001234567');
+    await user.type(screen.getByLabelText('Dirección'), 'Calle 10 # 20-30');
+    await selectOption(user, 'Departamento', 'Antioquia');
+    await selectOption(user, 'Municipio', 'Medellín');
+
+    const submit = screen.getByRole('button', { name: 'Continuar' });
+    await waitFor(() => expect(submit).toBeEnabled());
+    await user.click(submit);
+
+    expect(store.getState().checkout.step).toBe('CARD');
+  });
+
+  it('"Continuar" goes straight to SUMMARY when a tokenized card is already in the session', async () => {
+    const { user, store } = renderContactForm({
+      checkoutSession: {
+        ...BASE_SESSION,
+        card: { token: 'tok_test_4242', brand: CardBrand.VISA, last4: '4242' },
+        acceptance: { acceptanceToken: 'acc_test', personalDataAuthToken: 'auth_test' },
+      },
+    });
+
+    await user.type(screen.getByLabelText('Nombre completo'), 'Juana Pérez');
+    await user.type(screen.getByLabelText('Cédula'), '1020304050');
+    await user.type(screen.getByLabelText('Correo'), 'juana@example.com');
+    await user.type(screen.getByLabelText('Celular'), '3001234567');
+    await user.type(screen.getByLabelText('Dirección'), 'Calle 10 # 20-30');
+    await selectOption(user, 'Departamento', 'Antioquia');
+    await selectOption(user, 'Municipio', 'Medellín');
+
+    const submit = screen.getByRole('button', { name: 'Continuar' });
+    await waitFor(() => expect(submit).toBeEnabled());
+    await user.click(submit);
+
+    expect(store.getState().checkout.step).toBe('SUMMARY');
   });
 });
