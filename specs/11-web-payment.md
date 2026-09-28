@@ -291,7 +291,7 @@ Each step is one commit after review. Frontend steps save Chrome screenshots at 
    Manual test: `test` green.
    Commit: `feat(web): add payment session state and pending payment storage`.
 
-3. [ ] **Pay flow hook.** `hooks/use-checkout-flow.ts` with `pay()` and `retry()`. It builds the body from the session, the checkout slice and `toDeliveryValues`, and uses the quote's total as `expectedTotalInCents`. The `renderHook` + MSW specs cover:
+3. [x] **Pay flow hook.** `hooks/use-checkout-flow.ts` with `pay()` and `retry()`. It builds the body from the session, the checkout slice and `toDeliveryValues`, and uses the quote's total as `expectedTotalInCents`. The `renderHook` + MSW specs cover:
    - the call order `upsertCustomer` → pending entry written → `createTransaction`;
    - 201 → entry cleared, `closeCheckout`, navigation to `/transactions/:id`;
    - a replayed 201 behaves the same;
