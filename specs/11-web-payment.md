@@ -271,7 +271,7 @@ Each step is one commit after review. Frontend steps save Chrome screenshots at 
 
 ### Part 1 — summary and pay
 
-1. [ ] **Payment endpoints and MSW scenarios.** Add `upsertCustomer` and `createTransaction` to `checkout.api.ts`, the new transaction fixtures, and the POST/GET scenario handlers (the progressing counters included). The specs, over MSW, cover:
+1. [x] **Payment endpoints and MSW scenarios.** Add `upsertCustomer` and `createTransaction` to `checkout.api.ts`, the new transaction fixtures, and the POST/GET scenario handlers (the progressing counters included). The specs, over MSW, cover:
    - the `Idempotency-Key` header is sent;
    - `replayed` is true when `Idempotent-Replayed: true` comes back;
    - `upsertCustomer` unwraps `data`;

@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
 
+import { resetTransactionsHandlersState } from '@/mocks/handlers/transactions.handlers';
 import { server } from '@/mocks/server';
 
 // jsdom does not implement matchMedia; vaul (Drawer) and prefers-reduced-motion
@@ -28,7 +29,10 @@ if (!window.ResizeObserver) {
 }
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
-afterEach(() => server.resetHandlers());
+afterEach(() => {
+  server.resetHandlers();
+  resetTransactionsHandlersState();
+});
 afterAll(() => server.close());
 
 jest.mock('@/config/env', () => ({
