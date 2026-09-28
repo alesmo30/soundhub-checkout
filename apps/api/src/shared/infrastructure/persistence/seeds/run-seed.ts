@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 import type { DataSource, EntityManager } from 'typeorm';
 
@@ -40,10 +41,12 @@ interface ProductSeed {
   stock: number;
 }
 
-const DATA_DIR = 'src/shared/infrastructure/persistence/seeds/data';
-
+// __dirname, not a cwd-relative path: the Lambda webpack bundle flattens
+// every module into dist-lambda/, so a path built from process.cwd() breaks
+// there. copy-lambda-assets.ts copies this same data/ folder next to the
+// bundle so the __dirname-relative lookup keeps working once bundled.
 function readJson<T>(fileName: string): T {
-  return JSON.parse(readFileSync(`${DATA_DIR}/${fileName}`, 'utf8')) as T;
+  return JSON.parse(readFileSync(join(__dirname, 'data', fileName), 'utf8')) as T;
 }
 
 function productImageUrl(sku: string): string {

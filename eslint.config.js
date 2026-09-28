@@ -7,6 +7,7 @@ export default defineConfig(
   {
     ignores: [
       '**/dist/**',
+      '**/dist-lambda/**',
       '**/coverage/**',
       '**/node_modules/**',
       '**/cdk.out/**',

@@ -5,9 +5,10 @@
 // module-load time, before any of our own code runs.
 import 'reflect-metadata';
 
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import pg from 'pg';
 import { DataSource, type DataSourceOptions } from 'typeorm';
 
 import type { DbConfig } from '../../../config/app-config';
@@ -20,7 +21,24 @@ import { DeliveryOrmEntity } from '../../../modules/deliveries/infrastructure/pe
 import { TransactionOrmEntity } from '../../../modules/transactions/infrastructure/persistence/transaction.orm-entity';
 
 const MIGRATIONS_GLOB = 'src/shared/infrastructure/persistence/migrations/*.ts';
-const RDS_CA_BUNDLE_PATH = join(__dirname, '../../../../certs/rds-global-bundle.pem');
+
+// Two candidates because __dirname means different things depending on how
+// this module is loaded: unbundled (tsx from src/, 4 levels below apps/api)
+// vs. the Lambda webpack bundle, which flattens every module into one file
+// living directly in dist-lambda/ (see copy-lambda-assets.ts, which copies
+// the cert next to it).
+const RDS_CA_BUNDLE_CANDIDATES = [
+  join(__dirname, '../../../../certs/rds-global-bundle.pem'),
+  join(__dirname, 'certs/rds-global-bundle.pem'),
+];
+
+function resolveRdsCaBundlePath(): string {
+  const found = RDS_CA_BUNDLE_CANDIDATES.find(existsSync);
+  if (!found) {
+    throw new Error('rds-global-bundle.pem not found next to data-source.ts or in dist-lambda/certs');
+  }
+  return found;
+}
 
 const ENTITIES = [
   ProductOrmEntity,
@@ -47,8 +65,16 @@ export function buildDataSourceOptions(config: DbConfig): DataSourceOptions {
     database: config.db.name,
     synchronize: false,
     entities: ENTITIES,
+    // Passed explicitly instead of leaving TypeORM's PostgresDriver fall back
+    // to its own `PlatformTools.load('pg')`: that call is a dynamic
+    // `require(name)`, which a webpack bundle (dist-lambda) cannot resolve —
+    // there is no node_modules inside the Lambda zip for it to find at
+    // runtime. A real static `import pg from 'pg'` bundles correctly and
+    // sidesteps the dynamic lookup entirely, for both the bundled and the
+    // unbundled (local, ts-node/tsx) code paths.
+    driver: pg,
     ...(config.db.ssl && {
-      ssl: { ca: readFileSync(RDS_CA_BUNDLE_PATH, 'utf8'), rejectUnauthorized: true },
+      ssl: { ca: readFileSync(resolveRdsCaBundlePath(), 'utf8'), rejectUnauthorized: true },
     }),
   };
 }

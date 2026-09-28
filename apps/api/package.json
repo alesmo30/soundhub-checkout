@@ -4,6 +4,7 @@
   "type": "commonjs",
   "scripts": {
     "build": "nest build",
+    "build:lambda": "nest build --webpack --webpackPath webpack.lambda.config.cjs && tsx scripts/copy-lambda-assets.ts",
     "start": "node dist/main.js",
     "start:dev": "nest start --watch",
     "typecheck": "tsc --noEmit -p tsconfig.json",
@@ -49,6 +50,7 @@
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.20.4",
+    "@types/pg": "^8.23.1",
     "@types/supertest": "^7.2.1",
     "csv-parse": "^7.0.3",
     "fork-ts-checker-webpack-plugin": "^9.1.0",

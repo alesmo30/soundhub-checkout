@@ -333,7 +333,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step.
    Manual test: `typecheck` green.
    Commit: `feat(api): add Lambda handler and migrator entry points`.
 
-9. [ ] **Lambda bundle.** `webpack.lambda.config.cjs`, `scripts/copy-lambda-assets.ts`, `certs/rds-global-bundle.pem` and the `build:lambda` script (output `dist-lambda/`, git-ignored).
+9. [x] **Lambda bundle.** `webpack.lambda.config.cjs`, `scripts/copy-lambda-assets.ts`, `certs/rds-global-bundle.pem` and the `build:lambda` script (output `dist-lambda/`, git-ignored).
    Manual test: `build:lambda`, then a local smoke run against docker Postgres. `node` requires `dist-lambda/lambda.js` and invokes `handler` with a sample HTTP API event for:
    - `GET /api/v1/health` → 200 `database: 'up'`;
    - `GET /api/docs` → HTML;
