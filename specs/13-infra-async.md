@@ -72,7 +72,7 @@ Prerequisites (not commits):
 
 Each step is one commit after review. Target: ≤ ~300 changed lines per step. Pushing and opening a PR happen only when the user asks.
 
-1. [ ] **Async config constants.** Add the `ASYNC` namespace to `infra/lib/config/constants.ts` (queue name, DLQ max receive count, worker/reconciler memory and timeout, SQS visibility timeout, batch size, reconciler retry policy).
+1. [x] **Async config constants.** Add the `ASYNC` namespace to `infra/lib/config/constants.ts` (queue name, DLQ max receive count, worker/reconciler memory and timeout, SQS visibility timeout, batch size, reconciler retry policy).
 
    Manual test: `pnpm --filter @checkout/infra typecheck` passes.
    Commit: `feat(infra): add async section config constants`.
