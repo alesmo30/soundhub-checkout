@@ -27,6 +27,15 @@ export const CONTACT_FIELD_ERROR_MESSAGES = {
     'Este documento ya está registrado con otro correo. Usa el correo con el que compraste antes.',
 } as const;
 
+// Shown once by PendingPaymentRecovery (step 6) after a refresh recovers a
+// payment that turned out definitively unsuccessful: the tokenized card
+// from before the refresh never survives the reload (checkoutSession is
+// memory-only), so the customer must re-enter one (see
+// specs/11-web-payment.md#outcome-table, "PendingPaymentRecovery uses the
+// same table").
+export const PENDING_PAYMENT_RECOVERY_NOTICE =
+  'Tu pago anterior no se completó y no se hizo ningún cobro. Ingresa tu tarjeta de nuevo.';
+
 // One message per `PaymentProblem.kind` (see specs/11-web-payment.md
 // #outcome-table). The UI never renders the gateway's raw status message.
 export const PAYMENT_PROBLEM_MESSAGES = {

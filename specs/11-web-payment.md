@@ -327,7 +327,7 @@ Each step is one commit after review. Frontend steps save Chrome screenshots at 
    Manual test: in Chrome, both viewports, the email error after a mocked 409. Screenshots saved.
    Commit: `feat(web): highlight customer conflicts on the contact form`.
 
-6. [ ] **Pending payment recovery.** `pending-payment-recovery.tsx` is mounted at the router root and exported from `checkout/index.ts`. On mount with an entry, it shows the "Recuperando tu pago…" overlay (`aria-live`) and re-sends it. The specs simulate a refresh by writing an entry and rendering the app, and cover:
+6. [x] **Pending payment recovery.** `pending-payment-recovery.tsx` is mounted at the router root and exported from `checkout/index.ts`. On mount with an entry, it shows the "Recuperando tu pago…" overlay (`aria-live`) and re-sends it. The specs simulate a refresh by writing an entry and rendering the app, and cover:
    - the POST carries the stored key and a byte-identical body;
    - 201 → navigation and the entry cleared;
    - a definitive 409 → the entry cleared and the one-time notice shown;

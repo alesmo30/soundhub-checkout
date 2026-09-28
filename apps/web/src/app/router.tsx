@@ -4,6 +4,7 @@ import { Outlet, createBrowserRouter, type RouteObject } from 'react-router';
 import { AppShell } from '@/components/layout/app-shell';
 import { env } from '@/config/env';
 import { CatalogPage, ProductPage } from '@/features/catalog';
+import { PendingPaymentRecovery } from '@/features/checkout';
 
 import { NotFoundPage, TransactionPlaceholderPage } from './placeholder-pages';
 
@@ -13,6 +14,7 @@ export const routes: RouteObject[] = [
   {
     element: (
       <AppShell>
+        <PendingPaymentRecovery />
         <Outlet />
       </AppShell>
     ),

@@ -1,4 +1,5 @@
 export { CheckoutDialog } from './components/checkout-dialog';
+export { PendingPaymentRecovery } from './components/pending-payment-recovery';
 export {
   checkoutReducer,
   closeCheckout,
