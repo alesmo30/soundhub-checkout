@@ -298,7 +298,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step.
    Manual test: `test` green.
    Commit: `feat(infra): add private RDS PostgreSQL and app secrets`.
 
-5. [ ] **Bootstrap, budget and data deploy.** `infra/README.md` gets the profile, bootstrap, budget, `deploy CheckoutDataStack`, set-secrets and destroy commands. Then, each with its price and explicit approval:
+5. [x] **Bootstrap, budget and data deploy.** `infra/README.md` gets the profile, bootstrap, budget, `deploy CheckoutDataStack`, set-secrets and destroy commands. Then, each with its price and explicit approval:
    - `cdk bootstrap` (~USD 0.01/month);
    - the AWS Budgets alert at USD 30/month (free);
    - `cdk deploy CheckoutDataStack` (~USD 23/month from now on);
