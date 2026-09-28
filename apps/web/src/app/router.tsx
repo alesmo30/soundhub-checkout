@@ -5,8 +5,9 @@ import { AppShell } from '@/components/layout/app-shell';
 import { env } from '@/config/env';
 import { CatalogPage, ProductPage } from '@/features/catalog';
 import { PendingPaymentRecovery } from '@/features/checkout';
+import { TransactionStatusPage } from '@/features/transaction';
 
-import { NotFoundPage, TransactionPlaceholderPage } from './placeholder-pages';
+import { NotFoundPage } from './placeholder-pages';
 
 const DesignShowcasePage = lazy(() => import('./design-showcase-page'));
 
@@ -21,7 +22,7 @@ export const routes: RouteObject[] = [
     children: [
       { path: '/', element: <CatalogPage /> },
       { path: '/products/:id', element: <ProductPage /> },
-      { path: '/transactions/:id', element: <TransactionPlaceholderPage /> },
+      { path: '/transactions/:id', element: <TransactionStatusPage /> },
       ...(env.isDev
         ? [
             {

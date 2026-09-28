@@ -351,7 +351,7 @@ Each step is one commit after review. Frontend steps save Chrome screenshots at 
    Manual test: `test` green.
    Commit: `feat(web): poll transaction status honoring Retry-After`.
 
-8. [ ] **Status page.** `transaction-status-page.tsx`, `status-hero.tsx`, `transaction-breakdown.tsx`, `transaction-not-found.tsx` and `transaction.constants.ts`, with the router swap (and the placeholder removed). The specs cover:
+8. [x] **Status page.** `transaction-status-page.tsx`, `status-hero.tsx`, `transaction-breakdown.tsx`, `transaction-not-found.tsx` and `transaction.constants.ts`, with the router swap (and the placeholder removed). The specs cover:
    - each status renders its title, tone and icon;
    - the monospace reference, the breakdown with `formatCop`, `•••• 4242` and the delivery status label;
    - the region has `aria-live="polite"`;

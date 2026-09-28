@@ -31,12 +31,17 @@ describe('router', () => {
     ).toBeInTheDocument();
   });
 
-  it.each([
-    ['/transactions/abc', 'Transacción abc (placeholder)'],
-    ['/nope', '404 - Página no encontrada'],
-  ])('renders the placeholder for %s', (path, expectedText) => {
-    renderAt(path);
+  it('renders the not-found page for an unknown transaction id', async () => {
+    renderAt('/transactions/abc');
 
-    expect(screen.getByText(expectedText)).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'No encontramos este pago' }),
+    ).toBeInTheDocument();
+  });
+
+  it('renders the 404 page for an unmatched route', () => {
+    renderAt('/nope');
+
+    expect(screen.getByText('404 - Página no encontrada')).toBeInTheDocument();
   });
 });
