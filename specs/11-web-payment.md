@@ -362,7 +362,7 @@ Each step is one commit after review. Frontend steps save Chrome screenshots at 
    Manual test: in Chrome, both viewports, every status fixture id, the progressing id (PENDING, then APPROVED), and an unknown id. Screenshots saved.
    Commit: `feat(web): add the final transaction status page`.
 
-9. [ ] **Status actions.** `status-actions.tsx`:
+9. [x] **Status actions.** `status-actions.tsx`:
    - "Volver al producto" dispatches `invalidateProduct`, `resetCheckout` and `clearCheckoutSession`, then navigates to `/products/:productId`;
    - "Intentar con otra tarjeta" dispatches `invalidateProduct`, `closeCheckout` (it drops the card), `startCheckout({ productId, quantity })` and `goToStep('CARD')`, then navigates.
 
