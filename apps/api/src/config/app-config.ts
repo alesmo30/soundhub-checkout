@@ -11,6 +11,14 @@ import {
   validateEnvironmentVariables,
 } from './environment-variables';
 
+// Lives here, not in config.module.ts, so importing the token doesn't drag
+// in NestConfigModule.forRoot()'s eager env validation — that module-level
+// decorator call runs the instant the file is required, before any test can
+// intervene. A consumer that only needs the DI token (e.g. a unit spec
+// building its own fake AppConfig) must not be forced to satisfy the real
+// EnvironmentVariables schema just to reference this symbol.
+export const APP_CONFIG = Symbol('APP_CONFIG');
+
 export interface AppConfig {
   app: { nodeEnv: NodeEnv; port: number; logLevel: LogLevel };
   db: { host: string; port: number; username: string; password: string; name: string };

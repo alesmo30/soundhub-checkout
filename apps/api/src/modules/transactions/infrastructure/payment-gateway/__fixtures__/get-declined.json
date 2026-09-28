@@ -1,0 +1,49 @@
+{
+  "data": {
+    "id": "fake-txn-00000003",
+    "created_at": "2026-09-27T15:00:20.000Z",
+    "finalized_at": "2026-09-27T15:00:27.000Z",
+    "amount_in_cents": 20000000,
+    "reference": "TX-20260927-FAKE03",
+    "currency": "COP",
+    "payment_method_type": "CARD",
+    "payment_method": {
+      "type": "CARD",
+      "extra": {
+        "bin": "411111",
+        "name": "VISA",
+        "brand": "VISA",
+        "exp_year": "29",
+        "exp_month": "12",
+        "last_four": "1111",
+        "card_holder": "FAKE HOLDER",
+        "card_type": "CREDIT",
+        "issuer": "FAKE BANK",
+        "is_three_ds": false,
+        "country_iso2": "CO",
+        "three_ds_auth_type": null,
+        "external_identifier": "fake-ext-00000003",
+        "processor_response_code": "05"
+      },
+      "installments": 1
+    },
+    "status": "DECLINED",
+    "status_message": "The transaction was declined by the issuing bank",
+    "three_ds_auth": {},
+    "merchant": {
+      "id": 1,
+      "name": "FAKE MERCHANT",
+      "legal_name": "FAKE MERCHANT SAS",
+      "contact_name": "Fake Contact",
+      "phone_number": "+573000000000",
+      "logo_url": null,
+      "legal_id_type": "NIT",
+      "legal_id": "000000000",
+      "public_key": "pub_fake_00000000000000000000",
+      "email": "fake-merchant@example.com"
+    },
+    "entries": [],
+    "disbursement": null,
+    "refunds": []
+  }
+}

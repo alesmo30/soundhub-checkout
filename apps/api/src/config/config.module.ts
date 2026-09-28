@@ -1,10 +1,10 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule as NestConfigModule, ConfigService } from '@nestjs/config';
 
-import { buildAppConfig, type AppConfig } from './app-config';
+import { APP_CONFIG, buildAppConfig, type AppConfig } from './app-config';
 import { EnvironmentVariables, validateEnvironmentVariables } from './environment-variables';
 
-export const APP_CONFIG = Symbol('APP_CONFIG');
+export { APP_CONFIG };
 
 @Global()
 @Module({
