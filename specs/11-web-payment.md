@@ -1,6 +1,6 @@
 # SPEC 11 — Web: payment (summary, pay and final status)
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 07 (checkout forms, `checkoutSession`, `summary-sheet` stub), SPEC 05 (catalog product cache and `invalidateProduct`). Runs against MSW, in parallel with SPEC 08 and SPEC 10; checkpoint C3 runs after all three merge.
 > **Date:** 2026-09-27
 > **Objective:** The customer sees exactly what will be charged, pays once — a retry, a refresh mid-payment or a changed price never double-charges — and follows the real outcome on `/transactions/:id`, even after a refresh or from a shared link, before returning to the product with fresh stock.
@@ -376,7 +376,7 @@ Each step is one commit after review. Frontend steps save Chrome screenshots at 
 
 ### Close-out
 
-10. [ ] **Coverage, evidence and CI.**
+10. [x] **Coverage, evidence and CI.**
     - `pnpm lint`, `pnpm typecheck` and `pnpm --filter @checkout/web test:cov` are green, with coverage ≥ 80 % on all four metrics.
     - `docs/evidence/payment/` holds every screenshot listed in the acceptance criteria.
     - When the user asks, push and open the PR with `gh-cli`, wait for CI, and fix whatever fails.
