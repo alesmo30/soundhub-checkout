@@ -172,21 +172,6 @@ describe('HandlePaymentWebhookUseCase', () => {
     expect(result._unsafeUnwrap()).toBe('IGNORED');
   });
 
-  it('ignores an unmapped status, falling back to PENDING, with no finalize call', async () => {
-    const repository = new FakeTransactionRepository(buildTransaction());
-    const finalizer = new UnreachableFinalizer();
-    const useCase = buildUseCase({
-      transactionRepository: repository,
-      finalizeTransactionUseCase: finalizer,
-    });
-
-    const result = await useCase.execute(
-      buildEvent({ status: 'SOME_UNKNOWN_STATUS' as TransactionStatus }),
-    );
-
-    expect(result._unsafeUnwrap()).toBe('IGNORED');
-  });
-
   it.each([
     TransactionStatus.APPROVED,
     TransactionStatus.DECLINED,

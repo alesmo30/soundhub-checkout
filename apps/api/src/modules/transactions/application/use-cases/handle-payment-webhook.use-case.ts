@@ -5,7 +5,6 @@ import { okAsync, ResultAsync } from '../../../../shared/domain/result';
 import { PAYMENT_EVENT_TRANSACTION_UPDATED } from '../../domain/webhook-event.constants';
 import type { TransactionRepository } from '../ports/transaction.repository.port';
 import { FinalizeTransactionUseCase } from './finalize-transaction.use-case';
-import { toWebhookStatus } from './helpers/to-webhook-status';
 
 export interface PaymentWebhookEvent {
   readonly type: string;
@@ -38,17 +37,17 @@ export class HandlePaymentWebhookUseCase {
     private readonly deps: HandlePaymentWebhookDependencies,
   ) {}
 
-  // The checksum already proved this event is genuine and unmodified
-  // (payment-webhook.controller.ts verifies it before calling here), so the
-  // signed status is trusted outright — no gateway call, per
-  // references/layering.md's "no network call while row locks are held" and
-  // this spec's own decision to avoid a ~25 s round trip during an outage.
+  // The checksum already proved this event is genuine and unmodified, and
+  // the controller already mapped the raw provider status through the
+  // anti-corruption layer, so the signed status is trusted outright here —
+  // no gateway call, per references/layering.md's "no network call while
+  // row locks are held" and this spec's own decision to avoid a ~25 s round
+  // trip during an outage.
   execute(event: PaymentWebhookEvent): ResultAsync<HandlePaymentWebhookResult, never> {
     if (event.type !== PAYMENT_EVENT_TRANSACTION_UPDATED) {
       return okAsync('IGNORED');
     }
 
-    const status = toWebhookStatus(event.status);
     const { transactionRepository, finalizeTransactionUseCase } = this.deps;
 
     return transactionRepository
@@ -61,13 +60,13 @@ export class HandlePaymentWebhookUseCase {
           return okAsync<HandlePaymentWebhookResult, never>('UNKNOWN_TRANSACTION');
         }
 
-        if (status === TransactionStatus.PENDING) {
+        if (event.status === TransactionStatus.PENDING) {
           return okAsync<HandlePaymentWebhookResult, never>('IGNORED');
         }
 
         return finalizeTransactionUseCase.execute({
           id: transaction.id,
-          status,
+          status: event.status,
           statusMessage: event.statusMessage,
         });
       });
