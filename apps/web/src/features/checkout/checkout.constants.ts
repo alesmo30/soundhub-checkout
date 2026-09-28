@@ -18,6 +18,15 @@ export const FEE_RULE_LABEL = {
   NATIONAL_DISTANCE: 'Envío nacional',
 } as const;
 
+// One message per `ContactFieldError.code` (see specs/11-web-payment.md
+// #outcome-table). Both customer conflicts highlight the email field,
+// never the national ID (see specs/11-web-payment.md#decisions, "Errors").
+export const CONTACT_FIELD_ERROR_MESSAGES = {
+  EMAIL_ALREADY_REGISTERED: 'Este correo ya está registrado con otro documento. Usa otro correo.',
+  CUSTOMER_DATA_MISMATCH:
+    'Este documento ya está registrado con otro correo. Usa el correo con el que compraste antes.',
+} as const;
+
 // One message per `PaymentProblem.kind` (see specs/11-web-payment.md
 // #outcome-table). The UI never renders the gateway's raw status message.
 export const PAYMENT_PROBLEM_MESSAGES = {

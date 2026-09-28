@@ -319,7 +319,7 @@ Each step is one commit after review. Frontend steps save Chrome screenshots at 
    Manual test: in Chrome, both viewports, the drawer on mobile, the dialog on desktop, and the price-changed and out-of-stock states (MSW overrides from the browser console). Screenshots saved.
    Commit: `feat(web): render the payment summary as a sheet and dialog`.
 
-5. [ ] **Contact form server errors.** `contact-form.tsx` sets `contactFieldError` on the email field (linked with `aria-describedby`) and clears it on submit. "Continuar" goes to `SUMMARY` when a card is in the session, and to `CARD` otherwise. The specs cover:
+5. [x] **Contact form server errors.** `contact-form.tsx` sets `contactFieldError` on the email field (linked with `aria-describedby`) and clears it on submit. "Continuar" goes to `SUMMARY` when a card is in the session, and to `CARD` otherwise. The specs cover:
    - both messages;
    - the error clears after editing and submitting;
    - with a card → `SUMMARY`, without → `CARD`.
