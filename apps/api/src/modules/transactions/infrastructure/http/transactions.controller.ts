@@ -1,27 +1,34 @@
-import { Body, Controller, Headers, HttpStatus, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Headers, HttpStatus, Param, Post, Res } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiHeader,
+  ApiNotFoundResponse,
+  ApiOkResponse,
   ApiServiceUnavailableResponse,
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import { IDEMPOTENCY_KEY_HEADER, IDEMPOTENT_REPLAYED_HEADER } from '@checkout/shared/contracts';
-import type { TransactionCreated } from '@checkout/shared/contracts';
+import type { TransactionCreated, TransactionView } from '@checkout/shared/contracts';
 import { ErrorCode } from '@checkout/shared/enums';
 import type { Response } from 'express';
 
+import { respond } from '../../../../shared/infrastructure/http/respond';
 import { DomainErrorException } from '../../../../shared/infrastructure/http/domain-error.exception';
 import type { CreateTransactionCommand } from '../../application/use-cases/create-transaction.use-case';
 import { CreateTransactionUseCase } from '../../application/use-cases/create-transaction.use-case';
+import { GetTransactionStatusUseCase } from '../../application/use-cases/get-transaction-status.use-case';
 import { requestHash } from '../../domain/request-hash';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransactionCreatedResponseDto } from './dto/transaction-created-response.dto';
+import { TransactionIdParamsDto } from './dto/transaction-id.params.dto';
+import { TransactionViewResponseDto } from './dto/transaction-view-response.dto';
 import { IdempotencyKeyPipe } from './idempotency-key.pipe';
 import {
   GATEWAY_UNAVAILABLE_RETRY_AFTER_SECONDS,
+  TRANSACTION_PENDING_RETRY_AFTER_SECONDS,
   TRANSACTIONS_CACHE_CONTROL,
 } from './transactions-http.constants';
 
@@ -30,6 +37,7 @@ import {
 export class TransactionsController {
   constructor(
     private readonly createTransactionUseCase: CreateTransactionUseCase,
+    private readonly getTransactionStatusUseCase: GetTransactionStatusUseCase,
     private readonly idempotencyKeyPipe: IdempotencyKeyPipe,
   ) {}
 
@@ -94,5 +102,25 @@ export class TransactionsController {
         throw new DomainErrorException(error);
       },
     );
+  }
+
+  // Cache-Control and Retry-After are set on the response object after
+  // respond() resolves, following ProductsController's technique: a thrown
+  // DomainErrorException (400/404) never sees this code, so neither header
+  // leaks onto an error response.
+  @Get(':id')
+  @ApiOkResponse({ type: TransactionViewResponseDto })
+  @ApiBadRequestResponse({ description: 'id is not a UUID v4.' })
+  @ApiNotFoundResponse({ description: 'No transaction with this id exists.' })
+  async status(
+    @Param() params: TransactionIdParamsDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<{ data: TransactionView }> {
+    const view = await respond(this.getTransactionStatusUseCase.execute(params.id));
+    response.header('Cache-Control', TRANSACTIONS_CACHE_CONTROL);
+    if (view.data.status === 'PENDING') {
+      response.header('Retry-After', String(TRANSACTION_PENDING_RETRY_AFTER_SECONDS));
+    }
+    return view;
   }
 }

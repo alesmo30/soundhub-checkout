@@ -253,7 +253,7 @@ Each step is one commit after review. Target: ≤ ~300 changed lines per step. P
    Manual test: `test` green.
    Commit: `feat(api): add get transaction status use case with gateway sync`.
 
-6. [ ] **GET /transactions/:id.** `transaction-id.params.dto.ts`, `transaction-view.dto.ts` and `transaction-view-response.dto.ts` (they implement `TransactionView`), `TRANSACTION_PENDING_RETRY_AFTER_SECONDS`, the `@Get(':id')` handler and the `TransactionsModule` provider. `transactions.controller.spec.ts` checks:
+6. [x] **GET /transactions/:id.** `transaction-id.params.dto.ts`, `transaction-view.dto.ts` and `transaction-view-response.dto.ts` (they implement `TransactionView`), `TRANSACTION_PENDING_RETRY_AFTER_SECONDS`, the `@Get(':id')` handler and the `TransactionsModule` provider. `transactions.controller.spec.ts` checks:
    - PENDING → 200, `Cache-Control: no-store` and `Retry-After: 2`;
    - APPROVED → 200 with no `Retry-After`;
    - a non-uuid id → 400 `VALIDATION_ERROR`;

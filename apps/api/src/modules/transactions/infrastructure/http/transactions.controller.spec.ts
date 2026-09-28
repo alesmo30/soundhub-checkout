@@ -3,7 +3,12 @@ import type { Server } from 'node:http';
 
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import type { ProblemDetails, Quote, TransactionCreated } from '@checkout/shared/contracts';
+import type {
+  ProblemDetails,
+  Quote,
+  TransactionCreated,
+  TransactionView,
+} from '@checkout/shared/contracts';
 import { IDEMPOTENCY_KEY_HEADER } from '@checkout/shared/contracts';
 import { ErrorCode } from '@checkout/shared/enums';
 import request from 'supertest';
@@ -35,6 +40,7 @@ import type {
   FinalizeTransactionOutcome,
   FinalizeTransactionUseCase,
 } from '../../application/use-cases/finalize-transaction.use-case';
+import { GetTransactionStatusUseCase } from '../../application/use-cases/get-transaction-status.use-case';
 import type { NewTransaction, Transaction } from '../../domain/transaction';
 import { IdempotencyKeyPipe } from './idempotency-key.pipe';
 import { TransactionsController } from './transactions.controller';
@@ -104,6 +110,35 @@ function asProblem(body: unknown): ProblemDetails {
 
 function asBody(body: unknown): { data: TransactionCreated } {
   return body as { data: TransactionCreated };
+}
+
+function asViewBody(body: unknown): { data: TransactionView } {
+  return body as { data: TransactionView };
+}
+
+function buildTransactionView(overrides: Partial<TransactionView> = {}): TransactionView {
+  return {
+    id: '44444444-4444-4444-8444-444444444444',
+    reference: 'ref-1',
+    status: 'PENDING',
+    statusMessage: null,
+    product: { id: PRODUCT_ID, name: 'Sony WH-1000XM5', imageUrl: '/images/products/1.webp' },
+    quantity: 2,
+    installments: 1,
+    amounts: {
+      unitPriceInCents: 250_000,
+      subtotalInCents: 500_000,
+      baseFeeInCents: 15_900,
+      deliveryFeeInCents: 8_000,
+      totalInCents: TOTAL_IN_CENTS,
+      currency: 'COP',
+    },
+    card: { brand: 'VISA', last4: '4242' },
+    delivery: { id: '55555555-5555-4555-8555-555555555555', status: 'AWAITING_PAYMENT' },
+    createdAt: '2026-09-27T00:00:00.000Z',
+    finalizedAt: null,
+    ...overrides,
+  };
 }
 
 // In-memory doubles, duplicated from create-transaction.use-case.spec.ts on
@@ -324,11 +359,24 @@ class FakeFinalizeTransactionUseCase {
   }
 }
 
+class FakeGetTransactionStatusUseCase {
+  constructor(
+    private readonly result: ResultAsync<TransactionView, DomainError> = okAsync(
+      buildTransactionView(),
+    ),
+  ) {}
+
+  execute(): ResultAsync<TransactionView, DomainError> {
+    return this.result;
+  }
+}
+
 interface BuildAppParams {
   readonly customerRepo?: FakeCustomerRepository;
   readonly getQuoteUseCase?: FakeGetQuoteUseCase;
   readonly stockReservation?: FakeStockReservation;
   readonly paymentGateway?: FakePaymentGateway;
+  readonly getTransactionStatusUseCase?: FakeGetTransactionStatusUseCase;
 }
 
 async function buildApp(params: BuildAppParams = {}): Promise<{
@@ -343,6 +391,8 @@ async function buildApp(params: BuildAppParams = {}): Promise<{
   const paymentGateway = params.paymentGateway ?? new FakePaymentGateway();
   const getQuoteUseCase = params.getQuoteUseCase ?? new FakeGetQuoteUseCase();
   const stockReservation = params.stockReservation ?? new FakeStockReservation();
+  const getTransactionStatusUseCase =
+    params.getTransactionStatusUseCase ?? new FakeGetTransactionStatusUseCase();
 
   const useCase = new CreateTransactionUseCase({
     transactionRepository: transactionRepo,
@@ -360,7 +410,11 @@ async function buildApp(params: BuildAppParams = {}): Promise<{
 
   const moduleRef = await Test.createTestingModule({
     controllers: [TransactionsController],
-    providers: [{ provide: CreateTransactionUseCase, useValue: useCase }, IdempotencyKeyPipe],
+    providers: [
+      { provide: CreateTransactionUseCase, useValue: useCase },
+      { provide: GetTransactionStatusUseCase, useValue: getTransactionStatusUseCase },
+      IdempotencyKeyPipe,
+    ],
   }).compile();
 
   const app = moduleRef.createNestApplication();
@@ -635,5 +689,83 @@ describe('TransactionsController', () => {
     const body = asBody(response.body);
     expect(body.data.status).toBe('ERROR');
     expect(body.data.statusMessage).toBe('Invalid token');
+  });
+
+  describe('GET /transactions/:id', () => {
+    const KNOWN_TRANSACTION_ID = '44444444-4444-4444-8444-444444444444';
+    const UNKNOWN_TRANSACTION_ID = '66666666-6666-4666-8666-666666666666';
+
+    it('returns 200 with Cache-Control: no-store and Retry-After: 2 for a PENDING transaction', async () => {
+      const { server } = await build({
+        getTransactionStatusUseCase: new FakeGetTransactionStatusUseCase(
+          okAsync(buildTransactionView({ status: 'PENDING' })),
+        ),
+      });
+
+      const response = await request(server).get(`/api/v1/transactions/${KNOWN_TRANSACTION_ID}`);
+
+      expect(response.status).toBe(200);
+      expect(response.headers['cache-control']).toBe('no-store');
+      expect(response.headers['retry-after']).toBe('2');
+      expect(asViewBody(response.body).data.status).toBe('PENDING');
+    });
+
+    it('returns 200 with Cache-Control: no-store and no Retry-After for an APPROVED transaction', async () => {
+      const { server } = await build({
+        getTransactionStatusUseCase: new FakeGetTransactionStatusUseCase(
+          okAsync(
+            buildTransactionView({ status: 'APPROVED', finalizedAt: '2026-09-27T00:00:00.000Z' }),
+          ),
+        ),
+      });
+
+      const response = await request(server).get(`/api/v1/transactions/${KNOWN_TRANSACTION_ID}`);
+
+      expect(response.status).toBe(200);
+      expect(response.headers['cache-control']).toBe('no-store');
+      expect(response.headers['retry-after']).toBeUndefined();
+      expect(asViewBody(response.body).data.status).toBe('APPROVED');
+    });
+
+    it('returns 400 VALIDATION_ERROR for a non-uuid id', async () => {
+      const { server } = await build();
+
+      const response = await request(server).get('/api/v1/transactions/not-a-uuid');
+
+      expect(response.status).toBe(400);
+      expect(asProblem(response.body).code).toBe(ErrorCode.VALIDATION_ERROR);
+    });
+
+    it('returns 404 TRANSACTION_NOT_FOUND for an unknown id, with neither Retry-After nor no-store', async () => {
+      const notFound = new DomainError(
+        ErrorCode.TRANSACTION_NOT_FOUND,
+        'NOT_FOUND',
+        `Transaction ${UNKNOWN_TRANSACTION_ID} not found`,
+      );
+      const { server } = await build({
+        getTransactionStatusUseCase: new FakeGetTransactionStatusUseCase(errAsync(notFound)),
+      });
+
+      const response = await request(server).get(`/api/v1/transactions/${UNKNOWN_TRANSACTION_ID}`);
+
+      expect(response.status).toBe(404);
+      expect(asProblem(response.body).code).toBe('TRANSACTION_NOT_FOUND');
+      expect(response.headers['retry-after']).toBeUndefined();
+      expect(response.headers['cache-control']).toBeUndefined();
+    });
+
+    it('never includes email or documentNumber in the body at any depth', async () => {
+      const { server } = await build({
+        getTransactionStatusUseCase: new FakeGetTransactionStatusUseCase(
+          okAsync(buildTransactionView()),
+        ),
+      });
+
+      const response = await request(server).get(`/api/v1/transactions/${KNOWN_TRANSACTION_ID}`);
+
+      const serialized = JSON.stringify(response.body);
+      expect(serialized).not.toMatch(/email/i);
+      expect(serialized).not.toMatch(/documentNumber/i);
+    });
   });
 });

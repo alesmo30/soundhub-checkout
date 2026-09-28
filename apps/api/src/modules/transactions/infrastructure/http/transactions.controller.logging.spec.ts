@@ -37,6 +37,7 @@ import type {
 } from '../../application/ports/transaction.repository.port';
 import { CreateTransactionUseCase } from '../../application/use-cases/create-transaction.use-case';
 import type { FinalizeTransactionUseCase } from '../../application/use-cases/finalize-transaction.use-case';
+import { GetTransactionStatusUseCase } from '../../application/use-cases/get-transaction-status.use-case';
 import type { NewTransaction, Transaction } from '../../domain/transaction';
 import { IdempotencyKeyPipe } from './idempotency-key.pipe';
 import { TransactionsController } from './transactions.controller';
@@ -341,6 +342,13 @@ async function buildApp(stream: MemoryStream): Promise<INestApplication> {
     controllers: [TransactionsController],
     providers: [
       { provide: CreateTransactionUseCase, useValue: buildUseCase() },
+      {
+        provide: GetTransactionStatusUseCase,
+        // Not used by this spec (its only concern is POST /transactions'
+        // redaction behavior), so a plain stub satisfies the controller's
+        // constructor without pulling in the GET flow's fakes.
+        useValue: { execute: () => okAsync(undefined) },
+      },
       IdempotencyKeyPipe,
     ],
   }).compile();
