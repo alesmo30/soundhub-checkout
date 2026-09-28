@@ -137,7 +137,7 @@ Prerequisites (not commits):
 
 ### Part 1 — Release
 
-1. [ ] **AlarmEmail in the deploy script.** `deploy.sh` reads `ALARM_EMAIL` from the root `.env`, fails fast naming it when missing or empty, and passes `--parameters CheckoutBackendStack:AlarmEmail=…`. `.env.example` gets the `ALARM_EMAIL=` key.
+1. [x] **AlarmEmail in the deploy script.** `deploy.sh` reads `ALARM_EMAIL` from the root `.env`, fails fast naming it when missing or empty, and passes `--parameters CheckoutBackendStack:AlarmEmail=…`. `.env.example` gets the `ALARM_EMAIL=` key.
    Manual test: with `ALARM_EMAIL` removed, `bash infra/scripts/deploy.sh` exits before building with `Missing deploy variable: ALARM_EMAIL`; with it set, `cdk synth` succeeds.
    Commit: `fix(infra): pass AlarmEmail parameter from .env to cdk deploy`.
 
