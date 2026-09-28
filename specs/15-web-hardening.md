@@ -32,7 +32,7 @@ No persisted data structures. No new dependencies besides `jest-axe` (+ `@types/
 
 ## Implementation plan
 
-1. [ ] **Responsive audit and fixes.** Resize Chrome to 320, 375×667, 768, 1024, 1440 on catalog, product page + checkout dialog, summary step, final status page; fix any overflow/clipping found (Tailwind classes only, no logic change).
+1. [x] **Responsive audit and fixes.** Resize Chrome to 320, 375×667, 768, 1024, 1440 on catalog, product page + checkout dialog, summary step, final status page; fix any overflow/clipping found (Tailwind classes only, no logic change).
    Manual test: Chrome DevTools device toolbar at all five widths — no horizontal scrollbar, no clipped text/buttons.
    Commit: `fix(web): resolve responsive overflow across viewports`.
 

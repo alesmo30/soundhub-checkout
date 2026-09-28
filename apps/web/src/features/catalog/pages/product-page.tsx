@@ -96,7 +96,7 @@ function ProductDetails({ product }: { product: ProductDetail }) {
           onChange={changeQuantity}
         />
         <Button
-          className="w-full md:w-auto md:self-start"
+          className="h-auto min-h-14 w-full py-3 text-center whitespace-normal md:h-14 md:w-auto md:self-start md:py-0"
           disabled={isOutOfStock}
           onClick={checkout}
         >
